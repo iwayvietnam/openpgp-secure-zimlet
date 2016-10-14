@@ -1,0 +1,24 @@
+
+.ImgDontSign {
+    background-image: url('imgs/dontsign.png');
+    width: 16px;
+    height: 16px;
+}
+
+.ImgSecureEmail {
+    background-image: url('imgs/secure.png');
+    width: 16px;
+    height: 16px;
+}
+
+.ImgSign {
+    background-image: url('imgs/sign.png');
+    width: 16px;
+    height: 16px;
+}
+
+.ImgSignEncrypt {
+    background-image: url('imgs/signencrypt.png');
+    width: 16px;
+    height: 16px;
+}
