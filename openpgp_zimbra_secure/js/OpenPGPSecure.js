@@ -55,7 +55,7 @@ OpenPGPZimbraSecure.prototype.init = function() {
     var self = this;
 
     this._addJsScript('js/mimemessage/mimemessage.js');
-    this._initWorker();
+    this._initOpenPGP();
 
     AjxDispatcher.addPackageLoadFunction('MailCore', new AjxCallback(this, function(){
         var sendMsgFunc = ZmMailMsg.prototype._sendMessage;
@@ -246,26 +246,29 @@ OpenPGPZimbraSecure.prototype._addJsScript = function(path) {
     head.appendChild(script);
 };
 
-OpenPGPZimbraSecure.prototype._initWorker = function() {
-    var path = this.getResource('js/openpgpjs/openpgp.worker.js');
+OpenPGPZimbraSecure.prototype._initOpenPGP = function() {
+    this._addJsScript('js/openpgpjs/openpgp.min.js');
+    var path = this.getResource('js/openpgpjs/openpgp.worker.min.js');
     try {
-        openpgp.initWorker({
-            path: path
-        });
+        setTimeout(function() {
+            openpgp.initWorker({
+                path: path
+            });
+        }, 1000);
     } catch (err) {
         try {
             setTimeout(function() {
                 openpgp.initWorker({
                     path: path
                 });
-            }, 1000);
+            }, 10000);
         } catch (err) {
             try {
                 setTimeout(function() {
                     openpgp.initWorker({
                         path: path
                     });
-                }, 10000);
+                }, 60000);
             } catch (err) {}
         }
     }
