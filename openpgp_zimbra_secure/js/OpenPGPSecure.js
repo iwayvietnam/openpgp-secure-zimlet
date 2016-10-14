@@ -47,6 +47,10 @@ OpenPGPZimbraSecure.BUTTON_CLASS = 'openpgp_zimbra_secure_button';
 OpenPGPZimbraSecure.PREF_SECURITY = 'OPENPGP_SECURITY';
 OpenPGPZimbraSecure.USER_SECURITY = 'OPENPGP_USER_SECURITY';
 
+OpenPGPZimbraSecure.OPENPGP_DONTSIGN = 0;
+OpenPGPZimbraSecure.OPENPGP_SIGN = 1;
+OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT = 2;
+
 OpenPGPZimbraSecure.prototype.init = function() {
     var self = this;
 
@@ -82,14 +86,10 @@ OpenPGPZimbraSecure.prototype.initializeToolbar = function(app, toolbar, control
         var enableSecurityButton = true;
         var msg = controller.getMsg();
         if (msg && msg.isInvite()) {
-            selectedValue = SMIME_DONTSIGN;
+            selectedValue = OpenPGPZimbraSecure.OPENPGP_DONTSIGN;
             enableSecurityButton = false;
         } else if (msg && msg.isDraft) {
-            var sign = msg.getMimeHeader(SMIME_DRAFT_HEADER_SIGN) == 'true';
-            if (sign)
-                selectedValue = SMIME_SIGN;
-            else
-                selectedValue = SMIME_DONTSIGN;
+            selectedValue = OpenPGPZimbraSecure.OPENPGP_DONTSIGN;
         } else {
             selectedValue = this._getSecuritySetting();
         }
@@ -117,17 +117,17 @@ OpenPGPZimbraSecure.prototype.initializeToolbar = function(app, toolbar, control
             var nosignButton = new DwtMenuItem({parent:securityMenu, style:DwtMenuItem.RADIO_STYLE, radioGroupId: signingRadioId});
             nosignButton.setText(openpgp_zimbra_secure.dontSignMessage);
             nosignButton.addSelectionListener(listener);
-            nosignButton.setData('sign', SMIME_DONTSIGN);
+            nosignButton.setData('sign', OpenPGPZimbraSecure.OPENPGP_DONTSIGN);
 
             var signButton = new DwtMenuItem({parent:securityMenu, style:DwtMenuItem.RADIO_STYLE, radioGroupId: signingRadioId});
             signButton.setText(openpgp_zimbra_secure.signMessage);
             signButton.addSelectionListener(listener);
-            signButton.setData('sign', SMIME_SIGN);
+            signButton.setData('sign', OpenPGPZimbraSecure.OPENPGP_SIGN);
 
             var signAndEncryptButton = new DwtMenuItem({parent:securityMenu, style:DwtMenuItem.RADIO_STYLE, radioGroupId: signingRadioId});
             signAndEncryptButton.setText(openpgp_zimbra_secure.signAndEncryptMessage);
             signAndEncryptButton.addSelectionListener(listener);
-            signAndEncryptButton.setData("sign", SMIME_SIGNENCRYPT);
+            signAndEncryptButton.setData("sign", OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT);
 
             securityMenu.checkItem('sign', selectedValue, true);
             this._setSecurityImage(securityButton, selectedValue);
@@ -160,7 +160,7 @@ OpenPGPZimbraSecure.prototype._handleSelectSigning = function(button, ev) {
     var composeCtrl = view && view.getController && view.getController();
 
     // hide upload button form to suppress HTML5 file upload dialogs
-    OpenPGPZimbraSecure._fixFormVisibility(view._attButton.getHtmlElement(), value == SMIME_DONTSIGN);
+    OpenPGPZimbraSecure._fixFormVisibility(view._attButton.getHtmlElement(), value == OpenPGPZimbraSecure.OPENPGP_DONTSIGN);
 
     this.setUserProperty(OpenPGPZimbraSecure.USER_SECURITY, value);
     this.saveUserProperties();
