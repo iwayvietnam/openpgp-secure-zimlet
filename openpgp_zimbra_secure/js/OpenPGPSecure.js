@@ -54,8 +54,7 @@ OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT = 2;
 OpenPGPZimbraSecure.prototype.init = function() {
     var self = this;
 
-    AjxDispatcher.addPackageLoadFunction('MailCore', new AjxCallback(this, function(){
-    }));
+    this._addJsScript('js/mimemessage/mimemessage.js');
 
     OpenPGPSecurePrefs.init(this);
 }

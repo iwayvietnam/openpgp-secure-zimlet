@@ -26,6 +26,13 @@
         target="main compose-window view-window">
     <include>js/OpenPGPSecure.js</include>
     <include>js/OpenPGPSecurePrefs.js</include>
+
+    <include>js/openpgpjs/openpgpjs.js</include>
+    <include>js/openpgpjs/openpgp.worker.js</include>
+    <include>js/json/json2.js</include>
+    <include>js/quoted-printable/quoted-printable.js</include>
+    <include>js/utf8/utf8.js</include>
+
     <include>templates/openpgp_zimbra_secure.template.js</include>
 
     <includeCSS>openpgp_zimbra_secure.css</includeCSS>
