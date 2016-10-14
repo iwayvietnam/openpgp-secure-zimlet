@@ -29,7 +29,7 @@ var OPENPGP_SECURITY_TYPES = [
 
 function openpgp_zimbra_secure_HandlerObject() {
     this._msgDivCache = {};
-    this._smimeCache = appCtxt.isChildWindow ? window.opener.openpgp_zimbra_secure_HandlerObject.getInstance()._smimeCache : {};
+    this._pgpMimeCache = appCtxt.isChildWindow ? window.opener.openpgp_zimbra_secure_HandlerObject.getInstance()._pgpMimeCache : {};
     this._patchedFuncs = {};
     this._pendingAttachments = [];
 };
@@ -55,12 +55,48 @@ OpenPGPZimbraSecure.prototype.init = function() {
     var self = this;
 
     this._addJsScript('js/mimemessage/mimemessage.js');
+    this._initWorker();
 
     OpenPGPSecurePrefs.init(this);
 }
 
 OpenPGPZimbraSecure.getInstance = function() {
     return appCtxt.getZimletMgr().getZimletByName('openpgp_zimbra_secure').handlerObject;
+};
+
+OpenPGPZimbraSecure.prototype.override = function(origFuncStr, newFunc, forceNew) {
+    if (this._patchedFuncs[origFuncStr] && !forceNew) {
+        console.log('OpenEC Secure: Not overriding ' + origFuncStr + '; Already overridden');
+    } else if (!newFunc) {
+        console.log('OpenEC Secure: Not overriding ' + origFuncStr + '; New function not specified');
+    } else {
+        var path = origFuncStr.split('.');
+        var object = window;
+        for (var i = 0; i < path.length - 1; i++) {
+            object = object[path[i]];
+            if (!object) {
+                // The path doesn't exist
+                console.log('OpenEC Secure: Not overriding ' + origFuncStr + '; '+ path.slice(0, i + 1).join('.') + " doesn't exist");
+                return;
+            }
+        }
+
+        var funcName = path[path.length - 1];
+        var oldFunc = object[funcName];
+
+        if (oldFunc) {
+            console.log('OpenEC Secure: Overriding ' + origFuncStr);
+
+            object[funcName] = function() {
+                newFunc.func = oldFunc;
+                return newFunc.apply(this, arguments);
+            }
+            object[funcName].func = oldFunc;
+            this._patchedFuncs[origFuncStr] = true;
+        } else {
+            console.log('OpenEC Secure: Not overriding ' + origFuncStr + '; not defined');
+        }
+    }
 };
 
 /**
@@ -97,9 +133,9 @@ OpenPGPZimbraSecure.prototype.initializeToolbar = function(app, toolbar, control
             var id = Dwt.getNextId() + '_' + OpenPGPZimbraSecure.BUTTON_CLASS;
             
             var securityButton = new DwtToolBarButton({
-                parent:toolbar,
-                id:id + '_checkbox',
-                index:index,
+                parent: toolbar,
+                id: id + '_checkbox',
+                index: index,
                 className: OpenPGPZimbraSecure.BUTTON_CLASS + ' ZToolbarButton'
             });
 
@@ -225,4 +261,29 @@ OpenPGPZimbraSecure.prototype._addJsScript = function(path) {
     script.type = 'text/javascript';
     script.src = this.getResource(path);
     head.appendChild(script);
+};
+
+OpenPGPZimbraSecure.prototype._initWorker = function() {
+    var path = this.getResource('js/openpgpjs/openpgp.worker.js');
+    try {
+        openpgp.initWorker({
+            path: path
+        });
+    } catch (err) {
+        try {
+            setTimeout(function() {
+                openpgp.initWorker({
+                    path: path
+                });
+            }, 1000);
+        } catch (err) {
+            try {
+                setTimeout(function() {
+                    openpgp.initWorker({
+                        path: path
+                    });
+                }, 10000);
+            } catch (err) {}
+        }
+    }
 };
