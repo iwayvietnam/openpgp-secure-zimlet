@@ -57,6 +57,13 @@ OpenPGPZimbraSecure.prototype.init = function() {
     this._addJsScript('js/mimemessage/mimemessage.js');
     this._initWorker();
 
+    AjxDispatcher.addPackageLoadFunction('MailCore', new AjxCallback(this, function(){
+        var sendMsgFunc = ZmMailMsg.prototype._sendMessage;
+        ZmMailMsg.prototype._sendMessage = function(params) {
+            self._sendMessage(sendMsgFunc, this, params);
+        }
+    }));
+
     OpenPGPSecurePrefs.init(this);
 }
 
@@ -64,39 +71,15 @@ OpenPGPZimbraSecure.getInstance = function() {
     return appCtxt.getZimletMgr().getZimletByName('openpgp_zimbra_secure').handlerObject;
 };
 
-OpenPGPZimbraSecure.prototype.override = function(origFuncStr, newFunc, forceNew) {
-    if (this._patchedFuncs[origFuncStr] && !forceNew) {
-        console.log('OpenEC Secure: Not overriding ' + origFuncStr + '; Already overridden');
-    } else if (!newFunc) {
-        console.log('OpenEC Secure: Not overriding ' + origFuncStr + '; New function not specified');
-    } else {
-        var path = origFuncStr.split('.');
-        var object = window;
-        for (var i = 0; i < path.length - 1; i++) {
-            object = object[path[i]];
-            if (!object) {
-                // The path doesn't exist
-                console.log('OpenEC Secure: Not overriding ' + origFuncStr + '; '+ path.slice(0, i + 1).join('.') + " doesn't exist");
-                return;
-            }
-        }
-
-        var funcName = path[path.length - 1];
-        var oldFunc = object[funcName];
-
-        if (oldFunc) {
-            console.log('OpenEC Secure: Overriding ' + origFuncStr);
-
-            object[funcName] = function() {
-                newFunc.func = oldFunc;
-                return newFunc.apply(this, arguments);
-            }
-            object[funcName].func = oldFunc;
-            this._patchedFuncs[origFuncStr] = true;
-        } else {
-            console.log('OpenEC Secure: Not overriding ' + origFuncStr + '; not defined');
-        }
-    }
+/**
+* Sends the given message
+* @param {Function} orig original func ZmMailMsg.prototype._sendMessage
+* @param {ZmMailMsg} msg
+* @param {Object} params the mail params inluding the jsonObj msg.
+*/
+OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
+    console.log(params);
+    orig.apply(msg, [params]);
 };
 
 /**
