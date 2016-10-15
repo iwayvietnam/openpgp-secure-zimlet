@@ -1,7 +1,7 @@
 /*
  * ***** BEGIN LICENSE BLOCK *****
- * OpenEC Zimbra Secure is the open source digital signature and encrypt for Zimbra Collaboration Open Source Edition software
- * Copyright (C) 2016-present OpenEC Zimbra Secure community
+ * OpenPGP Zimbra Secure is the open source digital signature and encrypt for Zimbra Collaboration Open Source Edition software
+ * Copyright (C) 2016-present OpenPGP Zimbra Secure
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -16,9 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  * ***** END LICENSE BLOCK *****
  *
- * S/MIME Secure Email Zimlet
+ * OpenPGP MIME Secure Email Zimlet
  *
- * Written by nguyennv@iwayvietnam.com
+ * Written by nguyennv1981@gmail.com
  */
 
 OpenPGPUtils = function() {};
