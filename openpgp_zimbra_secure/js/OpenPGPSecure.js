@@ -54,7 +54,7 @@ OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT = 2;
 OpenPGPZimbraSecure.prototype.init = function() {
     var self = this;
 
-    this._addJsScript([
+    this._addJsScripts([
         'js/mimemessage/mimemessage.js',
         'js/openpgpjs/openpgp.min.js'
     ]);
@@ -83,39 +83,39 @@ OpenPGPZimbraSecure.getInstance = function() {
 OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
     console.log(params);
     var self = this;
-    var shouldsign = false, shouldencrypt = false;
-    var isdraft = false;
+    var shouldSign = false, shouldEncrypt = false;
+    var isDraft = false;
 
     if (params.jsonObj.SendMsgRequest || params.jsonObj.SaveDraftRequest) {
         // Get preference setting, and use it if the toolbar does not override it.
-        shouldsign = this._shouldSign();
-        shouldencrypt = this._shouldEncrypt();
+        shouldSign = this._shouldSign();
+        shouldEncrypt = this._shouldEncrypt();
 
         var view = appCtxt.getCurrentView();
-        var composectrl = view && view.getController && view.getController();
+        var composeCtrl = view && view.getController && view.getController();
     }
 
-    if (!shouldencrypt && !shouldsign) {
+    if (!shouldEncrypt && !shouldSign) {
         // call the wrapped function
         orig.apply(msg, [params]);
         return;
     }
     if (params.jsonObj.SaveDraftRequest) {
-        isdraft = true;
-        shouldsign = false;
-        shouldencrypt = true;
+        isDraft = true;
+        shouldSign = false;
+        shouldEncrypt = true;
     }
 
     var input = (params.jsonObj.SendMsgRequest || params.jsonObj.SaveDraftRequest);
-    var hasfrom = false;
+    var hasFrom = false;
 
-    for (var i = 0; !hasfrom && i < input.m.e.length; i++) {
+    for (var i = 0; !hasFrom && i < input.m.e.length; i++) {
         if (input.m.e[i].t == "f") {
-            hasfrom = true;
+            hasFrom = true;
         }
     }
 
-    if (!hasfrom) {
+    if (!hasFrom) {
         var addr = OpenPGPUtils.getDefaultSenderAddress();
         input.m.e.push({ "a": addr.toString(), "t": "f" });
     }
@@ -124,7 +124,7 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
         for (var i = 0; list && i < list.length; i++) {
             var url = appCtxt.get(ZmSetting.CSFE_MSG_FETCHER_URI);
             if (fmt) {
-                url += "&fmt=native";
+                url += '&fmt=native';
             }
             var part = OpenPGPUtils.fetchPart(list[i], url);
             if (part) {
@@ -136,11 +136,11 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
                         //get the content type upto ; character
                         var ctIndex = part.ct.indexOf(';');
                         if (ctIndex == -1) ctIndex = part.ct.length;
-                        var newSrc = "data:" + part.ct.substring(0, ctIndex) + ";base64," + part.data;
+                        var newSrc = 'data:' + part.ct.substring(0, ctIndex) + ';base64,' + part.data;
                         view._htmlEditor.replaceImageSrc(oldSrc, newSrc);
                     }
                 }
-                self._pendingattachments.push(part);
+                self._pendingAttachments.push(part);
             }
         }
     };
@@ -162,7 +162,7 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
         checkAttachments(input.m.attach.mp);
         checkAttachments(input.m.attach.m);
         checkAttachments(input.m.attach.cn);
-        checkAttachments(input.m.attach.doc,null,"native");
+        checkAttachments(input.m.attach.doc, null, 'native');
         delete input.m.attach;
     }
     checkInlineAttachments(input.m.mp);
@@ -220,20 +220,20 @@ OpenPGPZimbraSecure.prototype.initializeToolbar = function(app, toolbar, control
 
             var listener = new AjxListener(this, this._handleSelectSigning, [securityButton]);
 
-            var nosignButton = new DwtMenuItem({parent:securityMenu, style:DwtMenuItem.RADIO_STYLE, radioGroupId: signingRadioId});
+            var nosignButton = new DwtMenuItem({parent: securityMenu, style: DwtMenuItem.RADIO_STYLE, radioGroupId: signingRadioId});
             nosignButton.setText(openpgp_zimbra_secure.dontSignMessage);
             nosignButton.addSelectionListener(listener);
             nosignButton.setData('sign', OpenPGPZimbraSecure.OPENPGP_DONTSIGN);
 
-            var signButton = new DwtMenuItem({parent:securityMenu, style:DwtMenuItem.RADIO_STYLE, radioGroupId: signingRadioId});
+            var signButton = new DwtMenuItem({parent: securityMenu, style: DwtMenuItem.RADIO_STYLE, radioGroupId: signingRadioId});
             signButton.setText(openpgp_zimbra_secure.signMessage);
             signButton.addSelectionListener(listener);
             signButton.setData('sign', OpenPGPZimbraSecure.OPENPGP_SIGN);
 
-            var signAndEncryptButton = new DwtMenuItem({parent:securityMenu, style:DwtMenuItem.RADIO_STYLE, radioGroupId: signingRadioId});
+            var signAndEncryptButton = new DwtMenuItem({parent: securityMenu, style: DwtMenuItem.RADIO_STYLE, radioGroupId: signingRadioId});
             signAndEncryptButton.setText(openpgp_zimbra_secure.signAndEncryptMessage);
             signAndEncryptButton.addSelectionListener(listener);
-            signAndEncryptButton.setData("sign", OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT);
+            signAndEncryptButton.setData('sign', OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT);
 
             securityMenu.checkItem('sign', selectedValue, true);
             this._setSecurityImage(securityButton, selectedValue);
@@ -335,12 +335,12 @@ SecureEmail.prototype._shouldEncrypt = function(ctlr, useToolbarOnly) {
     return this._getUserSecuritySetting(ctlr,useToolbarOnly) == OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT;
 };
 
-OpenPGPZimbraSecure.prototype._addJsScript = function(paths) {
+OpenPGPZimbraSecure.prototype._addJsScripts = function(paths) {
     var self = this;
     var head = document.getElementsByTagName('HEAD').item(0);
-    var script = document.createElement('script');
-    script.type = 'text/javascript';
     OpenPGPUtils.forEach(paths, function(path) {
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
         script.src = self.getResource(path);
         head.appendChild(script);
     });
