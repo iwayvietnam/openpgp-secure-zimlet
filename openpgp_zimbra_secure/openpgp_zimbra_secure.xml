@@ -26,6 +26,11 @@
         target="main compose-window view-window">
     <include>js/OpenPGPSecure.js</include>
     <include>js/OpenPGPSecurePrefs.js</include>
+    <include>js/OpenPGPUtils.js</include>
+    <include>js/OpenPGPMimeBuilder.js</include>
+    <include>js/OpenPGPEncrypt.js</include>
+    <include>js/OpenPGPDecrypt.js</include>
+    <include>js/widgets/GenerateKeypairDialog.js</include>
 
     <include>js/json/json2.js</include>
     <include>js/quoted-printable/quoted-printable.js</include>
