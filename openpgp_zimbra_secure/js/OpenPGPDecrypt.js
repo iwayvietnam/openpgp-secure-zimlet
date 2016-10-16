@@ -59,7 +59,7 @@ OpenPGPDecrypt.prototype.decrypt = function() {
     var self = this;
     var sequence = Promise.resolve();
 
-    sequence.then(function() {
+    return sequence.then(function() {
         var ct = this._message.contentType().fulltype;
         if(OpenPGPUtils.isEncryptedContentType(ct)) {
             var messageHeader = '-----BEGIN PGP MESSAGE-----';
@@ -95,7 +95,7 @@ OpenPGPDecrypt.prototype.decrypt = function() {
             var signature = '';
             OpenPGPUtils.forEach(message.body, function(body) {
                 if (OpenEcUtils.isOPENPGPContentType(body.contentType().fulltype)) {
-                    signature = body.body;
+                    signature = body.toString({noHeaders: true});
                 }
                 else {
                     bodyContent = body.toString();
@@ -116,5 +116,6 @@ OpenPGPDecrypt.prototype.decrypt = function() {
         if (self._onDecrypted) {
             self._onDecrypted(self, message);
         }
+        return message;
     });
 };

@@ -95,5 +95,6 @@ OpenPGPEncrypt.prototype.encrypt = function() {
         else if (self._afterEncrypt){
             self._afterEncrypt(self, self._mimeBuilder);
         }
+        return self._mimeBuilder;
     });
 };
