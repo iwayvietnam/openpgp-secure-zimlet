@@ -21,24 +21,79 @@
  * Written by nguyennv1981@gmail.com
  */
 
-OpenPGPDecrypt = function(opts) {
+OpenPGPDecrypt = function(opts, message, pgp) {
     opts = opts || {
-        message: '',
+        privateKey: '',
+        publicKeys: [],
+        passphrase: '',
         onDecrypted: false,
         onError: false
     };
-    this._message = mimemessage.parse(opts.message);
     this._onDecrypted = opts.onDecrypted;
     this._onError = opts.onError;
-    this._trustedCerts = [];
+
+    this._pgp = pgp || openpgp;
+    this._pgpKey = this._pgp.key;
+    this._pgp = this._pgp.default;
 
     var self = this;
-    if (this._message) {
+    var privateKey = this._pgpKey.readArmored(opts.privateKey).keys[0];
+    if (!privateKey.decrypt(opts.passphrase)) {
+        throw new Error('Wrong passphrase! Could not decrypt the private key!');
+    }
+    this._privateKey = privateKey;
+    this._publicKeys = [];
+    OpenPGPUtils.forEach(opts.publicKeys, function(key) {
+        this._publicKeys.push(self._pgpKey.readArmored(key).keys[0]);
+    });
+    this._message = mimemessage.parse(message);
+    if (!this._message) {
+        throw new Error('Wrong message! Could not parse the email message!');
+    }
+};
+
+OpenPGPDecrypt.prototype = new Object();
+OpenPGPDecrypt.prototype.constructor = OpenPGPDecrypt;
+
+OpenPGPDecrypt.prototype.decrypt = function() {
+    var self = this;
+    var sequence = Promise.resolve();
+
+    sequence.then(function() {
         var ct = this._message.contentType().fulltype;
+        if(OpenPGPUtils.isEncryptedContentType(ct)) {
+            var messageHeader = '-----BEGIN PGP MESSAGE-----';
+            var cipherText = messageHeader + self._message.toString({noHeaders: true}).split(messageHeader).pop();
+
+            var opts = {
+                message: openpgp.message.readArmored(cipherText),
+                publicKeys: self._publicKeys,
+                privateKey: self._privateKey
+            };
+            return openpgp.decrypt(opts).then(function(plainText) {
+                var data = plainText.data.replace(/\r?\n/g, "\r\n");
+                var message = mimemessage.parse(data);
+                if (!message) {
+                    throw new Error('Wrong message! Could not parse the decrypted email message!');
+                }
+                return message;
+            });
+        }
+        else {
+            return self._message; 
+        }
+    }, function(err) {
+        if (self._onError) {
+            self._onError(self, err);
+        }
+    })
+    .then(function(message) {
+        var signatures = [];
+        var ct = message.contentType().fulltype;
         if (OpenPGPUtils.isSignedContentType(ct)) {
             var bodyContent = '';
             var signature = '';
-            OpenPGPUtils.forEach(this._message.body, function(body) {
+            OpenPGPUtils.forEach(message.body, function(body) {
                 if (OpenEcUtils.isOPENPGPContentType(body.contentType().fulltype)) {
                     signature = body.body;
                 }
@@ -46,17 +101,20 @@ OpenPGPDecrypt = function(opts) {
                     bodyContent = body.toString();
                 }
             });
+
+            var pgpMessage = openpgp.message.readSignedContent(content, signature);
+            var signatures = pgpMessage.verify(self._publicKeys);
         }
-        else if(OpenPGPUtils.isEncryptedContentType(ct)) {
+        message.signatures = signatures;
+        return message;
+    }, function(err) {
+        if (self._onError) {
+            self._onError(self, err);
         }
-    }
-};
-
-OpenPGPDecrypt.prototype = new Object();
-OpenPGPDecrypt.prototype.constructor = OpenPGPDecrypt;
-
-OpenPGPDecrypt.prototype._decrypt = function(message) {
-};
-
-OpenPGPDecrypt.prototype._verify = function(signature, content) {
+    })
+    .then(function(message) {
+        if (self._onDecrypted) {
+            self._onDecrypted(self, message);
+        }
+    });
 };
