@@ -21,10 +21,10 @@
  * Written by nguyennv1981@gmail.com
  */
 
-GenerateKeypairDialog = function(controller, title, okListener, cancelListener, standardButtons) {
+GenerateKeypairDialog = function(handler) {
 };
 
-GenerateKeypairDialog.prototype = new ZmDialog;
+GenerateKeypairDialog.prototype = new OpenPGPDialog;
 GenerateKeypairDialog.prototype.constructor = GenerateKeypairDialog;
 
 GenerateKeypairDialog.prototype.toString = function() {
