@@ -126,7 +126,7 @@ OpenPGPMimeBuilder.prototype.buildSignedMessage = function(signature) {
     this._message.body.push(pgpMime);
 }
 
-OpenPGPMimeBuilder.prototype.buildEncryptedMessage = function(message) {
+OpenPGPMimeBuilder.prototype.buildEncryptedMessage = function(encryptedText) {
     var ctParts = [
         OpenPGPUtils.ENCRYPTED_MESSAGE_CONTENT_TYPE,
         'protocol="' + OpenPGPUtils.OPENPGP_ENCRYPTED_CONTENT_TYPE + '"',
@@ -147,7 +147,7 @@ OpenPGPMimeBuilder.prototype.buildEncryptedMessage = function(message) {
     var pgpMime = mimemessage.factory({
         contentType: 'application/octet-stream; name="encrypted.asc"',
         contentTransferEncoding: '7bit',
-        body: message
+        body: encryptedText
     });
     pgpMime.header('Content-Disposition', 'inline; filename="encrypted.asc"');
     pgpMime.header('Content-Description', 'OpenPGP encrypted message');
