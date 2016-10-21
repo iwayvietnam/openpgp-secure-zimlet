@@ -21,13 +21,29 @@
  * Written by nguyennv1981@gmail.com
  */
 
-OpenPGPDialog = function(handler, title, okListener, cancelListener, standardButtons) {
+OpenPGPDialog = function(handler, title, onOk, onCancel, standardButtons) {
     ZmDialog.call(this, {
         title: title,
         parent: handler.getShell(),
         className: "OpenPGP dialog",
         standardButtons: standardButtons
     });
+    this._handler = handler;
+    this._onOk = onOk;
+    this._onCancel = onCancel;
+
+    var submitListener = new AjxListener(this, this._dialogSubmit);
+    var onCancel = new AjxListener(this, this._dialogCancel);
+
+    if (this._button[DwtDialog.OK_BUTTON]) {
+        this.setButtonListener(DwtDialog.OK_BUTTON, submitListener);
+    }
+    if (this._button[DwtDialog.CANCEL_BUTTON]) {
+        this.registerCallback(DwtDialog.CANCEL_BUTTON, onCancel);
+    }
+    this.setEnterListener(submitListener);
+    this._createContent();
+    this._initialize();
 };
 
 OpenPGPDialog.prototype = new ZmDialog;
@@ -35,4 +51,66 @@ OpenPGPDialog.prototype.constructor = OpenPGPDialog;
 
 OpenPGPDialog.prototype.toString = function() {
     return "OpenPGPDialog";
+};
+
+OpenPGPDialog.prototype._dialogSubmit = function() {
+    var retVal;
+    if (this._onOk instanceof AjxCallback) {
+        retVal = this._onOk.run();
+    } else if (AjxUtil.isFunction(this._onOk)) {
+        retVal = this._onOk();
+    }
+    if (retVal !== false) {
+        this.popdown();
+    }
+};
+
+OpenPGPDialog.prototype._dialogCancel = function() {
+    this.popdown();
+    if (this._onCancel instanceof AjxCallback) {
+        this._onCancel.run();
+    } else if (AjxUtil.isFunction(this._onCancel)) {
+        this._onCancel();
+    }
+};
+
+OpenPGPDialog.prototype.popup = function(onOk, onCancel) {
+    if (onOk) {
+        this._onOk = onOk;
+    }
+    if (onCancel) {
+        this._onCancel = onCancel;
+    }
+    DwtDialog.prototype.popup.call(this);
+    if (this._focusElement) {
+        appCtxt.getKeyboardMgr().grabFocus(this._focusElement);
+    }
+};
+
+OpenPGPDialog.prototype.clearContentElement = function() {
+    while (this._contentEl.hasChildNodes()) {
+        this._contentEl.removeChild(this._contentEl.firstChild);
+    }
+};
+
+OpenPGPDialog.prototype.setContentElement = function(el) {
+    this.clearContentElement();
+    this._contentEl.appendChild(el);
+};
+
+OpenPGPDialog.prototype.getContentContainer = function(el) {
+    return this._contentEl;
+};
+
+OpenPGPDialog.prototype._createContent = function() {
+    if (this.CONTENT_TEMPLATE) {
+        this.setContent(AjxTemplate.expand(this.CONTENT_TEMPLATE, this._getTemplateData()));
+    }
+};
+
+OpenPGPDialog.prototype._getTemplateData = function() {
+    return {};
+};
+
+OpenPGPDialog.prototype._initialize = function() {
 };
