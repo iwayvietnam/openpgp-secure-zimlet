@@ -134,7 +134,7 @@ OpenPGPUtils.hexToBase64 = function(hex) {
 OpenPGPUtils.hexToBin = function(hex) {
     var bytes = [];
 
-    for(var i = 0; i < hex.length-  1; i += 2) {
+    for(var i = 0; i < hex.length - 1; i += 2) {
         bytes.push(parseInt(hex.substr(i, 2), 16));
     }
     return String.fromCharCode.apply(String, bytes);;
