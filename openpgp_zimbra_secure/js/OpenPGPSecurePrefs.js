@@ -44,10 +44,10 @@ OpenPGPSecurePrefs.registerSettings = function(handler) {
 
     var settings = OpenPGPSecurePrefs.SETTINGS;
 
-    for (var i = 0; i < settings.length; i++) {
-        var setting = appCtxt.getSettings().getSetting(settings[i]);
+    OpenPGPUtils.forEach(settings, function(name) {
+        var setting = appCtxt.getSettings().getSetting(name);
         setting.setValue(handler.getUserProperty(setting.id));
-    }
+    });
 };
 
 AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
@@ -82,7 +82,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
                 return new OpenPGPSecurePrefs(parent, sectionObj, controller, handler);
             }
         };
-        ZmPref.registerPrefSection('OPENPGP_SECURITY', section);
+        ZmPref.registerPrefSection(OpenPGPSecurePrefs.SECURITY, section);
     };
 
     // Saving
@@ -96,12 +96,14 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
     OpenPGPSecurePrefs.prototype._savePrefs = function(batchCommand) {
         var settings = OpenPGPSecurePrefs.SETTINGS;
         var zmSettings = appCtxt.getSettings();
-        for (var i = 0; i < settings.length; i++) {
-            var setting = zmSettings.getSetting(settings[i]);
+
+        OpenPGPUtils.forEach(settings, function(name) {
+            var setting = zmSettings.getSetting(name);
             var value = setting.getValue();
             this._handler.setUserProperty(setting.id, value);
             setting.origValue = value;
-        }
+        });
+
         this._controller.setDirty(this._section.id, false);
 
         if (batchCommand) {
@@ -111,9 +113,9 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
         this._handler.saveUserProperties();
     };
 
-    for (var i = 0; i < OpenPGPSecurePrefs._loadCallbacks.length; i++) {
-        OpenPGPSecurePrefs._loadCallbacks[i].run();
-    }
+    OpenPGPUtils.forEach(OpenPGPSecurePrefs._loadCallbacks, function(cb) {
+        cb.run();
+    });
     delete OpenPGPSecurePrefs._loadCallbacks;
 }));
 
