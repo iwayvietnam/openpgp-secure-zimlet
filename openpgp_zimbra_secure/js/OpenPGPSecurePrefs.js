@@ -28,9 +28,17 @@ OpenPGPSecurePrefs = function(shell, section, controller, handler) {
 };
 
 OpenPGPSecurePrefs.SECURITY = 'OPENPGP_SECURITY';
+OpenPGPSecurePrefs.PRIVATE_KEY = 'OPENPGP_PRIVATE_KEY';
+OpenPGPSecurePrefs.PASSPHRASE = 'OPENPGP_PASSPHRASE';
+OpenPGPSecurePrefs.PUBLIC_KEY = 'OPENPGP_PUBLIC_KEY';
+
+OpenPGPSecurePrefs.GEN_KEYPAIR = 'OPENPGP_GEN_KEYPAIR';
+OpenPGPSecurePrefs.SUBMIT_KEY = 'OPENPGP_SUBMIT_KEY';
+
 
 OpenPGPSecurePrefs.SETTINGS = [
-    OpenPGPSecurePrefs.SECURITY
+    OpenPGPSecurePrefs.SECURITY,
+    OpenPGPSecurePrefs.PUBLIC_KEY
 ];
 
 OpenPGPSecurePrefs._loadCallbacks = [];
@@ -41,10 +49,20 @@ OpenPGPSecurePrefs.registerSettings = function(handler) {
         dataType: ZmSetting.D_STRING,
         defaultValue: 'auto'
     });
+    appCtxt.getSettings().registerSetting(OpenPGPSecurePrefs.PRIVATE_KEY, {
+        type: ZmSetting.T_PREF,
+        dataType: ZmSetting.D_STRING
+    });
+    appCtxt.getSettings().registerSetting(OpenPGPSecurePrefs.PASSPHRASE, {
+        type: ZmSetting.T_PREF,
+        dataType: ZmSetting.D_STRING
+    });
+    appCtxt.getSettings().registerSetting(OpenPGPSecurePrefs.PUBLIC_KEY, {
+        type: ZmSetting.T_PREF,
+        dataType: ZmSetting.D_STRING
+    });
 
-    var settings = OpenPGPSecurePrefs.SETTINGS;
-
-    OpenPGPUtils.forEach(settings, function(name) {
+    OpenPGPUtils.forEach(OpenPGPSecurePrefs.SETTINGS, function(name) {
         var setting = appCtxt.getSettings().getSetting(name);
         setting.setValue(handler.getUserProperty(setting.id));
     });
@@ -63,12 +81,34 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
     OpenPGPSecurePrefs.registerPrefs = function(handler) {
         var msg = function(key){return openpgp_zimbra_secure[key];};
         ZmPref.registerPref(OpenPGPSecurePrefs.SECURITY, {
-            displayContainer:   ZmPref.TYPE_RADIO_GROUP,
-            orientation:        ZmPref.ORIENT_VERTICAL,
-            displayOptions:     [msg('prefSecurityAuto'), msg('prefSecurityNone'), msg('prefSecuritySign'), msg('prefSecurityBoth')],
-            options:            ['auto', '0', '1', '2']
+            displayContainer: ZmPref.TYPE_RADIO_GROUP,
+            orientation:      ZmPref.ORIENT_VERTICAL,
+            displayOptions:   [msg('prefSecurityAuto'), msg('prefSecurityNone'), msg('prefSecuritySign'), msg('prefSecurityBoth')],
+            options:          ['auto', '0', '1', '2']
+        });
+
+        ZmPref.registerPref(OpenPGPSecurePrefs.PRIVATE_KEY, {
+            displayName:        msg('prefPrivateKey'),
+            displayContainer:   ZmPref.TYPE_TEXTAREA
+        });
+
+        ZmPref.registerPref(OpenPGPSecurePrefs.PASSPHRASE, {
+            displayName:        msg('prefPassphrase'),
+            displayContainer:   ZmPref.TYPE_INPUT
+        });
+
+        ZmPref.registerPref(OpenPGPSecurePrefs.PUBLIC_KEY, {
+            displayName:        msg('prefPublicKey'),
+            displayContainer:   ZmPref.TYPE_TEXTAREA
         });
     
+        ZmPref.registerPref(OpenPGPSecurePrefs.GEN_KEYPAIR, {
+            displayContainer:   ZmPref.TYPE_STATIC
+        });
+        ZmPref.registerPref(OpenPGPSecurePrefs.SUBMIT_KEY, {
+            displayContainer:   ZmPref.TYPE_STATIC
+        });
+
         var section = {
             title: msg('prefSection'),
             icon: 'TrustedAddresses',
@@ -76,7 +116,12 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
             priority: 49,
             manageDirty: true,
             prefs: [
-                ZmSetting[OpenPGPSecurePrefs.SECURITY]
+                ZmSetting[OpenPGPSecurePrefs.SECURITY],
+                ZmSetting[OpenPGPSecurePrefs.PRIVATE_KEY],
+                ZmSetting[OpenPGPSecurePrefs.PASSPHRASE],
+                ZmSetting[OpenPGPSecurePrefs.PUBLIC_KEY],
+                ZmSetting[OpenPGPSecurePrefs.GEN_KEYPAIR],
+                ZmSetting[OpenPGPSecurePrefs.SUBMIT_KEY]
             ],
             createView: function(parent, sectionObj, controller) {
                 return new OpenPGPSecurePrefs(parent, sectionObj, controller, handler);
@@ -112,6 +157,30 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
         }
         this._handler.saveUserProperties();
     };
+
+    OpenPGPSecurePrefs.prototype._setupStatic = function(id, setup, value) {
+        if (id == OpenPGPSecurePrefs.GEN_KEYPAIR) {
+            var button = new DwtButton({parent: this, id: id});
+            button.setText(openpgp_zimbra_secure['btnKeyGen']);
+            button.setHandler(DwtEvent.ONCLICK, AjxCallback.simpleClosure(this._keyGen, this));
+            return button;
+        } else if(id == OpenPGPSecurePrefs.SUBMIT_KEY) {
+            var button = new DwtButton({parent: this, id: id});
+            button.setText(openpgp_zimbra_secure['btnKeySubmit']);
+            button.setHandler(DwtEvent.ONCLICK, AjxCallback.simpleClosure(this._keySubmit, this));
+            return button;
+        } else {
+            return ZmPreferencesPage.prototype._setupStatic.apply(this, arguments);
+        }
+    };
+
+    OpenPGPSecurePrefs.prototype._keyGen = function() {
+        var dialog = new GenerateKeypairDialog(this._handler);
+        dialog.popup();
+    }
+
+    OpenPGPSecurePrefs.prototype._keySubmit = function() {
+    }
 
     OpenPGPUtils.forEach(OpenPGPSecurePrefs._loadCallbacks, function(cb) {
         cb.run();
