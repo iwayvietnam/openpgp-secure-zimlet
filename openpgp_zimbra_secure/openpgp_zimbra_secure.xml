@@ -30,7 +30,9 @@
     <include>js/OpenPGPMimeBuilder.js</include>
     <include>js/OpenPGPEncrypt.js</include>
     <include>js/OpenPGPDecrypt.js</include>
+    <include>js/widgets/OpenPGPDialog.js</include>
     <include>js/widgets/GenerateKeypairDialog.js</include>
+    <include>js/widgets/GenerateKeypairView.js</include>
 
     <include>js/json/json2.js</include>
     <include>js/quoted-printable/quoted-printable.js</include>
