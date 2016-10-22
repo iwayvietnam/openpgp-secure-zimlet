@@ -55,8 +55,13 @@
                     <tr>
                         <td class='ZOptionsLabelTop'></td>
                         <td class='ZOptionsField'>
-                            <div id='${id}_OPENPGP_GEN_KEYPAIR'></div>
-                            <div id='${id}_OPENPGP_SUBMIT_KEY'></div>
+                            <table class='ZPropertySheet' border=0 cellspacing=0 cellpadding=0 width=100%>
+                                <tr>
+                                    <td><div id='${id}_OPENPGP_GEN_KEYPAIR'></div></td>
+                                    <td><div id='${id}_OPENPGP_SUBMIT_KEY'></div></td>
+                                    <td width=100%></td>
+                                </tr>
+                            </table>
                         </td>
                     </tr>
                 </table>
