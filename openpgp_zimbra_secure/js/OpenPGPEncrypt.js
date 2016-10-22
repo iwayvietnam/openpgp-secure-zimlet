@@ -34,7 +34,6 @@ OpenPGPEncrypt = function(opts, mimeBuilder, pgp) {
     this._mimeBuilder = mimeBuilder;
     this._pgp = pgp || openpgp;
     this._pgpKey = this._pgp.key;
-    this._pgp = this._pgp.default;
 
     var privateKey = this._pgpKey.readArmored(opts.privateKey).keys[0];
     if (!privateKey.decrypt(opts.passphrase)) {

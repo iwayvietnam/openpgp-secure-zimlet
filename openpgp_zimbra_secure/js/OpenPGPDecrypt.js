@@ -34,7 +34,6 @@ OpenPGPDecrypt = function(opts, message, pgp) {
 
     this._pgp = pgp || openpgp;
     this._pgpKey = this._pgp.key;
-    this._pgp = this._pgp.default;
 
     var self = this;
     var privateKey = this._pgpKey.readArmored(opts.privateKey).keys[0];
