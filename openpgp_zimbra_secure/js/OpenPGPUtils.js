@@ -206,6 +206,10 @@ OpenPGPUtils.forEach = function(obj, iteratee) {
     }
 };
 
+OpenPGPUtils.prop = function(key) {
+    return openpgp_zimbra_secure[key];
+};
+
 /*
  * random-string
  * https://github.com/valiton/node-random-string
@@ -218,7 +222,7 @@ OpenPGPUtils.randomString = function(opts) {
         letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
         specials = '!$%^&*()_+|~-=`{}[]:;<>?,./';
 
-    function _defaults (opts) {
+    function _defaults(opts) {
         opts || (opts = {});
         return {
             length: opts.length || 32,
@@ -228,7 +232,7 @@ OpenPGPUtils.randomString = function(opts) {
         };
     }
 
-    function _buildChars (opts) {
+    function _buildChars(opts) {
         var chars = '';
         if (opts.numeric) { chars += numbers; }
         if (opts.letters) { chars += letters; }

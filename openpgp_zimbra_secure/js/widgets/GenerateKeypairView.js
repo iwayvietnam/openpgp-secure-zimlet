@@ -66,12 +66,12 @@ GenerateKeypairView.prototype._initialize = function() {
     selKeyLength.replaceElement(id + "_selKeyLength");
 
     var btnPwdGen = this._btnPwdGen = new DwtButton({parent: this});
-    btnPwdGen.setText(openpgp_zimbra_secure['btnPwdGen']);
+    btnPwdGen.setText(OpenPGPUtils.prop('btnPwdGen'));
     btnPwdGen.setHandler(DwtEvent.ONCLICK, AjxCallback.simpleClosure(this._genPw, this));
     btnPwdGen.replaceElement(id + "_btnPwdGen");
 
     var btnShowHide = this._btnShowHide = new DwtButton({parent: this});
-    btnShowHide.setText(openpgp_zimbra_secure['btnShowHide']);
+    btnShowHide.setText(OpenPGPUtils.prop('btnShowHide'));
     btnShowHide.setHandler(DwtEvent.ONCLICK, AjxCallback.simpleClosure(this._showHide, this));
     btnShowHide.replaceElement(id + "_btnShowHide");
 };

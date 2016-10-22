@@ -221,17 +221,17 @@ OpenPGPZimbraSecure.prototype.initializeToolbar = function(app, toolbar, control
             var listener = new AjxListener(this, this._handleSelectSigning, [securityButton]);
 
             var nosignButton = new DwtMenuItem({parent: securityMenu, style: DwtMenuItem.RADIO_STYLE, radioGroupId: signingRadioId});
-            nosignButton.setText(openpgp_zimbra_secure.dontSignMessage);
+            nosignButton.setText(OpenPGPUtils.prop('dontSignMessage'));
             nosignButton.addSelectionListener(listener);
             nosignButton.setData('sign', OpenPGPZimbraSecure.OPENPGP_DONTSIGN);
 
             var signButton = new DwtMenuItem({parent: securityMenu, style: DwtMenuItem.RADIO_STYLE, radioGroupId: signingRadioId});
-            signButton.setText(openpgp_zimbra_secure.signMessage);
+            signButton.setText(OpenPGPUtils.prop('signMessage'));
             signButton.addSelectionListener(listener);
             signButton.setData('sign', OpenPGPZimbraSecure.OPENPGP_SIGN);
 
             var signAndEncryptButton = new DwtMenuItem({parent: securityMenu, style: DwtMenuItem.RADIO_STYLE, radioGroupId: signingRadioId});
-            signAndEncryptButton.setText(openpgp_zimbra_secure.signAndEncryptMessage);
+            signAndEncryptButton.setText(OpenPGPUtils.prop('signAndEncryptMessage'));
             signAndEncryptButton.addSelectionListener(listener);
             signAndEncryptButton.setData('sign', OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT);
 
@@ -377,8 +377,8 @@ OpenPGPZimbraSecure.popupErrorDialog = function(errorCode){
     if(!errorCode){
         errorCode = 'unknown-error';
     }
-    var msg = openpgp_zimbra_secure[errorCode];
-    var title = openpgp_zimbra_secure[errorCode + '-title'];
+    var msg = OpenPGPUtils.prop(errorCode);
+    var title = OpenPGPUtils.prop(errorCode + '-title');
 
     var dialog = appCtxt.getHelpMsgDialog();
     dialog.setMessage(msg, DwtMessageDialog.CRITICAL_STYLE, title);

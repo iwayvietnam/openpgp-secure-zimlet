@@ -79,38 +79,42 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
 
     // Setup
     OpenPGPSecurePrefs.registerPrefs = function(handler) {
-        var msg = function(key){return openpgp_zimbra_secure[key];};
         ZmPref.registerPref(OpenPGPSecurePrefs.SECURITY, {
             displayContainer: ZmPref.TYPE_RADIO_GROUP,
             orientation:      ZmPref.ORIENT_VERTICAL,
-            displayOptions:   [msg('prefSecurityAuto'), msg('prefSecurityNone'), msg('prefSecuritySign'), msg('prefSecurityBoth')],
+            displayOptions:   [
+                OpenPGPUtils.prop('prefSecurityAuto'),
+                OpenPGPUtils.prop('prefSecurityNone'),
+                OpenPGPUtils.prop('prefSecuritySign'),
+                OpenPGPUtils.prop('prefSecurityBoth')
+            ],
             options:          ['auto', '0', '1', '2']
         });
 
         ZmPref.registerPref(OpenPGPSecurePrefs.PRIVATE_KEY, {
-            displayName:        msg('prefPrivateKey'),
-            displayContainer:   ZmPref.TYPE_TEXTAREA
+            displayName:      OpenPGPUtils.prop('prefPrivateKey'),
+            displayContainer: ZmPref.TYPE_TEXTAREA
         });
 
         ZmPref.registerPref(OpenPGPSecurePrefs.PASSPHRASE, {
-            displayName:        msg('prefPassphrase'),
-            displayContainer:   ZmPref.TYPE_INPUT
+            displayName:      OpenPGPUtils.prop('prefPassphrase'),
+            displayContainer: ZmPref.TYPE_INPUT
         });
 
         ZmPref.registerPref(OpenPGPSecurePrefs.PUBLIC_KEY, {
-            displayName:        msg('prefPublicKey'),
-            displayContainer:   ZmPref.TYPE_TEXTAREA
+            displayName:      OpenPGPUtils.prop('prefPublicKey'),
+            displayContainer: ZmPref.TYPE_TEXTAREA
         });
     
         ZmPref.registerPref(OpenPGPSecurePrefs.GEN_KEYPAIR, {
-            displayContainer:   ZmPref.TYPE_STATIC
+            displayContainer: ZmPref.TYPE_STATIC
         });
         ZmPref.registerPref(OpenPGPSecurePrefs.SUBMIT_KEY, {
-            displayContainer:   ZmPref.TYPE_STATIC
+            displayContainer: ZmPref.TYPE_STATIC
         });
 
         var section = {
-            title: msg('prefSection'),
+            title: OpenPGPUtils.prop('prefSection'),
             icon: 'TrustedAddresses',
             templateId: 'openpgp_zimbra_secure#Preferences',
             priority: 49,
@@ -161,12 +165,12 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
     OpenPGPSecurePrefs.prototype._setupStatic = function(id, setup, value) {
         if (id == OpenPGPSecurePrefs.GEN_KEYPAIR) {
             var button = new DwtButton({parent: this, id: id});
-            button.setText(openpgp_zimbra_secure['btnKeyGen']);
+            button.setText(OpenPGPUtils.prop('btnKeyGen'));
             button.setHandler(DwtEvent.ONCLICK, AjxCallback.simpleClosure(this._keyGen, this));
             return button;
         } else if(id == OpenPGPSecurePrefs.SUBMIT_KEY) {
             var button = new DwtButton({parent: this, id: id});
-            button.setText(openpgp_zimbra_secure['btnKeySubmit']);
+            button.setText(OpenPGPUtils.prop('btnKeySubmit'));
             button.setHandler(DwtEvent.ONCLICK, AjxCallback.simpleClosure(this._keySubmit, this));
             return button;
         } else {
