@@ -326,12 +326,12 @@ OpenPGPZimbraSecure.prototype._getSecuritySetting = function() {
     }
 };
 
-SecureEmail.prototype._shouldSign = function(ctlr, useToolbarOnly) {
+OpenPGPZimbraSecure.prototype._shouldSign = function(ctlr, useToolbarOnly) {
     var value = this._getUserSecuritySetting(ctlr, useToolbarOnly);
     return (value == OpenPGPZimbraSecure.OPENPGP_SIGN || value == OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT);
 };
 
-SecureEmail.prototype._shouldEncrypt = function(ctlr, useToolbarOnly) {
+OpenPGPZimbraSecure.prototype._shouldEncrypt = function(ctlr, useToolbarOnly) {
     return this._getUserSecuritySetting(ctlr,useToolbarOnly) == OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT;
 };
 
