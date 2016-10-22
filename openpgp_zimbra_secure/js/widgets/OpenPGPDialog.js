@@ -33,13 +33,13 @@ OpenPGPDialog = function(handler, title, onOk, onCancel, standardButtons) {
     this._onCancel = onCancel;
 
     var submitListener = new AjxListener(this, this._dialogSubmit);
-    var onCancel = new AjxListener(this, this._dialogCancel);
+    var cancelListener = new AjxListener(this, this._dialogCancel);
 
     if (this._button[DwtDialog.OK_BUTTON]) {
         this.setButtonListener(DwtDialog.OK_BUTTON, submitListener);
     }
     if (this._button[DwtDialog.CANCEL_BUTTON]) {
-        this.registerCallback(DwtDialog.CANCEL_BUTTON, onCancel);
+        this.registerCallback(DwtDialog.CANCEL_BUTTON, cancelListener);
     }
     this.setEnterListener(submitListener);
     this._createContent();
@@ -54,13 +54,13 @@ OpenPGPDialog.prototype.toString = function() {
 };
 
 OpenPGPDialog.prototype._dialogSubmit = function() {
-    var retVal;
+    var result;
     if (this._onOk instanceof AjxCallback) {
-        retVal = this._onOk.run();
+        result = this._onOk.run();
     } else if (AjxUtil.isFunction(this._onOk)) {
-        retVal = this._onOk();
+        result = this._onOk();
     }
-    if (retVal !== false) {
+    if (result !== false) {
         this.popdown();
     }
 };
