@@ -21,7 +21,7 @@
  * Written by nguyennv1981@gmail.com
  */
 
-GenerateKeypairDialog = function(handler) {
+GenerateKeypairDialog = function(handler, title, onOk, onCancel, standardButtons) {
 };
 
 GenerateKeypairDialog.prototype = new OpenPGPDialog;

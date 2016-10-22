@@ -27,7 +27,6 @@ GenerateKeypairView = function(params) {
 
     this._name = params.name;
     this._emails = params.emails;
-    this._passphrase = params.passphrase;
     this._keyOptions = [1024, 2048, 2048];
 
     this._handler = params.handler;
@@ -39,7 +38,7 @@ GenerateKeypairView = function(params) {
 };
 
 GenerateKeypairView.prototype = new DwtComposite;
-GenerateKeypairView.prototype.constructor = CertificateUserView;
+GenerateKeypairView.prototype.constructor = GenerateKeypairView;
 
 GenerateKeypairView.prototype.TEMPLATE = "openpgp_zimbra_secure#GenerateKeypairView";
 
@@ -54,8 +53,12 @@ GenerateKeypairView.prototype._initialize = function() {
     txtEmails.setValue(AjxStringUtil.htmlEncode(this._emails));
     txtEmails.replaceElement(id + "_txtEmails");
 
+    var passphrase = OpenPGPUtils.randomString({
+        length: 24,
+        special: true
+    });
     var txtPassphrase = this._txtPassphrase = new DwtInputField({parent: this, type:  DwtInputField.PASSWORD});
-    txtPassphrase.setValue(AjxStringUtil.htmlEncode(this._passphrase));
+    txtPassphrase.setValue(AjxStringUtil.htmlEncode(passphrase));
     txtPassphrase.replaceElement(id + "_txtPassphrase");
 
     var selKeyLength = this._selKeyLength = new DwtSelect({parent: this});
