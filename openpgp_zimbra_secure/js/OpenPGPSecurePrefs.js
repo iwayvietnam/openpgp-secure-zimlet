@@ -61,6 +61,14 @@ OpenPGPSecurePrefs.registerSettings = function(handler) {
         type: ZmSetting.T_PREF,
         dataType: ZmSetting.D_STRING
     });
+    appCtxt.getSettings().registerSetting(OpenPGPSecurePrefs.GEN_KEYPAIR, {
+        type: ZmSetting.T_PREF,
+        dataType: ZmSetting.D_NONE
+    });
+    appCtxt.getSettings().registerSetting(OpenPGPSecurePrefs.SUBMIT_KEY, {
+        type: ZmSetting.T_PREF,
+        dataType: ZmSetting.D_NONE
+    });
 
     OpenPGPUtils.forEach(OpenPGPSecurePrefs.SETTINGS, function(name) {
         var setting = appCtxt.getSettings().getSetting(name);
