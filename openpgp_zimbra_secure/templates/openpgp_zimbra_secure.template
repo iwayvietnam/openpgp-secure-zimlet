@@ -2,7 +2,7 @@
 
 <template id='openpgp_zimbra_secure#Preferences'>
     <div align=right style='margin-right: 20px; margin-bottom: 10px;'>
-            <div id='${id}_REVERT_PAGE' tabindex='10' style='margin-right: 25px;'></div>
+        <div id='${id}_REVERT_PAGE' tabindex='10' style='margin-right: 25px;'></div>
     </div>
 
     <table border=0 cellspacing=0 cellpadding=0 width=100%>
@@ -22,6 +22,53 @@
                         <td class='ZOptionsField'><div id='${id}_OPENPGP_SECURITY' tabindex='35'></div></td>
                     </tr>
                 </table>
+            </td>
+        </tr>
+    </table>
+
+    <table border=0 cellspacing=0 cellpadding=0 width=100%>
+        <tr class='ZOptionsHeaderRow'>
+            <td class='ZOptionsHeaderL'><div class='ImgPrefsHeader_L'></div></td>
+            <td class='ZOptionsHeader ImgPrefsHeader'><$=openpgp_zimbra_secure.prefKeypair$></td>
+            <td class='ZOptionsHeaderR'><div class='ImgPrefsHeader_R'></div></td>
+        </tr>
+    </table>
+    <table class='ZOptionsSectionTable' border=0 cellspacing=0 cellpadding=0 width=100%>
+        <tr>
+            <td class='ZOptionsSectionMain'>
+                <table width=100%>
+                    <tr>
+                        <td class='ZOptionsLabelTop'><$=openpgp_zimbra_secure.prefPrivateKey$></td>
+                        <td class='ZOptionsField'><div id='${id}_OPENPGP_PRIVATE_KEY' tabindex='35'></div></td>
+                    </tr>
+
+                    <tr>
+                        <td class='ZOptionsLabelTop'><$=openpgp_zimbra_secure.prefPassphrase$></td>
+                        <td class='ZOptionsField'><div id='${id}_OPENPGP_PASSPHRASE' tabindex='36'></div></td>
+                    </tr>
+
+                    <tr>
+                        <td class='ZOptionsLabelTop'><$=openpgp_zimbra_secure.prefPublicKey$></td>
+                        <td class='ZOptionsField'><div id='${id}_OPENPGP_PUBLIC_KEY' tabindex='37'></div></td>
+                    </tr>
+
+                    <tr>
+                        <td class='ZOptionsLabelTop'></td>
+                        <td class='ZOptionsField'>
+                            <div id='${id}_OPENPGP_GEN_KEYPAIR'></div>
+                            <div id='${id}_OPENPGP_SUBMIT_KEY'></div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</template>
+
+<template id='openpgp_zimbra_secure#GenerateKeypairView'>
+    <table border=0 cellspacing=0 cellpadding=0 width=100%>
+        <tr class='ZOptionsHeaderRow'>
+            <td class='ZOptionsHeaderL'>
             </td>
         </tr>
     </table>
