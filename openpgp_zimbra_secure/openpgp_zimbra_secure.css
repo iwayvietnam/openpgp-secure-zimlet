@@ -22,3 +22,7 @@
     width: 16px;
     height: 16px;
 }
+.GenKeyInput input[type="password"],
+.GenKeyInput input[type="text"] {
+    width: 98%;
+}
