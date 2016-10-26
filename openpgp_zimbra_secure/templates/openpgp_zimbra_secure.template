@@ -39,17 +39,25 @@
                 <table width=100%>
                     <tr>
                         <td class='ZOptionsLabelTop'><$=openpgp_zimbra_secure.prefPrivateKey$></td>
-                        <td class='ZOptionsField'><div id='${id}_OPENPGP_PRIVATE_KEY' tabindex='35'></div></td>
+                        <td class='ZOptionsField'><div id='${id}_OPENPGP_PRIVATE_KEY'></div></td>
                     </tr>
 
                     <tr>
                         <td class='ZOptionsLabelTop'><$=openpgp_zimbra_secure.prefPassphrase$></td>
-                        <td class='ZOptionsField'><div id='${id}_OPENPGP_PASSPHRASE' tabindex='36'></div></td>
+                        <td class='ZOptionsField'>
+                            <table class='ZPropertySheet' border=0 cellspacing=0 cellpadding=0 width=100%>
+                                <tr>
+                                    <td><div id='${id}_OPENPGP_PASSPHRASE'></div></td>
+                                    <td><div id='${id}_OPENPGP_TOGGLE_PASSPHASE'></div></td>
+                                    <td width=100%></td>
+                                </tr>
+                            </table>
+                        </td>
                     </tr>
 
                     <tr>
                         <td class='ZOptionsLabelTop'><$=openpgp_zimbra_secure.prefPublicKey$></td>
-                        <td class='ZOptionsField'><div id='${id}_OPENPGP_PUBLIC_KEY' tabindex='37'></div></td>
+                        <td class='ZOptionsField'><div id='${id}_OPENPGP_PUBLIC_KEY'></div></td>
                     </tr>
 
                     <tr>
@@ -71,10 +79,42 @@
 </template>
 
 <template id='openpgp_zimbra_secure#GenerateKeypairView'>
-    <table border=0 cellspacing=0 cellpadding=0 width=100%>
-        <tr class='ZOptionsHeaderRow'>
-            <td class='ZOptionsHeaderL'>
+    <table border=0 cellspacing=0 cellpadding=0 width=100% class='GenKeypairTable'>
+        <tr class='GenKeypairRow'>
+            <td><$=openpgp_zimbra_secure.keyPairGenName$></td>
+            <td><div id='${id}_txtName'></div></td>
+        </tr>
+        <tr class='GenKeypairRow'>
+            <td><$=openpgp_zimbra_secure.keyPairGenEmail$></td>
+            <td><div id='${id}_txtEmail'></div></td>
+        </tr>
+        <tr class='GenKeypairRow'>
+            <td></td>
+            <td><$=openpgp_zimbra_secure.keyPairGenEmailDesc$></td>
+        </tr>
+        <tr class='GenKeypairRow'>
+            <td><$=openpgp_zimbra_secure.keyPairGenPassphrase$></td>
+            <td><div id='${id}_txtPassphrase'></div></td>
+        </tr>
+        <tr class='GenKeypairRow'>
+            <td></td>
+            <td>
+                <table class='ZPropertySheet' border=0 cellspacing=0 cellpadding=0 width=100%>
+                    <tr>
+                        <td><div id='${id}_btnPwdGen'></div></td>
+                        <td><div id='${id}_btnShowHide'></div></td>
+                        <td width=100%></td>
+                    </tr>
+                </table>
             </td>
+        </tr>
+        <tr class='GenKeypairRow'>
+            <td><$=openpgp_zimbra_secure.keyPairGenKeyLength$></td>
+            <td><div id='${id}_selNumBits'></div></td>
+        </tr>
+        <tr class='GenKeypairRow'>
+            <td></td>
+            <td><$=openpgp_zimbra_secure.keyPairGenKeyLengthDesc$></td>
         </tr>
     </table>
 </template>
