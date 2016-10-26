@@ -67,6 +67,18 @@ OpenPGPZimbraSecure.prototype.init = function() {
         }
     }));
 
+    OpenPGPZimbraSecure.settings = [];
+
+    var pwdKey = 'secure_password_' + this.getUsername();
+    if (localStorage[pwdKey]) {
+        OpenPGPZimbraSecure.settings['secure_password'] = localStorage[pwdKey];
+    }
+    else {
+        localStorage[pwdKey] = OpenPGPZimbraSecure.settings['secure_password'] = OpenPGPUtils.randomString({
+            length: 24
+        });
+    }
+
     OpenPGPSecurePrefs.init(this);
 }
 
