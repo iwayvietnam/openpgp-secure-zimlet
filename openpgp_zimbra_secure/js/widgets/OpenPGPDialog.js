@@ -53,6 +53,21 @@ OpenPGPDialog.prototype.toString = function() {
     return "OpenPGPDialog";
 };
 
+OpenPGPDialog.prototype.setView = function(newView) {
+    this.reset();
+    if (newView) {
+        var contentDiv = this._getContentDiv();
+        var el = newView.getHtmlElement();
+        contentDiv.parentNode.replaceChild(el, contentDiv);
+        this._contentEl = el;
+        this._view = newView;
+    }
+};
+
+OpenPGPDialog.prototype.getView = function() {
+    return this._view;
+};
+
 OpenPGPDialog.prototype._dialogSubmit = function() {
     var result;
     if (this._onOk instanceof AjxCallback) {
