@@ -22,6 +22,36 @@
  */
 
 GenerateKeypairDialog = function(handler, title, onOk, onCancel, standardButtons) {
+    OpenPGPDialog.call(
+        this,
+        handler,
+        title,
+        onOk,
+        onCancel,
+        standardButtons
+    );
+
+    if (appCtxt.get(ZmSetting.DISPLAY_NAME)) {
+        displayName = appCtxt.get(ZmSetting.DISPLAY_NAME);
+    } else {
+        displayName = appCtxt.getActiveAccount().name;
+    }  
+
+    var emails = [appCtxt.getActiveAccount().name];
+    var aliases = appCtxt.get(ZmSetting.MAIL_ALIASES);
+    if(aliases) {
+        OpenPGPUtils.forEach(aliases, function(alias) {
+            emails.push(alias);
+        });      
+    }
+
+    var view = new GenerateKeypairView({
+        parent: this,
+        handler: handler,
+        name: displayName,
+        email: emails.join(', ')
+    });
+    this.setView(view);
 };
 
 GenerateKeypairDialog.prototype = new OpenPGPDialog;

@@ -22,12 +22,12 @@
  */
 
 GenerateKeypairView = function(params) {
-    params.className = params.className || "DwtComposite GenerateKeypairView";
+    params.className = params.className || 'DwtComposite GenerateKeypairView';
     DwtComposite.call(this, params);
 
     this._name = params.name;
-    this._emails = params.emails;
-    this._keyOptions = [1024, 2048, 2048];
+    this._email = params.email;
+    this._numBits = [1024, 2048, 4096];
 
     this._handler = params.handler;
     this._createHtmlFromTemplate(this.TEMPLATE, {
@@ -40,51 +40,55 @@ GenerateKeypairView = function(params) {
 GenerateKeypairView.prototype = new DwtComposite;
 GenerateKeypairView.prototype.constructor = GenerateKeypairView;
 
-GenerateKeypairView.prototype.TEMPLATE = "openpgp_zimbra_secure#GenerateKeypairView";
+GenerateKeypairView.prototype.TEMPLATE = 'openpgp_zimbra_secure#GenerateKeypairView';
 
 GenerateKeypairView.prototype._initialize = function() {
     var id = this.getHTMLElId();
 
-    var txtName = this._txtName = new DwtInputField({parent: this});
+    var txtName = this.txtName = new DwtInputField({parent: this, className: 'GenKeyInput'});
     txtName.setValue(AjxStringUtil.htmlEncode(this._name));
-    txtName.replaceElement(id + "_txtName");
+    txtName.replaceElement(id + '_txtName');
 
-    var txtEmails = this._txtEmails = new DwtInputField({parent: this});
-    txtEmails.setValue(AjxStringUtil.htmlEncode(this._emails));
-    txtEmails.replaceElement(id + "_txtEmails");
+    var txtEmail = this.txtEmail = new DwtInputField({parent: this, className: 'GenKeyInput'});
+    txtEmail.setValue(AjxStringUtil.htmlEncode(this._email));
+    txtEmail.replaceElement(id + '_txtEmail');
 
-    var passphrase = OpenPGPUtils.randomString({
-        length: 24,
-        special: true
+    var txtPassphrase = this.txtPassphrase = new DwtInputField({parent: this, className: 'GenKeyInput', type: DwtInputField.PASSWORD});
+    txtPassphrase.setValue(OpenPGPUtils.randomString({
+        length: 24
+    }));
+    txtPassphrase.replaceElement(id + '_txtPassphrase');
+
+    var selNumBits = this.selNumBits = new DwtSelect({parent: this});
+    OpenPGPUtils.forEach(this._numBits, function(numBits) {
+        var opt = new DwtSelectOption(numBits, null, numBits);
+        selNumBits.addOption(opt);
     });
-    var txtPassphrase = this._txtPassphrase = new DwtInputField({parent: this, type:  DwtInputField.PASSWORD});
-    txtPassphrase.setValue(AjxStringUtil.htmlEncode(passphrase));
-    txtPassphrase.replaceElement(id + "_txtPassphrase");
+    selNumBits.replaceElement(id + '_selNumBits');
 
-    var selKeyLength = this._selKeyLength = new DwtSelect({parent: this});
-    OpenPGPUtils.forEach(this._keyOptions, function(keyLength) {
-        var opt = new DwtSelectOption(keyLength, null, keyLength);
-        selKeyLength.addOption(opt);
-    });
-    selKeyLength.replaceElement(id + "_selKeyLength");
-
-    var btnPwdGen = this._btnPwdGen = new DwtButton({parent: this});
+    var btnPwdGen = this.btnPwdGen = new DwtButton({parent: this});
     btnPwdGen.setText(OpenPGPUtils.prop('btnPwdGen'));
     btnPwdGen.setHandler(DwtEvent.ONCLICK, AjxCallback.simpleClosure(this._genPw, this));
-    btnPwdGen.replaceElement(id + "_btnPwdGen");
+    btnPwdGen.replaceElement(id + '_btnPwdGen');
 
-    var btnShowHide = this._btnShowHide = new DwtButton({parent: this});
+    var btnShowHide = this.btnShowHide = new DwtButton({parent: this});
     btnShowHide.setText(OpenPGPUtils.prop('btnShowHide'));
     btnShowHide.setHandler(DwtEvent.ONCLICK, AjxCallback.simpleClosure(this._showHide, this));
-    btnShowHide.replaceElement(id + "_btnShowHide");
+    btnShowHide.replaceElement(id + '_btnShowHide');
 };
 
 GenerateKeypairView.prototype._genPw = function() {
-    this._txtPassphrase.setValue(OpenPGPUtils.randomString({
-        length: 24,
-        special: true
+    this.txtPassphrase.setValue(OpenPGPUtils.randomString({
+        length: 24
     }));
 }
 
 GenerateKeypairView.prototype._showHide = function() {
+    var id = this.getHTMLElId();
+    var input = document.getElementById(id + '_txtPassphrase');
+    if (input.getAttribute('type') == 'password') {
+        input.setAttribute('type', 'text');
+    } else {
+        input.setAttribute('type', 'password');   
+    }
 }
