@@ -88,6 +88,36 @@ OpenPGPUtils.isEncryptedContentType = function(cType) {
     return AjxUtil.indexOf([OpenPGPUtils.OPENPGP_ENCRYPTED_CONTENT_TYPE], cType) !== -1;
 };
 
+OpenPGPUtils.localStorageSave = function(key, pwd, data) {
+    var opts = {
+        data: data,
+        passwords: [pwd]
+    };
+    return openpgp.encrypt(opts).then(function(encrypted) {
+        localStorage[key] = encrypted.data;
+        return encrypted.data;
+    });
+}
+
+OpenPGPUtils.localStorageRead = function(key, pwd) {
+    var sequence = Promise.resolve();
+    return sequence.then(function() {
+        if (localStorage[key]) {
+            var encrypted = localStorage[key];
+            var opts = {
+                message: openpgp.message.readArmored(encrypted),
+                password: pwd
+            };
+            return openpgp.decrypt(opts).then(function(plaintext) {
+                return plaintext.data;
+            });
+        }
+        else {
+            return false;
+        }
+    });
+}
+
 OpenPGPUtils.base64Encode = function(bin) {
     if (!window.btoa) {
         for (var i = 0, j = 0, len = bin.length / 3, base64 = []; i < len; ++i) {
