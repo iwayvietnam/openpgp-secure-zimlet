@@ -216,6 +216,7 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
         attachments.push(this._pendingAttachments.pop());
     }
 
+    var dupes = [];
     var publicKeys = [];
     var receivers = [];
     OpenPGPUtils.forEach(input.m.e, function(e) {
@@ -233,8 +234,11 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
         var key = openpgp.key.readArmored(publicKey).keys[0];
         OpenPGPUtils.forEach(receivers, function(receiver) {
             for (i = 0; i < key.users.length; i++) {
-                if (key.users[i].userId && key.users[i].userId.indexOf(receiver) >= 0) {
+                var uid = key.users[i].userId;
+                var fingerprint = key.primaryKey.fingerprint;
+                if (uid.indexOf(receiver) >= 0 && !dupes[fingerprint + uid]) {
                     publicKeys.push(publicKey);
+                    dupes[fingerprint + uid] = fingerprint + uid;
                 }
             }
         });
