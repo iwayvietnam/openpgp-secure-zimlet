@@ -27,8 +27,7 @@ OpenPGPEncrypt = function(opts, mimeBuilder, pgp) {
         publicKeys: [],
         passphrase: '',
         shouldEncrypt: false,
-        beforeEncrypt: false,
-        afterEncrypt: false,
+        onEncrypted: false,
         onError: false
     };
     var self = this;
@@ -36,8 +35,7 @@ OpenPGPEncrypt = function(opts, mimeBuilder, pgp) {
     this._pgp = pgp || openpgp;
     this._pgpKey = this._pgp.key;
     this._shouldEncrypt = opts.shouldEncrypt;
-    this._beforeEncrypt = opts.beforeEncrypt;
-    this._afterEncrypt = opts.afterEncrypt;
+    this._onEncrypted = opts.onEncrypted;
     this._onError = opts.onError;
 
     var privateKey = this._pgpKey.readArmored(opts.privateKey).keys[0];
@@ -58,10 +56,6 @@ OpenPGPEncrypt.prototype.encrypt = function() {
     var self = this;
     var sequence = Promise.resolve();
 
-    if (this._beforeEncrypt) {
-        this._beforeEncrypt(this, this._mimeBuilder);
-    }
-
     return sequence.then(function() {
         var opts = {
             data: self._mimeBuilder.toString(),
@@ -79,14 +73,13 @@ OpenPGPEncrypt.prototype.encrypt = function() {
         if (self._shouldEncrypt) {
             var opts = {
                 data: self._mimeBuilder.toString(),
-                // privateKeys: self._privateKey,
                 publicKeys: self._publicKeys,
                 armor: true
             };
             return self._pgp.encrypt(opts).then(function(cipherText) {
                 self._mimeBuilder.buildEncryptedMessage(cipherText.data);
-                if (self._afterEncrypt) {
-                    self._afterEncrypt(self, self._mimeBuilder);
+                if (self._onEncrypted) {
+                    self._onEncrypted(self, self._mimeBuilder);
                 }
                 return self._mimeBuilder;
             }, function(err) {
