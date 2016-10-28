@@ -42,7 +42,7 @@ OpenPGPDecrypt = function(opts, message, pgp) {
     this._privateKey = privateKey;
     this._publicKeys = [];
     OpenPGPUtils.forEach(opts.publicKeys, function(key) {
-        self._publicKeys.push(self._pgpKey.readArmored(key).keys[0]);
+        self._publicKeys = self._publicKeys.concat(self._pgpKey.readArmored(key).keys);
     });
     this._message = mimemessage.parse(message);
     if (!this._message) {

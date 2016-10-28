@@ -45,7 +45,7 @@ OpenPGPEncrypt = function(opts, mimeBuilder, pgp) {
     this._privateKey = privateKey;
     this._publicKeys = [];
     OpenPGPUtils.forEach(opts.publicKeys, function(key) {
-        self._publicKeys.push(self._pgpKey.readArmored(key).keys[0]);
+        self._publicKeys = self._publicKeys.concat(self._pgpKey.readArmored(key).keys);
     });
 };
 
