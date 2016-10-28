@@ -231,8 +231,10 @@ OpenPGPUtils.getDefaultSenderAddress = function() {
 };
 
 OpenPGPUtils.forEach = function(obj, iteratee) {
-    for (i = 0, length = obj.length; i < length; i++) {
-        iteratee(obj[i], i, obj);
+    if (obj) {
+        for (i = 0, length = obj.length; i < length; i++) {
+            iteratee(obj[i], i, obj);
+        }
     }
 };
 
