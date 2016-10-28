@@ -80,30 +80,14 @@ OpenPGPSecurePrefs.registerSettings = function(handler) {
         setting.setValue(handler.getUserProperty(setting.id));
     });
 
-    var publicKey = localStorage['openpgp_public_key_' + handler.getUsername()];
     var publicKeySetting = zmSettings.getSetting(OpenPGPSecurePrefs.PUBLIC_KEY);
-    publicKeySetting.setValue(publicKey);
+    publicKeySetting.setValue(handler.publicKey);
 
-    setTimeout(function() {
-        var securePwd = OpenPGPZimbraSecure.settings['secure_password'];
-        OpenPGPUtils.localStorageRead(
-            'openpgp_private_key_' + handler.getUsername(),
-            securePwd
-        )
-        .then(function(privateKey) {
-            var privateKeySetting = zmSettings.getSetting(OpenPGPSecurePrefs.PRIVATE_KEY);
-            privateKeySetting.setValue(privateKey);
-        });
+    var privateKeySetting = zmSettings.getSetting(OpenPGPSecurePrefs.PRIVATE_KEY);
+    privateKeySetting.setValue(handler.privateKey);
 
-        OpenPGPUtils.localStorageRead(
-            'openpgp_passphrase_' + handler.getUsername(),
-            securePwd
-        )
-        .then(function(passphrase) {
-            var passphraseSetting = zmSettings.getSetting(OpenPGPSecurePrefs.PASSPHRASE);
-            passphraseSetting.setValue(passphrase);
-        });
-    }, 1000);
+    var passphraseSetting = zmSettings.getSetting(OpenPGPSecurePrefs.PASSPHRASE);
+    passphraseSetting.setValue(handler.privatePass);
 };
 
 AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
