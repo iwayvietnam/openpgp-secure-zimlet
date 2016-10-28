@@ -48,7 +48,7 @@
                             <table class='ZPropertySheet' border=0 cellspacing=0 cellpadding=0 width=100%>
                                 <tr>
                                     <td><div id='${id}_OPENPGP_PASSPHRASE'></div></td>
-                                    <td><div id='${id}_OPENPGP_TOGGLE_PASSPHASE'></div></td>
+                                    <td><div id='${id}_OPENPGP_PASSPHRASE_TOGGLE'></div></td>
                                     <td width=100%></td>
                                 </tr>
                             </table>
@@ -65,12 +65,42 @@
                         <td class='ZOptionsField'>
                             <table class='ZPropertySheet' border=0 cellspacing=0 cellpadding=0 width=100%>
                                 <tr>
-                                    <td><div id='${id}_OPENPGP_GEN_KEYPAIR'></div></td>
-                                    <td><div id='${id}_OPENPGP_SUBMIT_KEY'></div></td>
+                                    <td><div id='${id}_OPENPGP_KEYPAIR_GEN'></div></td>
+                                    <td><div id='${id}_OPENPGP_KEY_SUBMIT'></div></td>
                                     <td width=100%></td>
                                 </tr>
                             </table>
                         </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <table border=0 cellspacing=0 cellpadding=0 width=100%>
+        <tr class='ZOptionsHeaderRow'>
+            <td class='ZOptionsHeaderL'><div class='ImgPrefsHeader_L'></div></td>
+            <td class='ZOptionsHeader ImgPrefsHeader'><$=openpgp_zimbra_secure.prefPublicKeys$></td>
+            <td class='ZOptionsHeaderR'><div class='ImgPrefsHeader_R'></div></td>
+        </tr>
+    </table>
+    <table class='ZOptionsSectionTable' border=0 cellspacing=0 cellpadding=0 width=100%>
+        <tr>
+            <td class='ZOptionsSectionMain'>
+                <table width=100%>
+                    <tr>
+                        <td class='ZOptionsField'>
+                            <table class='ZPropertySheet' border=0 cellspacing=0 cellpadding=0 width=100%>
+                                <tr>
+                                    <td><div id='${id}_OPENPGP_KEY_LOOKUP'></div></td>
+                                    <td><div id='${id}_OPENPGP_KEY_ADD'></div></td>
+                                    <td width=100%></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class='ZOptionsField'><div id='${id}_OPENPGP_PUBLIC_KEYS'></div></td>
                     </tr>
                 </table>
             </td>
