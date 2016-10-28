@@ -29,13 +29,12 @@ OpenPGPDecrypt = function(opts, message, pgp) {
         onDecrypted: false,
         onError: false
     };
+    var self = this;
+    this._pgp = pgp || openpgp;
+    this._pgpKey = this._pgp.key;
     this._onDecrypted = opts.onDecrypted;
     this._onError = opts.onError;
 
-    this._pgp = pgp || openpgp;
-    this._pgpKey = this._pgp.key;
-
-    var self = this;
     var privateKey = this._pgpKey.readArmored(opts.privateKey).keys[0];
     if (!privateKey.decrypt(opts.passphrase)) {
         throw new Error('Wrong passphrase! Could not decrypt the private key!');
@@ -43,7 +42,7 @@ OpenPGPDecrypt = function(opts, message, pgp) {
     this._privateKey = privateKey;
     this._publicKeys = [];
     OpenPGPUtils.forEach(opts.publicKeys, function(key) {
-        this._publicKeys.push(self._pgpKey.readArmored(key).keys[0]);
+        self._publicKeys.push(self._pgpKey.readArmored(key).keys[0]);
     });
     this._message = mimemessage.parse(message);
     if (!this._message) {
@@ -59,7 +58,7 @@ OpenPGPDecrypt.prototype.decrypt = function() {
     var sequence = Promise.resolve();
 
     return sequence.then(function() {
-        var ct = this._message.contentType().fulltype;
+        var ct = self._message.contentType().fulltype;
         if(OpenPGPUtils.isEncryptedContentType(ct)) {
             var messageHeader = '-----BEGIN PGP MESSAGE-----';
             var cipherText = messageHeader + self._message.toString({noHeaders: true}).split(messageHeader).pop();
