@@ -124,18 +124,18 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
         shouldEncrypt = this._shouldEncrypt();
 
         var view = appCtxt.getCurrentView();
-        var composeCtrl = view && view.getController && view.getController();
+    }
+
+    if (params.jsonObj.SaveDraftRequest) {
+        isDraft = true;
+        shouldSign = false;
+        shouldEncrypt = false;
     }
 
     if (!shouldEncrypt && !shouldSign) {
         // call the wrapped function
         orig.apply(msg, [params]);
         return;
-    }
-    if (params.jsonObj.SaveDraftRequest) {
-        isDraft = true;
-        shouldSign = false;
-        shouldEncrypt = true;
     }
 
     var input = (params.jsonObj.SendMsgRequest || params.jsonObj.SaveDraftRequest);
@@ -199,15 +199,15 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
     }
     checkInlineAttachments(input.m.mp);
 
-    var mimeParts = [];
+    var contentParts = [];
     OpenPGPUtils.forEach(input.m.mp, function(part) {
         if (part.mp) {
             OpenPGPUtils.forEach(part.mp, function(mp) {
-                mimeParts.push(mp);
+                contentParts.push(mp);
             });
         }
         else {
-            mimeParts.push(part);
+            contentParts.push(part);
         }
     });
 
@@ -216,8 +216,6 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
         attachments.push(this._pendingAttachments.pop());
     }
 
-    var dupes = [];
-    var publicKeys = [];
     var receivers = [];
     OpenPGPUtils.forEach(input.m.e, function(e) {
         if (e.t == 't') {
@@ -230,11 +228,14 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
             receivers.push(e.a);
         }
     });
+
+    var dupes = [];
+    var publicKeys = [];
     OpenPGPUtils.forEach(this.publicKeys, function(publicKey) {
         var key = openpgp.key.readArmored(publicKey).keys[0];
         OpenPGPUtils.forEach(receivers, function(receiver) {
             for (i = 0; i < key.users.length; i++) {
-                var uid = key.users[i].userId;
+                var uid = key.users[i].userId.userid;
                 var fingerprint = key.primaryKey.fingerprint;
                 if (uid.indexOf(receiver) >= 0 && !dupes[fingerprint + uid]) {
                     publicKeys.push(publicKey);
@@ -253,7 +254,7 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
             self._onEncryptError(error);
         }
     }, new OpenPGPMimeBuilder({
-        contentParts: mps,
+        contentParts: contentParts,
         attachments: attachments
     }));
     encryptor.encrypt().then(function(builder) {
