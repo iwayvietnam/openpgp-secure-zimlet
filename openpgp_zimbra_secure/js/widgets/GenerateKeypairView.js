@@ -29,7 +29,6 @@ GenerateKeypairView = function(params) {
     this._email = params.email;
     this._numBits = [1024, 2048, 4096];
 
-    this._handler = params.handler;
     this._createHtmlFromTemplate(this.TEMPLATE, {
         id: this.getHTMLElId()
     });
@@ -39,6 +38,10 @@ GenerateKeypairView = function(params) {
 
 GenerateKeypairView.prototype = new DwtComposite;
 GenerateKeypairView.prototype.constructor = GenerateKeypairView;
+
+GenerateKeypairView.prototype.toString = function() {
+    return 'GenerateKeypairView';
+};
 
 GenerateKeypairView.prototype.TEMPLATE = 'openpgp_zimbra_secure#GenerateKeypairView';
 

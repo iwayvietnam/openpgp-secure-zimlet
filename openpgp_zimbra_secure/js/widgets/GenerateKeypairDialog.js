@@ -58,5 +58,5 @@ GenerateKeypairDialog.prototype = new OpenPGPDialog;
 GenerateKeypairDialog.prototype.constructor = GenerateKeypairDialog;
 
 GenerateKeypairDialog.prototype.toString = function() {
-    return "GenerateKeypairDialog";
+    return 'GenerateKeypairDialog';
 };

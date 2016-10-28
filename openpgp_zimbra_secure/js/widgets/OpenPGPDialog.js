@@ -50,7 +50,7 @@ OpenPGPDialog.prototype = new ZmDialog;
 OpenPGPDialog.prototype.constructor = OpenPGPDialog;
 
 OpenPGPDialog.prototype.toString = function() {
-    return "OpenPGPDialog";
+    return 'OpenPGPDialog';
 };
 
 OpenPGPDialog.prototype.setView = function(newView) {
