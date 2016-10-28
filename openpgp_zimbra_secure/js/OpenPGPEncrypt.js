@@ -31,9 +31,14 @@ OpenPGPEncrypt = function(opts, mimeBuilder, pgp) {
         afterEncrypt: false,
         onError: false
     };
+    var self = this;
     this._mimeBuilder = mimeBuilder;
     this._pgp = pgp || openpgp;
     this._pgpKey = this._pgp.key;
+    this._shouldEncrypt = opts.shouldEncrypt;
+    this._beforeEncrypt = opts.beforeEncrypt;
+    this._afterEncrypt = opts.afterEncrypt;
+    this._onError = opts.onError;
 
     var privateKey = this._pgpKey.readArmored(opts.privateKey).keys[0];
     if (!privateKey.decrypt(opts.passphrase)) {
@@ -42,13 +47,8 @@ OpenPGPEncrypt = function(opts, mimeBuilder, pgp) {
     this._privateKey = privateKey;
     this._publicKeys = [];
     OpenPGPUtils.forEach(opts.publicKeys, function(key) {
-        this._publicKeys.push(self._pgpKey.readArmored(key).keys[0]);
+        self._publicKeys.push(self._pgpKey.readArmored(key).keys[0]);
     });
-
-    this._shouldEncrypt = opts.shouldEncrypt;
-    this._beforeEncrypt = opts.beforeEncrypt;
-    this._afterEncrypt = opts.afterEncrypt;
-    this._onError = opts.onError;
 };
 
 OpenPGPEncrypt.prototype = new Object();
@@ -56,44 +56,51 @@ OpenPGPEncrypt.prototype.constructor = OpenPGPEncrypt;
 
 OpenPGPEncrypt.prototype.encrypt = function() {
     var self = this;
+    var sequence = Promise.resolve();
+
     if (this._beforeEncrypt) {
         this._beforeEncrypt(this, this._mimeBuilder);
     }
-    var opts = {
-        data: self._mimeBuilder.toString(),
-        privateKeys: this._privateKey,
-        armor: true
-    };
-    return this._pgp.sign(options).then(function(signedMessage) {
-        var signatureHeader = '-----BEGIN PGP SIGNATURE-----';
-        var signature = signatureHeader + signedMessage.data.split(signatureHeader).pop();
-        self._mimeBuilder.buildSignedMessage(signature);
-    }, function(err) {
-        if (self._onError) {
-            self._onError(self, err);
-        }
-    }).then(function() {
+
+    return sequence.then(function() {
+        var opts = {
+            data: self._mimeBuilder.toString(),
+            privateKeys: self._privateKey,
+            armor: true
+        };
+        return self._pgp.sign(opts).then(function(signedText) {
+            var signatureHeader = '-----BEGIN PGP SIGNATURE-----';
+            var signature = signatureHeader + signedText.data.split(signatureHeader).pop();
+            self._mimeBuilder.buildSignedMessage(signature);
+            console.log('Signed message:');
+            console.log(self._mimeBuilder.toString());
+            return self._mimeBuilder;
+        });
+    })
+    .then(function(builder) {
         if (self._shouldEncrypt) {
             var opts = {
                 data: self._mimeBuilder.toString(),
-                privateKeys: this._privateKey,
-                publicKeys: this._publicKeys,
+                // privateKeys: self._privateKey,
+                publicKeys: self._publicKeys,
                 armor: true
             };
-            self._pgp.encrypt(opts).then(function(cipherText) {
+            return self._pgp.encrypt(opts).then(function(cipherText) {
+                console.log('Encrypted message:');
+                console.log(cipherText.data);
                 self._mimeBuilder.buildEncryptedMessage(cipherText.data);
                 if (self._afterEncrypt) {
                     self._afterEncrypt(self, self._mimeBuilder);
                 }
+                return self._mimeBuilder;
             }, function(err) {
-                if (this._onError) {
-                    this._onError(this, err);
+                if (self._onError) {
+                    self._onError(self, err);
                 }
             });
         }
-        else if (self._afterEncrypt){
-            self._afterEncrypt(self, self._mimeBuilder);
+        else {
+            return self._mimeBuilder;
         }
-        return self._mimeBuilder;
     });
 };
