@@ -72,8 +72,6 @@ OpenPGPEncrypt.prototype.encrypt = function() {
             var signatureHeader = '-----BEGIN PGP SIGNATURE-----';
             var signature = signatureHeader + signedText.data.split(signatureHeader).pop();
             self._mimeBuilder.buildSignedMessage(signature);
-            console.log('Signed message:');
-            console.log(self._mimeBuilder.toString());
             return self._mimeBuilder;
         });
     })
@@ -86,8 +84,6 @@ OpenPGPEncrypt.prototype.encrypt = function() {
                 armor: true
             };
             return self._pgp.encrypt(opts).then(function(cipherText) {
-                console.log('Encrypted message:');
-                console.log(cipherText.data);
                 self._mimeBuilder.buildEncryptedMessage(cipherText.data);
                 if (self._afterEncrypt) {
                     self._afterEncrypt(self, self._mimeBuilder);
