@@ -149,6 +149,58 @@
     </table>
 </template>
 
+<template id='openpgp_zimbra_secure#KeyLookupView'>
+    <div class='KeyLookupTableWrap'>
+        <table border=0 cellspacing=0 cellpadding=0 width=100% class='KeyLookupTable'>
+            <tr class='KeyLookupRow'>
+                <td>
+                    <table class='ZPropertySheet' border=0 cellspacing=0 cellpadding=0 width=100%>
+                        <tr>
+                            <td><div id='${id}_txtQuery'></div></td>
+                            <td><div id='${id}_btnSearch'></div></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr class='KeyLookupRow'>
+                <td><div id='${id}_Result'></div></td>
+            </tr>
+        </table>
+    </div>
+</template>
+
+<template id='openpgp_zimbra_secure#KeyLookupResult'>
+    <table border=0 cellspacing=0 cellpadding=0 width=100% class='KeyLookupResult'>
+        <tr>
+            <td><input name="keyLookupValue" value="${keyValue}" type="radio"></td>
+            <td><b>${keyUid}</b></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><b><$=openpgp_zimbra_secure.keyLookupFingerprint$>: ${fingerprint}</b></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><$=openpgp_zimbra_secure.keyLookupKeylength$>: ${keyLength}</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><$=openpgp_zimbra_secure.keyLookupCreated$>: ${created}</td>
+        </tr>
+    </table>
+    <hr style="width:550px; color: #bbbbbb; background-color: #bbbbbb; height: 1px; border: 0;">
+</template>
+
+<template id='openpgp_zimbra_secure#KeyAddView'>
+    <table border=0 cellspacing=0 cellpadding=0 width=100% class='KeyAddTable'>
+        <tr class='KeyAddRow'>
+            <td>
+                <div id='${id}_txtKey'></div>
+            </td>
+        </tr>
+    </table>
+</template>
+
 <template id='openpgp_zimbra_secure#securityHeader'>
     <tr id="${id}" class='OpenPGPSecurityRow'>
         <td class="LabelColName">
