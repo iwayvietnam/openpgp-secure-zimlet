@@ -47,7 +47,6 @@ GenerateKeypairDialog = function(handler, title, onOk, onCancel, standardButtons
 
     var view = new GenerateKeypairView({
         parent: this,
-        handler: handler,
         name: displayName,
         email: emails.join(', ')
     });

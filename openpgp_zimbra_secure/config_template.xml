@@ -22,6 +22,6 @@
 -->
 <zimletConfig name="openpgp_zimbra_secure" version="0.1">
     <global>
-        <property name="openpgp-key-server">https://keys.fedoraproject.org/</property>
+        <property name="openpgp-key-server">https://pgp.mit.edu</property>
     </global>
 </zimletConfig>

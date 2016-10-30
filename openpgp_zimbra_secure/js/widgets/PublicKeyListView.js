@@ -33,11 +33,12 @@ PublicKeyListView = function(params, pgp) {
     this._pgpKey = this._pgp.key;
 
     this._publicKeys = [];
+    this._dupes = [];
+
     var self = this;
-    OpenPGPUtils.forEach(params.publicKeys, function(key) {
-        self._publicKeys = self._publicKeys.concat(self._pgpKey.readArmored(key).keys);
+    params.publicKeys.forEach(function(key) {
+        self.addPublicKey(key);
     });
-    console.log(this._publicKeys);
 }
 
 PublicKeyListView.prototype = new DwtListView;
@@ -64,23 +65,77 @@ PublicKeyListView.prototype._getHeaderList = function () {
     headers.push(new DwtListHeaderItem({
         field: PublicKeyListView.FIELD_FINGERPRINT,
         text: OpenPGPUtils.prop('prefFingerprint'),
-        width: ZmMsg.COLUMN_WIDTH_TYPE_DLV,
+        width: 330,
         sortable: PublicKeyListView.FIELD_FINGERPRINT
     }));
 
     headers.push(new DwtListHeaderItem({
         field: PublicKeyListView.FIELD_KEY_LENGTH,
-        text: OpenPGPUtils.prop('prefPriKeyLength'),
-        width: ZmMsg.COLUMN_WIDTH_SIZE_DLV,
+        text: OpenPGPUtils.prop('prefKeyLength'),
+        width: 100,
         sortable: PublicKeyListView.FIELD_KEY_LENGTH
     }));
 
     headers.push(new DwtListHeaderItem({
         field: PublicKeyListView.FIELD_CREATED,
         text: OpenPGPUtils.prop('prefCreated'),
-        width: ZmMsg.COLUMN_WIDTH_DATE_DLV,
+        width: 170,
         sortable: PublicKeyListView.FIELD_CREATED
     }));
 
     return headers;
 };
+
+DwtListView.prototype._getCellContents = function(htmlArr, idx, item, field, colIdx, params) {
+    if (field === PublicKeyListView.FIELD_UID) {
+        htmlArr[idx++] = item.uid;
+    }
+    else if (field === PublicKeyListView.FIELD_FINGERPRINT) {
+        htmlArr[idx++] = item.fingerprint;
+    }
+    else if (field === PublicKeyListView.FIELD_KEY_LENGTH) {
+        htmlArr[idx++] = item.key_length;
+    }
+    else if (field === PublicKeyListView.FIELD_CREATED) {
+        htmlArr[idx++] = item.created;
+    }
+    else {
+        htmlArr[idx++] = item.toString ? item.toString() : item;
+    }
+    return idx;
+}
+
+DwtListView.prototype.addPublicKey = function(armoredKey) {
+    var self = this;
+    var pubKey = this._pgpKey.readArmored(armoredKey);
+    pubKey.keys.forEach(function(key) {
+        self._publicKeys.push(key);
+        var priKey = key.primaryKey;
+        var isDuplicate = false;
+
+        var fingerprint = priKey.fingerprint;
+        var keyUid = '';
+        key.users.forEach(function(user) {
+            var uid = user.userId.userid;
+            if (!self._dupes[fingerprint + uid]) {
+                self._dupes[fingerprint + uid] = fingerprint + uid;
+                keyUid = keyUid + AjxStringUtil.htmlEncode(uid) + '<br>';
+            }
+            else {
+                isDuplicate = true;
+            }
+        });
+        if (!isDuplicate) {
+            var keyLength = '';
+            if (priKey.mpi.length > 0) {
+                keyLength = (priKey.mpi[0].byteLength() * 8);
+            }
+            self.addItem({
+                uid: keyUid,
+                fingerprint: fingerprint,
+                key_length: keyLength,
+                created: priKey.created
+            });
+        }
+    });
+}

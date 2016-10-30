@@ -22,7 +22,40 @@
     width: 16px;
     height: 16px;
 }
+
+.KeyLookupView {
+    width: 550px;
+    height: 250px;
+}
+
+.KeyLookupTableWrap {
+    width: 550px;
+    height: 250px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+.KeyAddView {
+    width: 450px;
+}
+
+.KeyAddInput textarea {
+    width: 98%;
+    height: 150px;
+}
+
+.KeyLookupInput input[type="text"],
 .GenKeyInput input[type="password"],
 .GenKeyInput input[type="text"] {
     width: 98%;
+}
+
+.PublicKeyListView .Row {
+    height: auto;
+    border-bottom: 1px solid #bbb;
+    padding: 5px 0;
+}
+
+.PublicKeyListView .Row:last-child {
+    border-bottom: none;
 }

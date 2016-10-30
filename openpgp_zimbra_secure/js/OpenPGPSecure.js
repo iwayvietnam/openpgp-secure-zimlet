@@ -497,9 +497,11 @@ OpenPGPZimbraSecure.prototype._initOpenPGP = function() {
         openpgp.initWorker({
             path: path
         });
-        self.publicKey = localStorage['openpgp_public_key_' + self.getUsername()];
-        if (self.publicKey.length > 0) {
-            self.publicKeys.push(self.publicKey);
+        if (localStorage['openpgp_public_key_' + self.getUsername()]) {
+            self.publicKey = localStorage['openpgp_public_key_' + self.getUsername()];
+            if (self.publicKey.length > 0) {
+                self.publicKeys.push(self.publicKey);
+            }
         }
     })
     .then(function() {
