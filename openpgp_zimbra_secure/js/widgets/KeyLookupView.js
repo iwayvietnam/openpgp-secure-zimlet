@@ -1,0 +1,92 @@
+/*
+ * ***** BEGIN LICENSE BLOCK *****
+ * OpenPGP Zimbra Secure is the open source digital signature and encrypt for Zimbra Collaboration Open Source Edition software
+ * Copyright (C) 2016-present OpenPGP Zimbra Secure
+
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>
+ * ***** END LICENSE BLOCK *****
+ *
+ * OpenPGP MIME Secure Email Zimlet
+ *
+ * Written by nguyennv1981@gmail.com
+ */
+
+KeyLookupView = function(params) {
+    params.className = params.className || 'DwtComposite KeyLookupView';
+    DwtComposite.call(this, params);
+
+    this._handler = params.handler;
+    var keyServer = this._handler.getZimletContext().getConfig('openpgp-key-server');
+    this._hkp = new openpgp.HKP(keyServer);
+
+    this._createHtmlFromTemplate(this.TEMPLATE, {
+        id: this.getHTMLElId()
+    });
+
+    this._initialize();
+};
+
+KeyLookupView.prototype = new DwtComposite;
+KeyLookupView.prototype.constructor = KeyLookupView;
+
+KeyLookupView.prototype.toString = function() {
+    return 'KeyLookupView';
+};
+
+KeyLookupView.prototype.TEMPLATE = 'openpgp_zimbra_secure#KeyLookupView';
+
+KeyLookupView.prototype._initialize = function() {
+    var id = this.getHTMLElId();
+
+    var txtQuery = this.txtQuery = new DwtInputField({parent: this, className: 'KeyLookupInput'});
+    txtQuery.replaceElement(id + '_txtQuery');
+
+    var btnSearch = this.btnSearch = new DwtButton({parent: this});
+    btnSearch.setText(OpenPGPUtils.prop('btnSearch'));
+    btnSearch.setHandler(DwtEvent.ONCLICK, AjxCallback.simpleClosure(this._keyLookup, this));
+    btnSearch.replaceElement(id + '_btnSearch');
+};
+
+KeyLookupView.prototype._keyLookup = function() {
+    var self = this;
+    var query = this.txtQuery.getValue();
+    if (query.length > 0) {
+        var opts = {
+            query: query
+        };
+        this._hkp.lookup(opts).then(function(publicKey) {
+            var id = self.getHTMLElId();
+            var pubKey = openpgp.key.readArmored(publicKey);
+            var html = '';
+            pubKey.keys.forEach(function(key) {
+                var keyUid = '';
+                key.users.forEach(function(user) {
+                    keyUid = keyUid + OpenPGPUtils.prop('keyLookupUid') + ': ' + AjxStringUtil.htmlEncode(user.userId.userid) + '<br>';
+                });
+                var keyLength = '';
+                var priKey = key.primaryKey;
+                if (priKey.mpi.length > 0) {
+                    keyLength = (priKey.mpi[0].byteLength() * 8);
+                }
+                html = html + AjxTemplate.expand('openpgp_zimbra_secure#KeyLookupResult', {
+                    keyValue: key.armor(),
+                    keyUid: keyUid,
+                    fingerprint: priKey.fingerprint,
+                    keyLength: keyLength,
+                    created: priKey.created
+                });
+            });
+            document.getElementById(id + '_Result').innerHTML = html;
+        });
+    }
+}
