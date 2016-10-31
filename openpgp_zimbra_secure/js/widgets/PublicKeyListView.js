@@ -26,7 +26,7 @@ PublicKeyListView = function(params, pgp) {
     params.headerList = params.headerList || this._getHeaderList();
     params.publicKeys = params.publicKeys || [];
     DwtListView.call(this, params);
-    this.createHeaderHtml(PublicKeyListView.FIELD_UID);
+    this.createHeaderHtml();
     this.setSize('100%', '100%');
 
     this._pgp = pgp || openpgp;
@@ -116,29 +116,25 @@ PublicKeyListView.prototype._getHeaderList = function () {
 
     headers.push(new DwtListHeaderItem({
         field: PublicKeyListView.FIELD_UID,
-        text: OpenPGPUtils.prop('prefUid'),
-        sortable: PublicKeyListView.FIELD_UID
+        text: OpenPGPUtils.prop('prefUid')
     }));
 
     headers.push(new DwtListHeaderItem({
         field: PublicKeyListView.FIELD_FINGERPRINT,
         text: OpenPGPUtils.prop('prefFingerprint'),
-        width: 330,
-        sortable: PublicKeyListView.FIELD_FINGERPRINT
+        width: 330
     }));
 
     headers.push(new DwtListHeaderItem({
         field: PublicKeyListView.FIELD_KEY_LENGTH,
         text: OpenPGPUtils.prop('prefKeyLength'),
-        width: 100,
-        sortable: PublicKeyListView.FIELD_KEY_LENGTH
+        width: 100
     }));
 
     headers.push(new DwtListHeaderItem({
         field: PublicKeyListView.FIELD_CREATED,
         text: OpenPGPUtils.prop('prefCreated'),
-        width: 170,
-        sortable: PublicKeyListView.FIELD_CREATED
+        width: 170
     }));
 
     return headers;
