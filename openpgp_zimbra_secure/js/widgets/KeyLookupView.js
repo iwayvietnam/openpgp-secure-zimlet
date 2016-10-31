@@ -57,6 +57,11 @@ KeyLookupView.prototype._initialize = function() {
     btnSearch.replaceElement(id + '_btnSearch');
 };
 
+KeyLookupView.prototype.reset = function() {
+    this.txtQuery.setValue('');
+    document.getElementById(this.getHTMLElId() + '_Result').innerHTML = '';
+}
+
 KeyLookupView.prototype._keyLookup = function() {
     var self = this;
     var query = this.txtQuery.getValue();

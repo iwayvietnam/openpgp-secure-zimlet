@@ -363,7 +363,8 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
     OpenPGPSecurePrefs.prototype._keyAdd = function() {
         var self = this;
         if (this._handler._keyAddDialog) {
-            this._handler._keyAddDialog.popup();
+            var dialog = this._handler._keyAddDialog;
+            dialog.getView().txtKey.setValue('');
         }
         else {
             var dialog = this._handler._keyAddDialog = new KeyAddDialog(
@@ -376,14 +377,15 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
                 false,
                 [DwtDialog.CANCEL_BUTTON, DwtDialog.OK_BUTTON]
             );
-            dialog.popup();
         }
+        dialog.popup();
     }
 
     OpenPGPSecurePrefs.prototype._keyLookup = function() {
         var self = this;
         if (this._handler._keyLookupDialog) {
-            this._handler._keyLookupDialog.popup();
+            var dialog = this._handler._keyLookupDialog;
+            dialog.getView().reset();
         }
         else {
             var keyServer = this._handler.getZimletContext().getConfig('openpgp-key-server');
@@ -401,8 +403,8 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
                 false,
                 [DwtDialog.CANCEL_BUTTON, DwtDialog.OK_BUTTON]
             );
-            dialog.popup();
         }
+        dialog.popup();
     }
 
     OpenPGPUtils.forEach(OpenPGPSecurePrefs._loadCallbacks, function(cb) {
