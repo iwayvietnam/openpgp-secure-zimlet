@@ -81,6 +81,7 @@ PublicKeyListView.prototype.addPublicKey = function(armoredKey) {
                 keyLength = (priKey.mpi[0].byteLength() * 8);
             }
             self.addItem({
+                id: fingerprint,
                 uid: keyUid,
                 fingerprint: fingerprint,
                 key_length: keyLength,
@@ -91,6 +92,23 @@ PublicKeyListView.prototype.addPublicKey = function(armoredKey) {
 
     var storeKey = 'openpgp_public_keys_' + OpenPGPZimbraSecure.getInstance().getUsername();
     localStorage[storeKey] = JSON.stringify(self._publicKeys);
+}
+
+PublicKeyListView.prototype._removePublicKey = function(item) {
+    var self = this;
+    this._publicKeys.forEach(function(armoredKey, index) {
+        var pubKey = self._pgpKey.readArmored(armoredKey);
+        pubKey.keys.forEach(function(key) {
+            var fingerprint = key.primaryKey.fingerprint;
+            if (item.id == fingerprint) {
+                self._publicKeys.splice(index, 1);
+            }
+        });
+    });
+
+    var storeKey = 'openpgp_public_keys_' + OpenPGPZimbraSecure.getInstance().getUsername();
+    localStorage[storeKey] = JSON.stringify(this._publicKeys);
+    this.removeItem(item);
 }
 
 PublicKeyListView.prototype._getHeaderList = function () {
@@ -146,7 +164,6 @@ PublicKeyListView.prototype._getCellContents = function(htmlArr, idx, item, fiel
 }
 
 PublicKeyListView.prototype._listActionListener = function (ev) {
-    console.log(ev.item);
     var actionMenu = this._initializeActionMenu(ev.item);
     actionMenu.popup(0, ev.docX, ev.docY);
 };
@@ -159,19 +176,16 @@ PublicKeyListView.prototype._initializeActionMenu = function (item) {
         controller: this
     };
     var actionMenu = new ZmActionMenu(params);
-    this._addMenuListeners(actionMenu);
+    this._addMenuListeners(actionMenu, item);
     return actionMenu;
 };
 
-PublicKeyListView.prototype._addMenuListeners = function (menu) {
-    menu.addSelectionListener(ZmOperation.DELETE, AjxListener(this, this._deleteListener), 0);
-    menu.addPopdownListener(AjxListener(this, this._menuPopdownListener));
-    console.log('_addMenuListeners');
+PublicKeyListView.prototype._addMenuListeners = function (menu, item) {
+    menu.addSelectionListener(ZmOperation.DELETE, new AjxListener(this, this._deleteListener, [item]), 0);
+    menu.addPopdownListener(new AjxListener(this, this._menuPopdownListener));
 };
 
-PublicKeyListView.prototype._deleteListener = function(ev) {
-    console.log(ev);
-    var item = this.getSelection()[0];
+PublicKeyListView.prototype._deleteListener = function(item) {
     var deleteDialog = new DwtMessageDialog({
         parent: appCtxt.getShell(),
         buttons: [DwtDialog.YES_BUTTON, DwtDialog.NO_BUTTON]
@@ -187,9 +201,9 @@ PublicKeyListView.prototype._deleteListener = function(ev) {
 };
 
 PublicKeyListView.prototype._deleteCallback = function(item, dialog) {
+    this._removePublicKey(item);
     dialog.popdown();
 };
 
-PublicKeyListView.prototype._menuPopdownListener = function(ev) {
-    console.log(ev);
+PublicKeyListView.prototype._menuPopdownListener = function(menu) {
 };

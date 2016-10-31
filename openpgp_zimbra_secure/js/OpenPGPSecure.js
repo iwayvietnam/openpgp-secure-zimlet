@@ -183,7 +183,7 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
             if (subPart.attach) {
                 checkAttachments(subPart.attach.mp, subPart.ci);
                 checkAttachments(subPart.attach.doc, subPart.ci);
-                multiPart.splice(i,1);
+                multiPart.splice(i, 1);
             } else if (subPart.mp) {
                 checkInlineAttachments(subPart.mp);
             }
