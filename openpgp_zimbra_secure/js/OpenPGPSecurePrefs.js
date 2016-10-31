@@ -295,53 +295,29 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
 
     OpenPGPSecurePrefs.prototype._keyGen = function() {
         var self = this;
-        if (this._handler._genkeyDialog) {
-            this._handler._genkeyDialog.popup();
-        }
-        else {
-            var dialog = this._handler._genkeyDialog = new GenerateKeypairDialog(
+        if (!this._handler._genkeyDialog) {
+            this._handler._genkeyDialog = new GenerateKeypairDialog(
                 this._handler,
                 OpenPGPUtils.prop('keyPairGenTitle'),
-                function() {
-                    var view = dialog.getView();
-                    var name = view.txtName.getValue();
-                    var email = view.txtEmail.getValue();
-                    var passphrase = view.txtPassphrase.getValue();
-                    var numBits = view.selNumBits.getValue();
-
-                    var userIds = [];
-                    var addresses = email.split(', ');
-                    OpenPGPUtils.forEach(addresses, function(address) {
-                        userIds.push({name: name, email: address});
-                    });
-
-                    var opts = {
-                        userIds: userIds,
-                        numBits: numBits,
-                        passphrase: passphrase
-                    };
-                    return openpgp.generateKey(opts).then(function(key) {
+                function(dialog) {
+                    return dialog.generateKey().then(function(key) {
                         var privKeyInput = document.getElementById(self._id + '_' + OpenPGPSecurePrefs.PRIVATE_KEY);
-                        privKeyInput.value = key.privateKeyArmored;
+                        privKeyInput.value = key.privateKey;
 
                         var pubKeyInput = document.getElementById(self._id + '_' + OpenPGPSecurePrefs.PUBLIC_KEY);
-                        pubKeyInput.value = key.publicKeyArmored;
+                        pubKeyInput.value = key.publicKey;
 
                         var passphraseInput = document.getElementById(self._id + '_' + OpenPGPSecurePrefs.PASSPHRASE);
-                        passphraseInput.value = passphrase;
+                        passphraseInput.value = key.passphrase;
 
-                        return {
-                            privateKey: key.privateKeyArmored,
-                            publicKey: key.publicKeyArmored,
-                            passphrase: passphrase
-                        };
+                        return key;
                     });
                 },
                 false,
                 [DwtDialog.CANCEL_BUTTON, DwtDialog.OK_BUTTON]
             );
-            dialog.popup();
         }
+        this._handler._genkeyDialog.popup();
     }
 
     OpenPGPSecurePrefs.prototype._keySubmit = function() {

@@ -59,3 +59,30 @@ GenerateKeypairDialog.prototype.constructor = GenerateKeypairDialog;
 GenerateKeypairDialog.prototype.toString = function() {
     return 'GenerateKeypairDialog';
 };
+
+GenerateKeypairDialog.prototype.generateKey = function() {
+    var view = this.getView();
+    var name = view.txtName.getValue();
+    var email = view.txtEmail.getValue();
+    var passphrase = view.txtPassphrase.getValue();
+    var numBits = view.selNumBits.getValue();
+
+    var userIds = [];
+    var addresses = email.split(', ');
+    OpenPGPUtils.forEach(addresses, function(address) {
+        userIds.push({name: name, email: address});
+    });
+
+    var opts = {
+        userIds: userIds,
+        numBits: numBits,
+        passphrase: passphrase
+    };
+    return openpgp.generateKey(opts).then(function(key) {
+        return {
+            privateKey: AjxStringUtil.trim(key.privateKeyArmored),
+            publicKey: AjxStringUtil.trim(key.publicKeyArmored),
+            passphrase: passphrase
+        };
+    });
+};
