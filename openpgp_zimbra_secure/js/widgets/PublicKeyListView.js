@@ -86,7 +86,7 @@ PublicKeyListView.prototype._getHeaderList = function () {
     return headers;
 };
 
-DwtListView.prototype._getCellContents = function(htmlArr, idx, item, field, colIdx, params) {
+PublicKeyListView.prototype._getCellContents = function(htmlArr, idx, item, field, colIdx, params) {
     if (field === PublicKeyListView.FIELD_UID) {
         htmlArr[idx++] = item.uid;
     }
@@ -105,7 +105,7 @@ DwtListView.prototype._getCellContents = function(htmlArr, idx, item, field, col
     return idx;
 }
 
-DwtListView.prototype.addPublicKey = function(armoredKey) {
+PublicKeyListView.prototype.addPublicKey = function(armoredKey) {
     var self = this;
     var pubKey = this._pgpKey.readArmored(armoredKey);
     pubKey.keys.forEach(function(key) {
