@@ -60,22 +60,17 @@ PublicKeyListView.prototype.addPublicKey = function(armoredKey) {
     var pubKey = this._pgpKey.readArmored(armoredKey);
     pubKey.keys.forEach(function(key) {
         var priKey = key.primaryKey;
-        var isDuplicate = false;
 
         var fingerprint = priKey.fingerprint;
-        var keyUid = '';
-        key.users.forEach(function(user) {
-            var uid = user.userId.userid;
-            if (!self._dupes[fingerprint + uid]) {
-                self._dupes[fingerprint + uid] = fingerprint + uid;
-                keyUid = keyUid + AjxStringUtil.htmlEncode(uid) + '<br>';
-            }
-            else {
-                isDuplicate = true;
-            }
-        });
-        if (!isDuplicate) {
+        if (!self._dupes[fingerprint]) {
+            self._dupes[fingerprint] = fingerprint;
             self._publicKeys.push(key.armor());
+
+            var keyUid = '';
+            key.users.forEach(function(user) {
+                keyUid = keyUid + AjxStringUtil.htmlEncode(user.userId.userid) + '<br>';
+            });
+
             var keyLength = '';
             if (priKey.mpi.length > 0) {
                 keyLength = (priKey.mpi[0].byteLength() * 8);
@@ -102,6 +97,7 @@ PublicKeyListView.prototype._removePublicKey = function(item) {
             var fingerprint = key.primaryKey.fingerprint;
             if (item.id == fingerprint) {
                 self._publicKeys.splice(index, 1);
+                delete self._dupes[fingerprint];
             }
         });
     });
@@ -160,28 +156,30 @@ PublicKeyListView.prototype._getCellContents = function(htmlArr, idx, item, fiel
 }
 
 PublicKeyListView.prototype._listActionListener = function (ev) {
-    var actionMenu = this._initializeActionMenu(ev.item);
+    var actionMenu = this._initializeActionMenu();
     actionMenu.popup(0, ev.docX, ev.docY);
 };
 
-PublicKeyListView.prototype._initializeActionMenu = function (item) {
-    var params = {
-        parent: appCtxt.getShell(),
-        menuItems: [ZmOperation.DELETE],
-        context: this.toString(),
-        controller: this
-    };
-    var actionMenu = new ZmActionMenu(params);
-    this._addMenuListeners(actionMenu, item);
-    return actionMenu;
+PublicKeyListView.prototype._initializeActionMenu = function () {
+    if (!this._actionMenu) {
+        var params = {
+            parent: appCtxt.getShell(),
+            menuItems: [ZmOperation.DELETE],
+            context: this.toString(),
+            controller: this
+        };
+        this._actionMenu = new ZmActionMenu(params);
+        this._addMenuListeners(this._actionMenu);
+    }
+    return this._actionMenu;
 };
 
-PublicKeyListView.prototype._addMenuListeners = function (menu, item) {
-    menu.addSelectionListener(ZmOperation.DELETE, new AjxListener(this, this._deleteListener, [item]), 0);
+PublicKeyListView.prototype._addMenuListeners = function (menu) {
+    menu.addSelectionListener(ZmOperation.DELETE, new AjxListener(this, this._deleteListener), 0);
     menu.addPopdownListener(new AjxListener(this, this._menuPopdownListener));
 };
 
-PublicKeyListView.prototype._deleteListener = function(item) {
+PublicKeyListView.prototype._deleteListener = function() {
     var deleteDialog = new DwtMessageDialog({
         parent: appCtxt.getShell(),
         buttons: [DwtDialog.YES_BUTTON, DwtDialog.NO_BUTTON]
@@ -191,13 +189,18 @@ PublicKeyListView.prototype._deleteListener = function(item) {
         DwtMessageDialog.WARNING_STYLE,
         ZmMsg.remove
     );
-    deleteDialog.setButtonListener(DwtDialog.YES_BUTTON, new AjxListener(this, this._deleteCallback, [item, deleteDialog]));
-    deleteDialog.addEnterListener(new AjxListener(this, this._deleteCallback, [item, deleteDialog]));
+
+    var listener = new AjxListener(this, this._deleteCallback, [deleteDialog]);
+    deleteDialog.setButtonListener(DwtDialog.YES_BUTTON, listener);
+    deleteDialog.addEnterListener(listener);
     deleteDialog.popup();
 };
 
-PublicKeyListView.prototype._deleteCallback = function(item, dialog) {
-    this._removePublicKey(item);
+PublicKeyListView.prototype._deleteCallback = function(dialog) {
+    var items = this.getSelection();
+    if (items.length > 0) {
+        this._removePublicKey(items[0]);
+    }
     dialog.popdown();
 };
 
