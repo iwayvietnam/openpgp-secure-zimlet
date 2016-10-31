@@ -71,9 +71,9 @@ OpenPGPDialog.prototype.getView = function() {
 OpenPGPDialog.prototype._dialogSubmit = function() {
     var result;
     if (this._onOk instanceof AjxCallback) {
-        result = this._onOk.run();
+        result = this._onOk.run(this);
     } else if (AjxUtil.isFunction(this._onOk)) {
-        result = this._onOk();
+        result = this._onOk(this);
     }
     if (result !== false) {
         this.popdown();
@@ -83,9 +83,9 @@ OpenPGPDialog.prototype._dialogSubmit = function() {
 OpenPGPDialog.prototype._dialogCancel = function() {
     this.popdown();
     if (this._onCancel instanceof AjxCallback) {
-        this._onCancel.run();
+        this._onCancel.run(this);
     } else if (AjxUtil.isFunction(this._onCancel)) {
-        this._onCancel();
+        this._onCancel(this);
     }
 };
 
