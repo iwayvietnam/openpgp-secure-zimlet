@@ -33,6 +33,8 @@ function openpgp_zimbra_secure_HandlerObject() {
     this._patchedFuncs = {};
     this._pendingAttachments = [];
 
+    this._fingerprints = [];
+
     this.privateKey = '';
     this.privatePass = '';
     this.publicKey = '';
@@ -105,6 +107,39 @@ OpenPGPZimbraSecure.prototype.init = function() {
 OpenPGPZimbraSecure.getInstance = function() {
     return appCtxt.getZimletMgr().getZimletByName('openpgp_zimbra_secure').handlerObject;
 };
+
+OpenPGPZimbraSecure.prototype.addPublicKey = function(armoredKey) {
+    var self = this;
+    var pubKey = openpgp.key.readArmored(armoredKey);
+    pubKey.keys.forEach(function(key) {
+        var priKey = key.primaryKey;
+
+        var fingerprint = priKey.fingerprint;
+        if (!self._fingerprints[fingerprint]) {
+            self._fingerprints[fingerprint] = fingerprint;
+            self.publicKeys.push(key.armor());
+        }
+    });
+
+    var storeKey = 'openpgp_public_keys_' + this.getUsername();
+    localStorage[storeKey] = JSON.stringify(this.publicKeys);
+}
+
+OpenPGPZimbraSecure.prototype.removePublicKey = function(fingerprint) {
+    var self = this;
+    this.publicKeys.forEach(function(armoredKey, index) {
+        var pubKey = openpgp.key.readArmored(armoredKey);
+        pubKey.keys.forEach(function(key) {
+            if (fingerprint == key.primaryKey.fingerprint) {
+                self.publicKeys.splice(index, 1);
+                delete self._fingerprints[fingerprint];
+            }
+        });
+    });
+
+    var storeKey = 'openpgp_public_keys_' + this.getUsername();
+    localStorage[storeKey] = JSON.stringify(this.publicKeys);
+}
 
 /**
 * Sends the given message
@@ -231,14 +266,14 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
 
     var dupes = [];
     var publicKeys = [];
-    OpenPGPUtils.forEach(this.publicKeys, function(publicKey) {
-        var key = openpgp.key.readArmored(publicKey).keys[0];
+    OpenPGPUtils.forEach(this.publicKeys, function(armoredKey) {
+        var key = openpgp.key.readArmored(armoredKey).keys[0];
         OpenPGPUtils.forEach(receivers, function(receiver) {
             for (i = 0; i < key.users.length; i++) {
                 var uid = key.users[i].userId.userid;
                 var fingerprint = key.primaryKey.fingerprint;
                 if (uid.indexOf(receiver) >= 0 && !dupes[fingerprint + uid]) {
-                    publicKeys.push(publicKey);
+                    publicKeys.push(armoredKey);
                     dupes[fingerprint + uid] = fingerprint + uid;
                 }
             }
@@ -506,6 +541,12 @@ OpenPGPZimbraSecure.prototype._initOpenPGP = function() {
                 self.publicKeys.push(self.publicKey);
             }
         }
+        self.publicKeys.forEach(function(armoredKey) {
+            var pubKey = openpgp.key.readArmored(armoredKey);
+            pubKey.keys.forEach(function(key) {
+                self._fingerprints[key.primaryKey.fingerprint] = key.primaryKey.fingerprint;
+            });
+        });
     })
     .then(function() {
         return OpenPGPUtils.localStorageRead(

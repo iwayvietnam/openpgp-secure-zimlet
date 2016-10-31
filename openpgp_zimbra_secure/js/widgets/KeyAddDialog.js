@@ -42,3 +42,11 @@ KeyAddDialog.prototype.constructor = KeyAddDialog;
 KeyAddDialog.prototype.toString = function() {
     return 'KeyAddDialog';
 };
+
+KeyAddDialog.prototype.getPublicKey = function() {
+    return this.getView().txtKey.getValue();
+};
+
+KeyAddDialog.prototype.setPublicKey = function(publicKey) {
+    return this.getView().txtKey.setValue(publicKey);
+};

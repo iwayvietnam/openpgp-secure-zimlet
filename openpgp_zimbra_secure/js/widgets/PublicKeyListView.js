@@ -24,19 +24,18 @@
 PublicKeyListView = function(params, pgp) {
     params.className = params.className || 'DwtListView PublicKeyListView';
     params.headerList = params.headerList || this._getHeaderList();
-    params.publicKeys = params.publicKeys || [];
     DwtListView.call(this, params);
     this.createHeaderHtml();
     this.setSize('100%', '100%');
 
+    this._onDeleteItem = params.onDeleteItem || function(item) {};
     this._pgp = pgp || openpgp;
     this._pgpKey = this._pgp.key;
-
-    this._publicKeys = [];
-    this._dupes = [];
+    this._itemIds = [];
 
     var self = this;
-    params.publicKeys.forEach(function(key) {
+    var publicKeys = params.publicKeys || [];
+    publicKeys.forEach(function(key) {
         self.addPublicKey(key);
     });
 
@@ -62,9 +61,8 @@ PublicKeyListView.prototype.addPublicKey = function(armoredKey) {
         var priKey = key.primaryKey;
 
         var fingerprint = priKey.fingerprint;
-        if (!self._dupes[fingerprint]) {
-            self._dupes[fingerprint] = fingerprint;
-            self._publicKeys.push(key.armor());
+        if (!self._itemIds[fingerprint]) {
+            self._itemIds[fingerprint] = fingerprint;
 
             var keyUid = '';
             key.users.forEach(function(user) {
@@ -84,27 +82,6 @@ PublicKeyListView.prototype.addPublicKey = function(armoredKey) {
             });
         }
     });
-
-    var storeKey = 'openpgp_public_keys_' + OpenPGPZimbraSecure.getInstance().getUsername();
-    localStorage[storeKey] = JSON.stringify(self._publicKeys);
-}
-
-PublicKeyListView.prototype._removePublicKey = function(item) {
-    var self = this;
-    this._publicKeys.forEach(function(armoredKey, index) {
-        var pubKey = self._pgpKey.readArmored(armoredKey);
-        pubKey.keys.forEach(function(key) {
-            var fingerprint = key.primaryKey.fingerprint;
-            if (item.id == fingerprint) {
-                self._publicKeys.splice(index, 1);
-                delete self._dupes[fingerprint];
-            }
-        });
-    });
-
-    var storeKey = 'openpgp_public_keys_' + OpenPGPZimbraSecure.getInstance().getUsername();
-    localStorage[storeKey] = JSON.stringify(this._publicKeys);
-    this.removeItem(item);
 }
 
 PublicKeyListView.prototype._getHeaderList = function () {
@@ -199,7 +176,10 @@ PublicKeyListView.prototype._deleteListener = function() {
 PublicKeyListView.prototype._deleteCallback = function(dialog) {
     var items = this.getSelection();
     if (items.length > 0) {
-        this._removePublicKey(items[0]);
+        var item = items[0];
+        this._onDeleteItem(item);
+        delete this._itemIds[item.id];
+        this.removeItem(item);
     }
     dialog.popdown();
 };

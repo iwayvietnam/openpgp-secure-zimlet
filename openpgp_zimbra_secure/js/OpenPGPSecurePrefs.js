@@ -275,10 +275,16 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
     };
 
     OpenPGPSecurePrefs.prototype._setupCustom = function(id, setup, value) {
+        var self = this;
         if (id == OpenPGPSecurePrefs.PUBLIC_KEYS) {
             var publicKeyList = this._publicKeyList = new PublicKeyListView({
                 parent: this,
                 id: id,
+                onDeleteItem: function(item) {
+                    if (item) {
+                        self._handler.removePublicKey(item.id);
+                    }
+                },
                 publicKeys: this._handler.publicKeys
             });
             return publicKeyList;
@@ -364,15 +370,16 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
         var self = this;
         if (this._handler._keyAddDialog) {
             var dialog = this._handler._keyAddDialog;
-            dialog.getView().txtKey.setValue('');
+            dialog.setPublicKey('');
         }
         else {
             var dialog = this._handler._keyAddDialog = new KeyAddDialog(
                 this._handler,
                 OpenPGPUtils.prop('keyAddTitle'),
                 function() {
-                    var view = dialog.getView();
-                    self._publicKeyList.addPublicKey(view.txtKey.getValue());
+                    var key = dialog.getPublicKey();
+                    self._handler.addPublicKey(key);
+                    self._publicKeyList.addPublicKey(key);
                 },
                 false,
                 [DwtDialog.CANCEL_BUTTON, DwtDialog.OK_BUTTON]
@@ -396,6 +403,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
                     var keyLookup = document.getElementsByName('keyLookupValue');
                     for(var i = 0; i < keyLookup.length; i++) {
                         if (keyLookup[i].checked == true) {
+                            self._handler.addPublicKey(keyLookup[i].value);
                             self._publicKeyList.addPublicKey(keyLookup[i].value);
                         }
                     }
