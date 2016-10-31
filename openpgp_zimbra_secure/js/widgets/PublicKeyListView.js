@@ -39,6 +39,8 @@ PublicKeyListView = function(params, pgp) {
     params.publicKeys.forEach(function(key) {
         self.addPublicKey(key);
     });
+
+    this.addActionListener(new AjxListener(this, this._listActionListener));
 }
 
 PublicKeyListView.prototype = new DwtListView;
@@ -52,6 +54,44 @@ PublicKeyListView.FIELD_UID = 'uid';
 PublicKeyListView.FIELD_FINGERPRINT = 'fingerprint';
 PublicKeyListView.FIELD_KEY_LENGTH = 'key_length';
 PublicKeyListView.FIELD_CREATED = 'created';
+
+PublicKeyListView.prototype.addPublicKey = function(armoredKey) {
+    var self = this;
+    var pubKey = this._pgpKey.readArmored(armoredKey);
+    pubKey.keys.forEach(function(key) {
+        var priKey = key.primaryKey;
+        var isDuplicate = false;
+
+        var fingerprint = priKey.fingerprint;
+        var keyUid = '';
+        key.users.forEach(function(user) {
+            var uid = user.userId.userid;
+            if (!self._dupes[fingerprint + uid]) {
+                self._dupes[fingerprint + uid] = fingerprint + uid;
+                keyUid = keyUid + AjxStringUtil.htmlEncode(uid) + '<br>';
+            }
+            else {
+                isDuplicate = true;
+            }
+        });
+        if (!isDuplicate) {
+            self._publicKeys.push(key.armor());
+            var keyLength = '';
+            if (priKey.mpi.length > 0) {
+                keyLength = (priKey.mpi[0].byteLength() * 8);
+            }
+            self.addItem({
+                uid: keyUid,
+                fingerprint: fingerprint,
+                key_length: keyLength,
+                created: priKey.created
+            });
+        }
+    });
+
+    var storeKey = 'openpgp_public_keys_' + OpenPGPZimbraSecure.getInstance().getUsername();
+    localStorage[storeKey] = JSON.stringify(self._publicKeys);
+}
 
 PublicKeyListView.prototype._getHeaderList = function () {
     var headers = [];
@@ -105,40 +145,51 @@ PublicKeyListView.prototype._getCellContents = function(htmlArr, idx, item, fiel
     return idx;
 }
 
-PublicKeyListView.prototype.addPublicKey = function(armoredKey) {
-    var self = this;
-    var pubKey = this._pgpKey.readArmored(armoredKey);
-    pubKey.keys.forEach(function(key) {
-        var priKey = key.primaryKey;
-        var isDuplicate = false;
+PublicKeyListView.prototype._listActionListener = function (ev) {
+    console.log(ev.item);
+    var actionMenu = this._initializeActionMenu(ev.item);
+    actionMenu.popup(0, ev.docX, ev.docY);
+};
 
-        var fingerprint = priKey.fingerprint;
-        var keyUid = '';
-        key.users.forEach(function(user) {
-            var uid = user.userId.userid;
-            if (!self._dupes[fingerprint + uid]) {
-                self._dupes[fingerprint + uid] = fingerprint + uid;
-                keyUid = keyUid + AjxStringUtil.htmlEncode(uid) + '<br>';
-            }
-            else {
-                isDuplicate = true;
-            }
-        });
-        if (!isDuplicate) {
-            self._publicKeys.push(key.armor());
-            var keyLength = '';
-            if (priKey.mpi.length > 0) {
-                keyLength = (priKey.mpi[0].byteLength() * 8);
-            }
-            self.addItem({
-                uid: keyUid,
-                fingerprint: fingerprint,
-                key_length: keyLength,
-                created: priKey.created
-            });
-        }
+PublicKeyListView.prototype._initializeActionMenu = function (item) {
+    var params = {
+        parent: appCtxt.getShell(),
+        menuItems: [ZmOperation.DELETE],
+        context: this.toString(),
+        controller: this
+    };
+    var actionMenu = new ZmActionMenu(params);
+    this._addMenuListeners(actionMenu);
+    return actionMenu;
+};
+
+PublicKeyListView.prototype._addMenuListeners = function (menu) {
+    menu.addSelectionListener(ZmOperation.DELETE, AjxListener(this, this._deleteListener), 0);
+    menu.addPopdownListener(AjxListener(this, this._menuPopdownListener));
+    console.log('_addMenuListeners');
+};
+
+PublicKeyListView.prototype._deleteListener = function(ev) {
+    console.log(ev);
+    var item = this.getSelection()[0];
+    var deleteDialog = new DwtMessageDialog({
+        parent: appCtxt.getShell(),
+        buttons: [DwtDialog.YES_BUTTON, DwtDialog.NO_BUTTON]
     });
+    deleteDialog.setMessage(
+        (ZmMsg.confirmDeleteForever).replace(/{0,.*,1#|\|2#.*\}/g,""),
+        DwtMessageDialog.WARNING_STYLE,
+        ZmMsg.remove
+    );
+    deleteDialog.setButtonListener(DwtDialog.YES_BUTTON, new AjxListener(this, this._deleteCallback, [item, deleteDialog]));
+    deleteDialog.addEnterListener(new AjxListener(this, this._deleteCallback, [item, deleteDialog]));
+    deleteDialog.popup();
+};
 
-    var storeKey = 'openpgp_public_keys_' + OpenPGPZimbraSecure.getInstance().getUsername();
-    localStorage[storeKey] = JSON.stringify(self._publicKeys);
-}
+PublicKeyListView.prototype._deleteCallback = function(item, dialog) {
+    dialog.popdown();
+};
+
+PublicKeyListView.prototype._menuPopdownListener = function(ev) {
+    console.log(ev);
+};
