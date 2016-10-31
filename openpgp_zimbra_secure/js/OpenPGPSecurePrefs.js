@@ -346,7 +346,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
             var keyServer = this._handler.getZimletContext().getConfig('openpgp-key-server');
             var hkp = new openpgp.HKP(keyServer);
             hkp.upload(publicKey).then(function() {
-                self._handler.displayStatusMessage(OpenPGPUtils.prop('publicKeyAdded'));
+                self._handler.displayStatusMessage(OpenPGPUtils.prop('publicKeySubmitted'));
             });
         }
     }
@@ -369,7 +369,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
         else {
             var dialog = this._handler._keyAddDialog = new KeyAddDialog(
                 this._handler,
-                OpenPGPUtils.prop('keyLookupTitle'),
+                OpenPGPUtils.prop('keyAddTitle'),
                 function() {
                     var view = dialog.getView();
                     self._publicKeyList.addPublicKey(view.txtKey.getValue());
