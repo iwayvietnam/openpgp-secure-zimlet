@@ -109,7 +109,6 @@ PublicKeyListView.prototype.addPublicKey = function(armoredKey) {
     var self = this;
     var pubKey = this._pgpKey.readArmored(armoredKey);
     pubKey.keys.forEach(function(key) {
-        self._publicKeys.push(key);
         var priKey = key.primaryKey;
         var isDuplicate = false;
 
@@ -126,6 +125,7 @@ PublicKeyListView.prototype.addPublicKey = function(armoredKey) {
             }
         });
         if (!isDuplicate) {
+            self._publicKeys.push(key.armor());
             var keyLength = '';
             if (priKey.mpi.length > 0) {
                 keyLength = (priKey.mpi[0].byteLength() * 8);
@@ -138,4 +138,7 @@ PublicKeyListView.prototype.addPublicKey = function(armoredKey) {
             });
         }
     });
+
+    var storeKey = 'openpgp_public_keys_' + OpenPGPZimbraSecure.getInstance().getUsername();
+    localStorage[storeKey] = JSON.stringify(self._publicKeys);
 }
