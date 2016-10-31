@@ -400,13 +400,9 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
                 this._handler,
                 OpenPGPUtils.prop('keyLookupTitle') + ' (' + keyServer + ')',
                 function() {
-                    var keyLookup = document.getElementsByName('keyLookupValue');
-                    for(var i = 0; i < keyLookup.length; i++) {
-                        if (keyLookup[i].checked == true) {
-                            self._handler.addPublicKey(keyLookup[i].value);
-                            self._publicKeyList.addPublicKey(keyLookup[i].value);
-                        }
-                    }
+                    var key = dialog.getPublicKey();
+                    self._handler.addPublicKey(key);
+                    self._publicKeyList.addPublicKey(key);
                 },
                 false,
                 [DwtDialog.CANCEL_BUTTON, DwtDialog.OK_BUTTON]
