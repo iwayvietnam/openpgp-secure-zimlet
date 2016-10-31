@@ -110,6 +110,7 @@ OpenPGPZimbraSecure.getInstance = function() {
 
 OpenPGPZimbraSecure.prototype.addPublicKey = function(armoredKey) {
     var self = this;
+    var added = false;
     var pubKey = openpgp.key.readArmored(armoredKey);
     pubKey.keys.forEach(function(key) {
         var priKey = key.primaryKey;
@@ -118,27 +119,34 @@ OpenPGPZimbraSecure.prototype.addPublicKey = function(armoredKey) {
         if (!self._fingerprints[fingerprint]) {
             self._fingerprints[fingerprint] = fingerprint;
             self.publicKeys.push(key.armor());
+            added = true;
         }
     });
 
-    var storeKey = 'openpgp_public_keys_' + this.getUsername();
-    localStorage[storeKey] = JSON.stringify(this.publicKeys);
+    if (added) {
+        var storeKey = 'openpgp_public_keys_' + this.getUsername();
+        localStorage[storeKey] = JSON.stringify(this.publicKeys);
+    }
 }
 
 OpenPGPZimbraSecure.prototype.removePublicKey = function(fingerprint) {
     var self = this;
+    var removed = false;
     this.publicKeys.forEach(function(armoredKey, index) {
         var pubKey = openpgp.key.readArmored(armoredKey);
         pubKey.keys.forEach(function(key) {
             if (fingerprint == key.primaryKey.fingerprint) {
                 self.publicKeys.splice(index, 1);
                 delete self._fingerprints[fingerprint];
+                removed = true;
             }
         });
     });
 
-    var storeKey = 'openpgp_public_keys_' + this.getUsername();
-    localStorage[storeKey] = JSON.stringify(this.publicKeys);
+    if (removed) {
+        var storeKey = 'openpgp_public_keys_' + this.getUsername();
+        localStorage[storeKey] = JSON.stringify(this.publicKeys);
+    }
 }
 
 /**
@@ -535,18 +543,18 @@ OpenPGPZimbraSecure.prototype._initOpenPGP = function() {
         if (localStorage['openpgp_public_keys_' + self.getUsername()]) {
             self.publicKeys = JSON.parse(localStorage['openpgp_public_keys_' + self.getUsername()]);
         }
-        if (localStorage['openpgp_public_key_' + self.getUsername()]) {
-            self.publicKey = localStorage['openpgp_public_key_' + self.getUsername()];
-            if (self.publicKey.length > 0) {
-                self.publicKeys.push(self.publicKey);
-            }
-        }
         self.publicKeys.forEach(function(armoredKey) {
             var pubKey = openpgp.key.readArmored(armoredKey);
             pubKey.keys.forEach(function(key) {
                 self._fingerprints[key.primaryKey.fingerprint] = key.primaryKey.fingerprint;
             });
         });
+        if (localStorage['openpgp_public_key_' + self.getUsername()]) {
+            self.publicKey = localStorage['openpgp_public_key_' + self.getUsername()];
+            if (self.publicKey.length > 0) {
+                self.addPublicKey(self.publicKey);
+            }
+        }
     })
     .then(function() {
         return OpenPGPUtils.localStorageRead(
