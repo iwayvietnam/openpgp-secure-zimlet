@@ -81,7 +81,7 @@ OpenPGPDecrypt.prototype.decrypt = function() {
             return self._message; 
         }
     }, function(err) {
-        if (self._onError) {
+        if (AjxUtil.isFunction(self._onError)) {
             self._onError(self, err);
         }
     })
@@ -106,12 +106,12 @@ OpenPGPDecrypt.prototype.decrypt = function() {
         message.signatures = signatures;
         return message;
     }, function(err) {
-        if (self._onError) {
+        if (AjxUtil.isFunction(self._onError)) {
             self._onError(self, err);
         }
     })
     .then(function(message) {
-        if (self._onDecrypted) {
+        if (AjxUtil.isFunction(self._onDecrypted)) {
             self._onDecrypted(self, message);
         }
         return message;

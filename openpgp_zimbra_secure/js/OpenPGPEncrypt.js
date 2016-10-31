@@ -78,17 +78,20 @@ OpenPGPEncrypt.prototype.encrypt = function() {
             };
             return self._pgp.encrypt(opts).then(function(cipherText) {
                 self._mimeBuilder.buildEncryptedMessage(cipherText.data);
-                if (self._onEncrypted) {
+                if (AjxUtil.isFunction(self._onEncrypted)) {
                     self._onEncrypted(self, self._mimeBuilder);
                 }
                 return self._mimeBuilder;
             }, function(err) {
-                if (self._onError) {
+                if (AjxUtil.isFunction(self._onError)) {
                     self._onError(self, err);
                 }
             });
         }
         else {
+            if (AjxUtil.isFunction(self._onEncrypted)) {
+                self._onEncrypted(self, self._mimeBuilder);
+            }
             return self._mimeBuilder;
         }
     });
