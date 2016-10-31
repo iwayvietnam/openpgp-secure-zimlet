@@ -386,9 +386,10 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
             this._handler._keyLookupDialog.popup();
         }
         else {
+            var keyServer = this._handler.getZimletContext().getConfig('openpgp-key-server');
             var dialog = this._handler._keyLookupDialog = new KeyLookupDialog(
                 this._handler,
-                OpenPGPUtils.prop('keyLookupTitle'),
+                OpenPGPUtils.prop('keyLookupTitle') + ' (' + keyServer + ')',
                 function() {
                     var keyLookup = document.getElementsByName('keyLookupValue');
                     for(var i = 0; i < keyLookup.length; i++) {
