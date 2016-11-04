@@ -24,7 +24,7 @@
 var OPENPGP_SECURITY_TYPES = [
     {label: openpgp_zimbra_secure.dontSignMessage, className: 'DontSign'},
     {label: openpgp_zimbra_secure.signMessage, className: 'Sign'},
-    {label: openpgp_zimbra_secure.signAndEncryptMessage, className:"SignEncrypt"}
+    {label: openpgp_zimbra_secure.signAndEncryptMessage, className: 'SignEncrypt'}
 ];
 
 function openpgp_zimbra_secure_HandlerObject() {
@@ -71,6 +71,46 @@ OpenPGPZimbraSecure.prototype.init = function() {
         ZmMailMsg.prototype._sendMessage = function(params) {
             self._sendMessage(sendMsgFunc, this, params);
         }
+
+        var fetchMsgFunc = ZmMailMsg._handleResponseFetchMsg;
+        ZmMailMsg._handleResponseFetchMsg = function(callback, result) {
+            console.log('Override: ZmMailMsg._handleResponseFetchMsg');
+            var newCallback = new AjxCallback(this, function(newResult) {
+                fetchMsgFunc.call(this, callback, newResult || result);
+            });
+            self._handleMessageResponse(newCallback, result);
+        };
+
+        var responseLoadMsgsFunc = ZmConv.prototype._handleResponseLoadMsgs;
+        ZmConv.prototype._handleResponseLoadMsgs = function(callback, result) {
+            console.log('Override: ZmConv.prototype._handleResponseLoadMsgs');
+            var newCallback = new AjxCallback(this, function(newResult) {
+                responseLoadMsgsFunc.call(this, callback, newResult || result);
+            });
+            self._handleMessageResponse(newCallback, result);
+        };
+    }));
+
+    AjxDispatcher.addPackageLoadFunction('Startup1_2', new AjxCallback(this, function() {
+        var self = this;
+
+        var responseGetConvFunc = ZmSearch.prototype._handleResponseGetConv;
+        ZmSearch.prototype._handleResponseGetConv = function(callback, result) {
+            console.log('Override: ZmSearch.prototype._handleResponseGetConv');
+            var newCallback = new AjxCallback(this, function(newResult) {
+                responseGetConvFunc.call(this, callback, newResult || result);
+            });
+            self._handleMessageResponse(newCallback, result);
+        };
+
+        var responseExecuteFunc = ZmSearch.prototype._handleResponseExecute;
+        ZmSearch.prototype._handleResponseExecute = function(callback, result) {
+            console.log('Override: ZmSearch.prototype._handleResponseExecute');
+            var newCallback = new AjxCallback(this, function(newResult) {
+                responseExecuteFunc.call(this, callback, newResult || result);
+            });
+            self._handleMessageResponse(newCallback, result);
+        };
     }));
 
     OpenPGPZimbraSecure.settings = [];
@@ -127,7 +167,7 @@ OpenPGPZimbraSecure.prototype.addPublicKey = function(armoredKey) {
         var storeKey = 'openpgp_public_keys_' + this.getUsername();
         localStorage[storeKey] = JSON.stringify(this.publicKeys);
     }
-}
+};
 
 OpenPGPZimbraSecure.prototype.removePublicKey = function(fingerprint) {
     var self = this;
@@ -148,6 +188,223 @@ OpenPGPZimbraSecure.prototype.removePublicKey = function(fingerprint) {
         localStorage[storeKey] = JSON.stringify(this.publicKeys);
     }
 }
+
+/**
+ * Additional processing of message from server before handling control back
+ * to Zimbra.
+ *
+ * @param {AjxCallback} callback original callback
+ * @param {ZmCsfeResult} csfeResult
+ */
+OpenPGPZimbraSecure.prototype._handleMessageResponse = function(callback, csfeResult) {
+    console.log('handleMessageResponse');
+    var self = this;
+    var encoded = false;
+    if (csfeResult) {
+        var response = csfeResult.getResponse();
+    }
+    else {
+        response = { _jsns: 'urn:zimbraMail', more: false };
+    }
+    console.log(response);
+    function hasPGPPart(part) {
+        var cType = part.ct;
+
+        if (OpenPGPUtils.isOPENPGPContentType(cType)) {
+            return true;
+        } else if (!part.mp) {
+            return false;
+        }
+        if (cType != ZmMimeTable.MSG_RFC822) {
+            //do not look at subparts in attached message
+            for (var i = 0; i < part.mp.length; i++) {
+                if (hasPGPPart(part.mp[i]))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    var pgpMsgs = [];
+    var msgs = [];
+
+    for (var requestName in response) {
+        var m = response[requestName].m;
+        if (!m && response[requestName].c) {
+            m = response[requestName].c[0].m;
+        }
+        if (m) {
+            for (var i = 0; i < m.length; i++) {
+                if (m[i]) {
+                    msgs.push(m[i]);
+                }
+            }
+        }
+    }
+
+    msgs.forEach(function(msg) {
+        if (hasPGPPart(msg)) {
+            pgpMsgs.push(msg);
+        }
+    });
+
+    if (pgpMsgs.length == 0) {
+        callback.run(csfeResult);
+    } else {
+        this._loadMessages(callback, csfeResult, pgpMsgs);
+    }
+};
+
+/**
+ * Load and decrypt the given pgp messages.
+ * @param {AjxCallback} callback
+ * @param {?} csfeResult
+ * @param {Array} pgpMsgs messages to load.
+ */
+OpenPGPZimbraSecure.prototype._loadMessages = function(callback, csfeResult, pgpMsgs){
+    var self = this;
+    var handled = 0;
+    var allLoadedCheck = new AjxCallback(function(){
+        handled += 1;
+
+        if (handled == pgpMsgs.length) {
+            callback.run(csfeResult);
+        }
+    });
+
+    pgpMsgs.forEach(function(msg) {
+        var newCallback = new AjxCallback(self, self._decryptMessage, [allLoadedCheck, msg]);
+        var partId = msg.part ? '&part=' + msg.part : '';
+        //add a timestamp param so that browser will not cache the request
+        var timestamp = '&timestamp=' + new Date().getTime();
+
+        var loadUrl = [
+            appCtxt.get(ZmSetting.CSFE_MSG_FETCHER_URI), '&id=', msg.id, partId, timestamp
+        ].join('');
+
+        AjxRpc.invoke('', loadUrl, {
+            'X-Zimbra-Encoding': 'x-base64'
+        }, newCallback, true);
+    });
+};
+
+/**
+ * PGP Mime decrypt the given text.
+ * @param {AjxCallback} callback
+ * @param {ZmMailMsg} msg
+ * @param {Object} response
+ */
+OpenPGPZimbraSecure.prototype._decryptMessage = function(callback, msg, response){
+    if (response.success) {
+        var decryptor = new OpenPGPDecrypt({
+            privateKey: this.privateKey,
+            passphrase: this.privatePass,
+            publicKeys: this.publicKeys,
+            onDecrypted: function(decryptor, message) {
+                console.log(message);
+                callback.run();
+                // this.onDecrypted(callback, msg, response);
+            },
+            onError: function(decryptor, error) {
+                console.log(error);
+            }
+        }, OpenPGPUtils.base64Decode(response.text));
+        decryptor.decrypt();
+    } else {
+        console.warn('Failed to get message source:');
+        console.warn(response);
+        callback.run();
+    }
+};
+
+/**
+ * Process the decrypted message before parsing control back to Zimbra.
+ * @param {AjxCallback} callback
+ * @param {ZmMailMsg} msg
+ * @param {Object} response from Java.
+ */
+OpenPGPZimbraSecure.prototype.onDecrypted = function(callback, msg, response) {
+    var pgpInfo = response;
+
+    if (response && response.success) {
+        pgpInfo = response.value;
+
+        if (window.console) {
+            console.log('PGP info:', pgpInfo);
+        }
+    }
+
+    this._pgpMimeCache[msg.id] = pgpInfo;
+
+    if (pgpInfo && pgpInfo.length) {
+        var encrypted = false;
+
+        for (var i = 0; i < pgpInfo.length; i++) {
+            if (pgpInfo[i].encrypted) {
+                encrypted = true;
+                break;
+            }
+        }
+
+        var contents = pgpInfo[pgpInfo.length - 1].contents;
+        var bodyfound = false;
+
+        msg.mp = contents.m.mp;
+        // set share invites if present
+        if(contents.m.shr){
+            msg.shr = contents.m.shr;
+        }
+
+        function fixcontentlocation(part) {
+            if (part.cachekey) {
+                part.cl = OpenPGPZimbraSecure.getCallbackURL(part.cachekey,
+                                                     part.filename || '');
+                part.relativeCl = true;
+            }
+        }
+
+        OpenPGPZimbraSecure._visitParts(msg, fixcontentlocation);
+
+        // find a body
+        function findbody(ctype, part) {
+            if (part.mp) {
+                findbody(ctype, part.mp);
+            } else if (part.ct) {
+                if (part.ct == ctype) {
+                    part.body = bodyfound = true;
+                } else if (part.cd == 'inline') {
+                    part.body = true;
+                }
+            } else {
+                for (var i = 0; !bodyfound && i < part.length; i++) {
+                    findbody(ctype, part[i]);
+                }
+            }
+        }
+
+        findbody(ZmMimeTable.TEXT_HTML, msg);
+        if (!bodyfound)
+            findbody(ZmMimeTable.TEXT_PLAIN, msg);
+
+        // find attachments with a Content-ID
+        var datamap = {};
+
+        OpenPGPZimbraSecure._visitParts(msg, function(part) {
+            if (part.ci && part.content) {
+                datamap['cid:' + part.ci.replace(/[<>]/g, '')] = part.content;
+            }
+        });
+
+        // sanitize using the sanitizer Google Caja
+        OpenPGPZimbraSecure._visitParts(msg, function(part) {
+            if (part.ct == ZmMimeTable.TEXT_HTML) {
+                part.content = SMIMESanitizer.sanitize(part.content, datamap);
+            }
+        });
+    }
+    callback.run(); // increment handled
+};
 
 /**
 * Sends the given message
@@ -185,14 +442,14 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
     var hasFrom = false;
 
     for (var i = 0; !hasFrom && i < input.m.e.length; i++) {
-        if (input.m.e[i].t == "f") {
+        if (input.m.e[i].t == 'f') {
             hasFrom = true;
         }
     }
 
     if (!hasFrom) {
         var addr = OpenPGPUtils.getDefaultSenderAddress();
-        input.m.e.push({ "a": addr.toString(), "t": "f" });
+        input.m.e.push({ 'a': addr.toString(), 't': 'f' });
     }
 
     function checkAttachments(list, cid, fmt) {
@@ -207,7 +464,7 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
                     part.ci = '<' + cid + '>';
                     if (/^image\//.test(part.ct)) {
                         //for images replace the src url of cid with the data uri
-                        var oldSrc = "cid:" + cid;
+                        var oldSrc = 'cid:' + cid;
                         //get the content type upto ; character
                         var ctIndex = part.ct.indexOf(';');
                         if (ctIndex == -1) ctIndex = part.ct.length;

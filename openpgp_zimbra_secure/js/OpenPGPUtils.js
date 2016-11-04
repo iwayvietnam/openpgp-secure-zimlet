@@ -39,22 +39,12 @@ OpenPGPUtils.OPENPGP_CONTENT_TYPES = [
     OpenPGPUtils.OPENPGP_KEYS_CONTENT_TYPE
 ];
 
-OpenPGPUtils.isSignedMessage = function(msg) {
-    if (msg.hasContentType(OpenPGPUtils.SIGNED_MESSAGE_CONTENT_TYPE)) {
-        return true;
-    }
-    else {
-        return OpenPGPUtils.hasSignatureContentType(msg);
-    }
+OpenPGPUtils.isSignedMessage = function(cType) {
+    return AjxUtil.indexOf([OpenPGPUtils.SIGNED_MESSAGE_CONTENT_TYPE], cType) !== -1;
 };
 
-OpenPGPUtils.isEncryptedMessage = function(msg) {
-    if (msg.hasContentType(OpenPGPUtils.OPENPGP_ENCRYPTED_CONTENT_TYPE)) {
-        return true;
-    }
-    else {
-        return OpenPGPUtils.hasEncryptedContentType(msg);
-    }
+OpenPGPUtils.isEncryptedMessage = function(cType) {
+    return AjxUtil.indexOf([OpenPGPUtils.ENCRYPTED_MESSAGE_CONTENT_TYPE], cType) !== -1;
 };
 
 OpenPGPUtils.hasSignatureContentType = function(msg) {
@@ -80,8 +70,8 @@ OpenPGPUtils.isOPENPGPContentType = function(cType) {
     return AjxUtil.indexOf(OpenPGPUtils.OPENPGP_CONTENT_TYPES, cType) !== -1;
 };
 
-OpenPGPUtils.isSignedContentType = function(cType) {
-    return AjxUtil.indexOf([OpenPGPUtils.SIGNED_MESSAGE_CONTENT_TYPE], cType) !== -1;
+OpenPGPUtils.isSignatureContentType = function(cType) {
+    return AjxUtil.indexOf([OpenPGPUtils.OPENPGP_SIGNATURE_CONTENT_TYPE], cType) !== -1;
 };
 
 OpenPGPUtils.isEncryptedContentType = function(cType) {

@@ -59,9 +59,15 @@ OpenPGPDecrypt.prototype.decrypt = function() {
 
     return sequence.then(function() {
         var ct = self._message.contentType().fulltype;
-        if(OpenPGPUtils.isEncryptedContentType(ct)) {
+        if(OpenPGPUtils.isEncryptedMessage(ct)) {
+            var cipherText = '';
             var messageHeader = '-----BEGIN PGP MESSAGE-----';
-            var cipherText = messageHeader + self._message.toString({noHeaders: true}).split(messageHeader).pop();
+            OpenPGPUtils.forEach(self._message.body, function(body) {
+                var content = body.toString({noHeaders: true});
+                if (content.indexOf(messageHeader) >= 0) {
+                    cipherText = content;
+                }
+            });
 
             var opts = {
                 message: self._pgp.message.readArmored(cipherText),
@@ -71,10 +77,17 @@ OpenPGPDecrypt.prototype.decrypt = function() {
             return self._pgp.decrypt(opts).then(function(plainText) {
                 var data = plainText.data.replace(/\r?\n/g, "\r\n");
                 var message = mimemessage.parse(data);
+                console.log('plainText:');
+                console.log(data);
                 if (!message) {
                     throw new Error('Wrong message! Could not parse the decrypted email message!');
                 }
                 return message;
+            }, function(err) {
+                if (AjxUtil.isFunction(self._onError)) {
+                    self._onError(self, err);
+                }
+                return self._message;
             });
         }
         else {
@@ -84,30 +97,38 @@ OpenPGPDecrypt.prototype.decrypt = function() {
         if (AjxUtil.isFunction(self._onError)) {
             self._onError(self, err);
         }
+        return self._message;
     })
     .then(function(message) {
-        var signatures = [];
-        var ct = message.contentType().fulltype;
-        if (OpenPGPUtils.isSignedContentType(ct)) {
-            var bodyContent = '';
-            var signature = '';
-            OpenPGPUtils.forEach(message.body, function(body) {
-                if (OpenPGPUtils.isOPENPGPContentType(body.contentType().fulltype)) {
-                    signature = body.toString({noHeaders: true});
-                }
-                else {
-                    bodyContent = body.toString();
-                }
-            });
-            var pgpMessage = self._pgp.message.readSignedContent(bodyContent, signature);
-            var signatures = pgpMessage.verify(self._publicKeys);
+        if (message) {
+            var signatures = [];
+            var ct = message.contentType().fulltype;
+            if (OpenPGPUtils.isSignedMessage(ct)) {
+                var bodyContent = '';
+                var signature = '';
+                OpenPGPUtils.forEach(message.body, function(body) {
+                    if (OpenPGPUtils.isSignatureContentType(body.contentType().fulltype)) {
+                        signature = body.toString({noHeaders: true});
+                    }
+                    else {
+                        bodyContent = body.toString();
+                    }
+                });
+                console.log('bodyContent:');
+                console.log(bodyContent);
+                console.log('signature:');
+                console.log(signature);
+                var pgpMessage = self._pgp.message.readSignedContent(bodyContent, signature);
+                var signatures = pgpMessage.verify(self._publicKeys);
+            }
+            message.signatures = signatures;
         }
-        message.signatures = signatures;
         return message;
     }, function(err) {
         if (AjxUtil.isFunction(self._onError)) {
             self._onError(self, err);
         }
+        return self._message;
     })
     .then(function(message) {
         if (AjxUtil.isFunction(self._onDecrypted)) {
