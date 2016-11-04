@@ -186,19 +186,19 @@ OpenPGPUtils.fetchPart = function(part, baseUrl) {
     }
 
     if (url) {
-        var rpcreq = new AjxRpcRequest();
+        var rpcReq = new AjxRpcRequest();
 
         if (addTimestamp) {
             //add a timestamp param so that browser will not cache the request
             url += "&timestamp=" + new Date().getTime();
         }
-        var response = rpcreq.invoke('', url,
+        var response = rpcReq.invoke('', url,
                                      { 'X-Zimbra-Encoding': 'x-base64' },
                                      null, true);
-        cType = rpcreq.__httpReq.getResponseHeader('Content-Type');
-        cDisposition= rpcreq.__httpReq.getResponseHeader('Content-Disposition');
+        cType = rpcReq.__httpReq.getResponseHeader('Content-Type');
+        cDisposition= rpcReq.__httpReq.getResponseHeader('Content-Disposition');
 
-        iType = rpcreq.__httpReq.getResponseHeader('X-Zimbra-ItemType');
+        iType = rpcReq.__httpReq.getResponseHeader('X-Zimbra-ItemType');
         if (iType == 'message') {
             //this is a attached message
             cDisposition = 'attachment; ';
@@ -209,7 +209,7 @@ OpenPGPUtils.fetchPart = function(part, baseUrl) {
             }
         }
         if (iType == 'document' && !cDisposition) {
-            var iname = rpcreq.__httpReq.getResponseHeader('X-Zimbra-ItemName');
+            var iname = rpcReq.__httpReq.getResponseHeader('X-Zimbra-ItemName');
             if (iname) {
                 cDisposition = 'attachment; filename="' + iname + '"';
             }

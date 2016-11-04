@@ -64,11 +64,11 @@ OpenPGPDecrypt.prototype.decrypt = function() {
             var cipherText = messageHeader + self._message.toString({noHeaders: true}).split(messageHeader).pop();
 
             var opts = {
-                message: openpgp.message.readArmored(cipherText),
+                message: self._pgp.message.readArmored(cipherText),
                 publicKeys: self._publicKeys,
                 privateKey: self._privateKey
             };
-            return openpgp.decrypt(opts).then(function(plainText) {
+            return self._pgp.decrypt(opts).then(function(plainText) {
                 var data = plainText.data.replace(/\r?\n/g, "\r\n");
                 var message = mimemessage.parse(data);
                 if (!message) {
@@ -92,15 +92,14 @@ OpenPGPDecrypt.prototype.decrypt = function() {
             var bodyContent = '';
             var signature = '';
             OpenPGPUtils.forEach(message.body, function(body) {
-                if (OpenEcUtils.isOPENPGPContentType(body.contentType().fulltype)) {
+                if (OpenPGPUtils.isOPENPGPContentType(body.contentType().fulltype)) {
                     signature = body.toString({noHeaders: true});
                 }
                 else {
                     bodyContent = body.toString();
                 }
             });
-
-            var pgpMessage = openpgp.message.readSignedContent(content, signature);
+            var pgpMessage = self._pgp.message.readSignedContent(bodyContent, signature);
             var signatures = pgpMessage.verify(self._publicKeys);
         }
         message.signatures = signatures;
