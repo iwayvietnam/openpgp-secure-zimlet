@@ -500,9 +500,9 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
     checkInlineAttachments(input.m.mp);
 
     var contentParts = [];
-    OpenPGPUtils.forEach(input.m.mp, function(part) {
+    input.m.mp.forEach(function(part) {
         if (part.mp) {
-            OpenPGPUtils.forEach(part.mp, function(mp) {
+            part.mp.forEach(function(mp) {
                 contentParts.push(mp);
             });
         }
@@ -517,7 +517,7 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
     }
 
     var receivers = [];
-    OpenPGPUtils.forEach(input.m.e, function(e) {
+    input.m.e.forEach(function(e) {
         if (e.t == 't') {
             receivers.push(e.a);
         }
@@ -531,9 +531,9 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
 
     var dupes = [];
     var publicKeys = [];
-    OpenPGPUtils.forEach(this.publicKeys, function(armoredKey) {
+    this.publicKeys.forEach(function(armoredKey) {
         var key = openpgp.key.readArmored(armoredKey).keys[0];
-        OpenPGPUtils.forEach(receivers, function(receiver) {
+        receivers.forEach(function(receiver) {
             for (i = 0; i < key.users.length; i++) {
                 var uid = key.users[i].userId.userid;
                 var fingerprint = key.primaryKey.fingerprint;
@@ -779,7 +779,7 @@ OpenPGPZimbraSecure.prototype._shouldEncrypt = function(ctlr, useToolbarOnly) {
 OpenPGPZimbraSecure.prototype._addJsScripts = function(paths) {
     var self = this;
     var head = document.getElementsByTagName('HEAD').item(0);
-    OpenPGPUtils.forEach(paths, function(path) {
+    paths.forEach(function(path) {
         var script = document.createElement('script');
         script.type = 'text/javascript';
         script.src = self.getResource(path);

@@ -35,15 +35,21 @@ OpenPGPDecrypt = function(opts, message, pgp) {
     this._onDecrypted = opts.onDecrypted;
     this._onError = opts.onError;
 
+    this._privateKey = false;
     var privateKey = this._pgpKey.readArmored(opts.privateKey).keys[0];
-    if (!privateKey.decrypt(opts.passphrase)) {
+    if (privateKey.decrypt(opts.passphrase)) {
+        this._privateKey = privateKey;
+    }
+    else {
         throw new Error('Wrong passphrase! Could not decrypt the private key!');
     }
-    this._privateKey = privateKey;
+
     this._publicKeys = [];
-    OpenPGPUtils.forEach(opts.publicKeys, function(key) {
-        self._publicKeys = self._publicKeys.concat(self._pgpKey.readArmored(key).keys);
-    });
+    if (opts.publicKeys) {
+        opts.publicKeys.forEach(function(key) {
+            self._publicKeys = self._publicKeys.concat(self._pgpKey.readArmored(key).keys);
+        });
+    }
     this._message = mimemessage.parse(message);
     if (!this._message) {
         throw new Error('Wrong message! Could not parse the email message!');
@@ -62,7 +68,7 @@ OpenPGPDecrypt.prototype.decrypt = function() {
         if(OpenPGPUtils.isEncryptedMessage(ct)) {
             var cipherText = '';
             var messageHeader = '-----BEGIN PGP MESSAGE-----';
-            OpenPGPUtils.forEach(self._message.body, function(body) {
+            self._message.body.forEach(function(body) {
                 var content = body.toString({noHeaders: true});
                 if (content.indexOf(messageHeader) >= 0) {
                     cipherText = content;
@@ -77,8 +83,8 @@ OpenPGPDecrypt.prototype.decrypt = function() {
             return self._pgp.decrypt(opts).then(function(plainText) {
                 var data = plainText.data.replace(/\r?\n/g, "\r\n");
                 var message = mimemessage.parse(data);
-                console.log('plainText:');
-                console.log(data);
+                console.log('decrypted message:');
+                console.log(message);
                 if (!message) {
                     throw new Error('Wrong message! Could not parse the decrypted email message!');
                 }
@@ -106,7 +112,7 @@ OpenPGPDecrypt.prototype.decrypt = function() {
             if (OpenPGPUtils.isSignedMessage(ct)) {
                 var bodyContent = '';
                 var signature = '';
-                OpenPGPUtils.forEach(message.body, function(body) {
+                message.body.forEach(function(body) {
                     if (OpenPGPUtils.isSignatureContentType(body.contentType().fulltype)) {
                         signature = body.toString({noHeaders: true});
                     }
