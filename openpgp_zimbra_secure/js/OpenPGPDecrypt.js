@@ -83,8 +83,6 @@ OpenPGPDecrypt.prototype.decrypt = function() {
             return self._pgp.decrypt(opts).then(function(plainText) {
                 var data = plainText.data.replace(/\r?\n/g, "\r\n");
                 var message = mimemessage.parse(data);
-                console.log('decrypted message:');
-                console.log(message);
                 if (!message) {
                     throw new Error('Wrong message! Could not parse the decrypted email message!');
                 }
@@ -120,10 +118,6 @@ OpenPGPDecrypt.prototype.decrypt = function() {
                         bodyContent = body.toString();
                     }
                 });
-                console.log('bodyContent:');
-                console.log(bodyContent);
-                console.log('signature:');
-                console.log(signature);
                 var pgpMessage = self._pgp.message.readSignedContent(bodyContent, signature);
                 var signatures = pgpMessage.verify(self._publicKeys);
             }
