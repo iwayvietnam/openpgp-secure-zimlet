@@ -33,22 +33,20 @@ OpenPGPMimeBuilder = function(opts) {
     this._message = mimemessage.factory({
         body: []
     });
-    var self = this;
+    var self = this, contentEntity, alternateEntity, attachmentEntities = [];
 
-    OpenPGPUtils.forEach(this._headers, function(header){
-        self._message.header(header.name, header.value);
-    });
-
-    if (this._attachments.length > 0 || this._contentParts.length > 1) {
-        this._message.contentType('multipart/mixed; boundary=' + OpenPGPUtils.randomString());
+    if (this._headers) {
+        this._headers.forEach(function(header){
+            self._message.header(header.name, header.value);
+        });
     }
 
     if (this._contentParts.length > 1) {
-        var alternate = mimemessage.factory({
+        alternateEntity = mimemessage.factory({
             contentType: 'multipart/alternative',
             body: []
         });
-        OpenPGPUtils.forEach(this._contentParts, function(cp){
+        this._contentParts.forEach(function(cp){
             var contentType = cp.ct;
             if (contentType == 'text/plain' || contentType == 'text/html') {
                 contentType += '; charset=utf-8';
@@ -58,42 +56,54 @@ OpenPGPMimeBuilder = function(opts) {
                 contentTransferEncoding: 'quoted-printable',
                 body: quotedPrintable.encode(utf8.encode(cp.content._content))
             });
-            alternate.body.push(contentEntity);
+            alternateEntity.body.push(contentEntity);
         });
-        this._message.body.push(alternate);
     }
-    else {
-        if (this._contentParts.length > 0) {
-            var cp = this._contentParts[0];
-            var contentType = cp.ct;
-            if (contentType == 'text/plain' || contentType == 'text/html') {
-                contentType += '; charset=utf-8';
-            }
-            if (this._attachments.length > 0) {
-                var alternate = mimemessage.factory({
-                    contentType: contentType,
-                    contentTransferEncoding: 'quoted-printable',
-                    body: quotedPrintable.encode(utf8.encode(cp.content._content))
-                });
-                this._message.body.push(alternate);
-            }
-            else {
-                this._message.contentType(contentType);
-                this._message.contentTransferEncoding('quoted-printable');
-                this._message.body = quotedPrintable.encode(utf8.encode(cp.content._content));
-            }
+    else if (this._contentParts.length > 0) {
+        var cp = this._contentParts[0];
+        var contentType = cp.ct;
+        if (contentType == 'text/plain' || contentType == 'text/html') {
+            contentType += '; charset=utf-8';
         }
+        contentEntity = mimemessage.factory({
+            contentType: contentType,
+            contentTransferEncoding: 'quoted-printable',
+            body: quotedPrintable.encode(utf8.encode(cp.content._content))
+        });
     }
 
-    OpenPGPUtils.forEach(this._attachments, function(mp){
-        var attach = mimemessage.factory({
-            contentType: mp.ct,
-            contentTransferEncoding: 'base64',
-            body: mp.data
+    if (this._attachments) {
+        this._attachments.forEach(function(mp){
+            var attachmentEntity = mimemessage.factory({
+                contentType: mp.ct,
+                contentTransferEncoding: 'base64',
+                body: AjxStringUtil.trim(mp.data)
+            });
+            attachmentEntity.header('Content-Disposition', mp.cd);
+            attachmentEntities.push(attachmentEntity);
         });
-        attach.header('Content-Disposition', mp.cd);
-        self._message.body.push(attach);
-    });
+    }
+
+    if (attachmentEntities.length > 0) {
+        this._message.contentType('multipart/mixed; boundary=' + OpenPGPUtils.randomString());
+        if (alternateEntity) {
+            this._message.body.push(alternateEntity);
+        }
+        else if (contentEntity) {
+            this._message.body.push(contentEntity);
+        }
+        attachmentEntities.forEach(function(attachmentEntity) {
+            self._message.body.push(attachmentEntity);
+        });
+    }
+    else {
+        if (alternateEntity) {
+            this._message = alternateEntity;
+        }
+        else if (contentEntity) {
+            this._message = contentEntity;
+        }
+    }
 };
 
 OpenPGPMimeBuilder.prototype = new Object();
@@ -112,7 +122,7 @@ OpenPGPMimeBuilder.prototype.buildSignedMessage = function(signature) {
         'boundary=' + OpenPGPUtils.randomString()
     ];
     this._message = mimemessage.factory({
-        contentType: ctParts.join(';'),
+        contentType: ctParts.join('; '),
         body: []
     });
 
@@ -133,7 +143,7 @@ OpenPGPMimeBuilder.prototype.buildEncryptedMessage = function(encryptedText) {
         'boundary=' + OpenPGPUtils.randomString()
     ];
     this._message = mimemessage.factory({
-        contentType: ctParts.join(';'),
+        contentType: ctParts.join('; '),
         body: []
     });
 
@@ -166,7 +176,7 @@ OpenPGPMimeBuilder.prototype.importHeaders = function(msg) {
         var ccAddresses = [];
         var bccAddresses = [];
         var rtAddresses = [];
-        OpenPGPUtils.forEach(msg.e, function(e) {
+        msg.e.forEach(function(e) {
             if (e.t == 'f') {
                 self.header('From', e.a);
             }
@@ -209,7 +219,7 @@ OpenPGPMimeBuilder.prototype.importHeaders = function(msg) {
         this.header('Subject', msg.su._content);
     }
     if (msg.header) {
-        OpenPGPUtils.forEach(msg.header, function(header) {
+        msg.header.forEach(function(header) {
             self.header(header.name, header._content);
         });
     }
