@@ -90,7 +90,7 @@ OpenPGPSecurePrefs.registerSettings = function(handler) {
         dataType: ZmSetting.D_NONE
     });
 
-    OpenPGPUtils.forEach(OpenPGPSecurePrefs.SETTINGS, function(name) {
+    OpenPGPSecurePrefs.SETTINGS.forEach(function(name) {
         var setting = zmSettings.getSetting(name);
         setting.setValue(handler.getUserProperty(setting.id));
     });
@@ -199,7 +199,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
         var settings = OpenPGPSecurePrefs.SETTINGS;
         var zmSettings = appCtxt.getSettings();
 
-        OpenPGPUtils.forEach(settings, function(name) {
+        settings.forEach(function(name) {
             var setting = zmSettings.getSetting(name);
             var value = setting.getValue();
             self._handler.setUserProperty(setting.id, value);
@@ -387,7 +387,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
         dialog.popup();
     }
 
-    OpenPGPUtils.forEach(OpenPGPSecurePrefs._loadCallbacks, function(cb) {
+    OpenPGPSecurePrefs._loadCallbacks.forEach(function(cb) {
         cb.run();
     });
     delete OpenPGPSecurePrefs._loadCallbacks;

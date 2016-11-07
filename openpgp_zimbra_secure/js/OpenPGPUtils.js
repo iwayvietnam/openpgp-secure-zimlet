@@ -57,7 +57,7 @@ OpenPGPUtils.hasEncryptedContentType = function(msg) {
 
 OpenPGPUtils.hasOPENPGPContentType = function(msg) {
     var has = false;
-    OpenPGPUtils.forEach(OpenPGPUtils.OPENPGP_CONTENT_TYPES, function(ct) {
+    OpenPGPUtils.OPENPGP_CONTENT_TYPES.forEach(function(ct) {
         has = msg.hasContentType(ct);
         if (has) {
             return;
@@ -218,14 +218,6 @@ OpenPGPUtils.getDefaultSenderAddress = function() {
     var identity = appCtxt.getIdentityCollection(account).defaultIdentity;
 
     return new AjxEmailAddress(identity.sendFromAddress, AjxEmailAddress.FROM, identity.sendFromDisplay);
-};
-
-OpenPGPUtils.forEach = function(obj, iteratee) {
-    if (obj) {
-        for (i = 0, length = obj.length; i < length; i++) {
-            iteratee(obj[i], i, obj);
-        }
-    }
 };
 
 OpenPGPUtils.prop = function(key) {
