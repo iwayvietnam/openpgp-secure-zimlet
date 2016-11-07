@@ -77,7 +77,6 @@ OpenPGPDecrypt.prototype.decrypt = function() {
 
             var opts = {
                 message: self._pgp.message.readArmored(cipherText),
-                publicKeys: self._publicKeys,
                 privateKey: self._privateKey
             };
             return self._pgp.decrypt(opts).then(function(plainText) {

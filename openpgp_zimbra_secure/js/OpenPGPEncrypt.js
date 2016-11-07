@@ -72,8 +72,7 @@ OpenPGPEncrypt.prototype.encrypt = function() {
         if (self._privateKey) {
             var opts = {
                 data: self._mimeBuilder.toString(),
-                privateKeys: self._privateKey,
-                armor: true
+                privateKeys: self._privateKey
             };
             return self._pgp.sign(opts).then(function(signedText) {
                 var signatureHeader = '-----BEGIN PGP SIGNATURE-----';
@@ -90,8 +89,7 @@ OpenPGPEncrypt.prototype.encrypt = function() {
         if (self._shouldEncrypt && self._publicKeys.length > 0) {
             var opts = {
                 data: self._mimeBuilder.toString(),
-                publicKeys: self._publicKeys,
-                armor: true
+                publicKeys: self._publicKeys
             };
             return self._pgp.encrypt(opts).then(function(cipherText) {
                 self._mimeBuilder.buildEncryptedMessage(cipherText.data);
