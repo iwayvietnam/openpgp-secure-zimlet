@@ -38,15 +38,21 @@ OpenPGPEncrypt = function(opts, mimeBuilder, pgp) {
     this._onEncrypted = opts.onEncrypted;
     this._onError = opts.onError;
 
+    this._privateKey = false;
     var privateKey = this._pgpKey.readArmored(opts.privateKey).keys[0];
-    if (!privateKey.decrypt(opts.passphrase)) {
+    if (privateKey.decrypt(opts.passphrase)) {
+        this._privateKey = privateKey;
+    }
+    else {
         throw new Error('Wrong passphrase! Could not decrypt the private key!');
     }
-    this._privateKey = privateKey;
+
     this._publicKeys = [];
-    OpenPGPUtils.forEach(opts.publicKeys, function(key) {
-        self._publicKeys = self._publicKeys.concat(self._pgpKey.readArmored(key).keys);
-    });
+    if (opts.publicKeys) {
+        opts.publicKeys.forEach(function(key) {
+            self._publicKeys = self._publicKeys.concat(self._pgpKey.readArmored(key).keys);
+        });
+    }
 };
 
 OpenPGPEncrypt.prototype = new Object();
@@ -57,20 +63,25 @@ OpenPGPEncrypt.prototype.encrypt = function() {
     var sequence = Promise.resolve();
 
     return sequence.then(function() {
-        var opts = {
-            data: self._mimeBuilder.toString(),
-            privateKeys: self._privateKey,
-            armor: true
-        };
-        return self._pgp.sign(opts).then(function(signedText) {
-            var signatureHeader = '-----BEGIN PGP SIGNATURE-----';
-            var signature = signatureHeader + signedText.data.split(signatureHeader).pop();
-            self._mimeBuilder.buildSignedMessage(signature);
+        if (self._privateKey) {
+            var opts = {
+                data: self._mimeBuilder.toString(),
+                privateKeys: self._privateKey,
+                armor: true
+            };
+            return self._pgp.sign(opts).then(function(signedText) {
+                var signatureHeader = '-----BEGIN PGP SIGNATURE-----';
+                var signature = signatureHeader + signedText.data.split(signatureHeader).pop();
+                self._mimeBuilder.buildSignedMessage(signature);
+                return self._mimeBuilder;
+            });
+        }
+        else {
             return self._mimeBuilder;
-        });
+        }
     })
     .then(function(builder) {
-        if (self._shouldEncrypt) {
+        if (self._shouldEncrypt && self._publicKeys.length > 0) {
             var opts = {
                 data: self._mimeBuilder.toString(),
                 publicKeys: self._publicKeys,
