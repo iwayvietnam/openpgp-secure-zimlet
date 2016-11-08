@@ -74,7 +74,6 @@ OpenPGPZimbraSecure.prototype.init = function() {
 
         var fetchMsgFunc = ZmMailMsg._handleResponseFetchMsg;
         ZmMailMsg._handleResponseFetchMsg = function(callback, result) {
-            console.log('Override: ZmMailMsg._handleResponseFetchMsg');
             var newCallback = new AjxCallback(this, function(newResult) {
                 fetchMsgFunc.call(this, callback, newResult || result);
             });
@@ -83,7 +82,6 @@ OpenPGPZimbraSecure.prototype.init = function() {
 
         var responseLoadMsgsFunc = ZmConv.prototype._handleResponseLoadMsgs;
         ZmConv.prototype._handleResponseLoadMsgs = function(callback, result) {
-            console.log('Override: ZmConv.prototype._handleResponseLoadMsgs');
             var newCallback = new AjxCallback(this, function(newResult) {
                 responseLoadMsgsFunc.call(this, callback, newResult || result);
             });
@@ -96,7 +94,6 @@ OpenPGPZimbraSecure.prototype.init = function() {
 
         var responseGetConvFunc = ZmSearch.prototype._handleResponseGetConv;
         ZmSearch.prototype._handleResponseGetConv = function(callback, result) {
-            console.log('Override: ZmSearch.prototype._handleResponseGetConv');
             var newCallback = new AjxCallback(this, function(newResult) {
                 responseGetConvFunc.call(this, callback, newResult || result);
             });
@@ -105,7 +102,6 @@ OpenPGPZimbraSecure.prototype.init = function() {
 
         var responseExecuteFunc = ZmSearch.prototype._handleResponseExecute;
         ZmSearch.prototype._handleResponseExecute = function(callback, result) {
-            console.log('Override: ZmSearch.prototype._handleResponseExecute');
             var newCallback = new AjxCallback(this, function(newResult) {
                 responseExecuteFunc.call(this, callback, newResult || result);
             });
@@ -550,6 +546,10 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
         publicKeys: publicKeys,
         passphrase: this.privatePass,
         shouldEncrypt: shouldEncrypt,
+        onEncrypted: function(signer, builder) {
+            builder.importHeaders(input.m);
+            self._onEncrypted(params, input, orig, msg, builder.toString());
+        },
         onError: function(signer, error) {
             self._onEncryptError(error);
         }
@@ -557,10 +557,7 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
         contentParts: contentParts,
         attachments: attachments
     }));
-    encryptor.encrypt().then(function(builder) {
-        builder.importHeaders(input.m);
-        self._onEncrypted(params, input, orig, msg, builder.toString());
-    });
+    encryptor.encrypt();
 };
 
 OpenPGPZimbraSecure.prototype._onEncrypted = function(params, input, orig, msg, message) {
