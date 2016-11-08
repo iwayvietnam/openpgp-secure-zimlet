@@ -26,6 +26,7 @@
         target="main compose-window view-window">
     <include>js/OpenPGPZimbraSecure.js</include>
     <include>js/OpenPGPSecurePrefs.js</include>
+    <include>js/OpenPGPSecureKeys.js</include>
     <include>js/OpenPGPUtils.js</include>
     <include>js/OpenPGPMimeBuilder.js</include>
     <include>js/OpenPGPEncrypt.js</include>
