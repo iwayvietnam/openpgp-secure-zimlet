@@ -27,7 +27,6 @@ OpenPGPEncrypt = function(opts, mimeBuilder, pgp) {
         publicKeys: [],
         passphrase: '',
         shouldEncrypt: false,
-        beforeEncrypt: false,
         onEncrypted: false,
         onError: false
     };
@@ -36,7 +35,6 @@ OpenPGPEncrypt = function(opts, mimeBuilder, pgp) {
     this._pgp = pgp || openpgp;
     this._pgpKey = this._pgp.key;
     this._shouldEncrypt = opts.shouldEncrypt;
-    this._beforeEncrypt = opts.beforeEncrypt;
     this._onEncrypted = opts.onEncrypted;
     this._onError = opts.onError;
 
@@ -63,10 +61,6 @@ OpenPGPEncrypt.prototype.constructor = OpenPGPEncrypt;
 OpenPGPEncrypt.prototype.encrypt = function() {
     var self = this;
     var sequence = Promise.resolve();
-
-    if (AjxUtil.isFunction(self._beforeEncrypt)) {
-        self._beforeEncrypt(self, self._mimeBuilder);
-    }
 
     return sequence.then(function() {
         if (self._privateKey) {
