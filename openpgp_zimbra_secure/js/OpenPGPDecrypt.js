@@ -51,6 +51,7 @@ OpenPGPDecrypt = function(opts, message, pgp) {
         });
     }
     this._message = mimemessage.parse(message);
+    this._message.encrypted = false;
     if (!this._message) {
         throw new Error('Wrong message! Could not parse the email message!');
     }
@@ -81,11 +82,14 @@ OpenPGPDecrypt.prototype.decrypt = function() {
             };
             return self._pgp.decrypt(opts).then(function(plainText) {
                 var data = plainText.data.replace(/\r?\n/g, "\r\n");
-                var message = mimemessage.parse(data);
-                if (!message) {
+                var self._message = mimemessage.parse(data);
+                if (!self._message) {
                     throw new Error('Wrong message! Could not parse the decrypted email message!');
                 }
-                return message;
+                else {
+                    self._message.encrypted = true;
+                }
+                return self._message;
             }, function(err) {
                 if (AjxUtil.isFunction(self._onError)) {
                     self._onError(self, err);
