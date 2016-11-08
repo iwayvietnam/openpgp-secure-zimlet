@@ -54,7 +54,7 @@ OpenPGPMimeBuilder = function(opts) {
             var contentEntity = mimemessage.factory({
                 contentType: contentType,
                 contentTransferEncoding: 'quoted-printable',
-                body: quotedPrintable.encode(utf8.encode(cp.content._content))
+                body: quotedPrintable.encode(utf8.encode(cp.content._content.replace(/\r?\n/g, "\r\n")))
             });
             alternateEntity.body.push(contentEntity);
         });
@@ -68,7 +68,7 @@ OpenPGPMimeBuilder = function(opts) {
         contentEntity = mimemessage.factory({
             contentType: contentType,
             contentTransferEncoding: 'quoted-printable',
-            body: quotedPrintable.encode(utf8.encode(cp.content._content))
+            body: quotedPrintable.encode(utf8.encode(cp.content._content.replace(/\r?\n/g, "\r\n")))
         });
     }
 
@@ -77,7 +77,7 @@ OpenPGPMimeBuilder = function(opts) {
             var attachmentEntity = mimemessage.factory({
                 contentType: mp.ct,
                 contentTransferEncoding: 'base64',
-                body: AjxStringUtil.trim(mp.data)
+                body: AjxStringUtil.trim(mp.data.replace(/\r?\n/g, "\r\n"))
             });
             attachmentEntity.header('Content-Disposition', mp.cd);
             attachmentEntities.push(attachmentEntity);
