@@ -203,6 +203,7 @@ OpenPGPZimbraSecure.prototype._handleMessageResponse = function(callback, csfeRe
         response = { _jsns: 'urn:zimbraMail', more: false };
     }
     console.log(response);
+
     function hasPGPPart(part) {
         var cType = part.ct;
 
@@ -225,10 +226,10 @@ OpenPGPZimbraSecure.prototype._handleMessageResponse = function(callback, csfeRe
     var pgpMsgs = [];
     var msgs = [];
 
-    for (var requestName in response) {
-        var m = response[requestName].m;
-        if (!m && response[requestName].c) {
-            m = response[requestName].c[0].m;
+    for (var name in response) {
+        var m = response[name].m;
+        if (!m && response[name].c) {
+            m = response[name].c[0].m;
         }
         if (m) {
             for (var i = 0; i < m.length; i++) {
@@ -300,7 +301,7 @@ OpenPGPZimbraSecure.prototype._decryptMessage = function(callback, msg, response
             onDecrypted: function(decryptor, message) {
                 console.log(message);
                 callback.run();
-                // this.onDecrypted(callback, msg, response);
+                // this.onDecrypted(callback, msg, message);
             },
             onError: function(decryptor, error) {
                 console.log(error);
@@ -320,29 +321,11 @@ OpenPGPZimbraSecure.prototype._decryptMessage = function(callback, msg, response
  * @param {ZmMailMsg} msg
  * @param {Object} response from Java.
  */
-OpenPGPZimbraSecure.prototype.onDecrypted = function(callback, msg, response) {
-    var pgpInfo = response;
-
-    if (response && response.success) {
-        pgpInfo = response.value;
-
-        if (window.console) {
-            console.log('PGP info:', pgpInfo);
-        }
-    }
-
+OpenPGPZimbraSecure.prototype.onDecrypted = function(callback, msg, mimeMessage) {
+    var pgpInfo = mimeMessage;
     this._pgpMimeCache[msg.id] = pgpInfo;
 
-    if (pgpInfo && pgpInfo.length) {
-        var encrypted = false;
-
-        for (var i = 0; i < pgpInfo.length; i++) {
-            if (pgpInfo[i].encrypted) {
-                encrypted = true;
-                break;
-            }
-        }
-
+    if (pgpInfo) {
         var contents = pgpInfo[pgpInfo.length - 1].contents;
         var bodyfound = false;
 
@@ -352,15 +335,14 @@ OpenPGPZimbraSecure.prototype.onDecrypted = function(callback, msg, response) {
             msg.shr = contents.m.shr;
         }
 
-        function fixcontentlocation(part) {
+        function fixContentLocation(part) {
             if (part.cachekey) {
-                part.cl = OpenPGPZimbraSecure.getCallbackURL(part.cachekey,
-                                                     part.filename || '');
+                part.cl = OpenPGPZimbraSecure.getCallbackURL(part.cachekey, part.filename || '');
                 part.relativeCl = true;
             }
         }
 
-        OpenPGPZimbraSecure._visitParts(msg, fixcontentlocation);
+        OpenPGPZimbraSecure._visitParts(msg, fixContentLocation);
 
         // find a body
         function findbody(ctype, part) {
