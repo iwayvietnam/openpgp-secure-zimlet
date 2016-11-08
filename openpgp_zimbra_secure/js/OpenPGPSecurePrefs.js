@@ -24,6 +24,7 @@
 OpenPGPSecurePrefs = function(shell, section, controller, handler) {
     if (!arguments.length) return;
     this._handler = handler;
+    this._pgpKeys = handler.getPGPKeys();
     ZmPreferencesPage.call(this, shell, section, controller);
     this._id = this.getHTMLElId();
 };
@@ -95,14 +96,16 @@ OpenPGPSecurePrefs.registerSettings = function(handler) {
         setting.setValue(handler.getUserProperty(setting.id));
     });
 
+    var pgpKeys = handler.getPGPKeys();
+
     var publicKeySetting = zmSettings.getSetting(OpenPGPSecurePrefs.PUBLIC_KEY);
-    publicKeySetting.setValue(handler.publicKey);
+    publicKeySetting.setValue(pgpKeys.getPublicKey().armor());
 
     var privateKeySetting = zmSettings.getSetting(OpenPGPSecurePrefs.PRIVATE_KEY);
-    privateKeySetting.setValue(handler.privateKey);
+    privateKeySetting.setValue(pgpKeys.getPrivateKey().armor());
 
     var passphraseSetting = zmSettings.getSetting(OpenPGPSecurePrefs.PASSPHRASE);
-    passphraseSetting.setValue(handler.privatePass);
+    passphraseSetting.setValue(pgpKeys.getPassphrase());
 };
 
 AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
@@ -223,18 +226,8 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
         var passphraseInput = document.getElementById(self._id + '_' + OpenPGPSecurePrefs.PASSPHRASE);
         var passphrase = passphraseInput.value;
 
-        var securePwd = OpenPGPZimbraSecure.settings['secure_password'];
-        OpenPGPUtils.localStorageSave(
-            'openpgp_private_key_' + this._handler.getUsername(),
-            securePwd,
-            privateKey
-        );
-        OpenPGPUtils.localStorageSave(
-            'openpgp_passphrase_' + this._handler.getUsername(),
-            securePwd,
-            passphrase
-        );
-        localStorage['openpgp_public_key_' + this._handler.getUsername()] = publicKey;
+        this._pgpKeys.setPrivateKey(privateKey, passphrase);
+        this._pgpKeys.setPublicKey(publicKey);
     };
 
     OpenPGPSecurePrefs.prototype._setupStatic = function(id, setup, value) {
@@ -282,10 +275,10 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
                 id: id,
                 onDeleteItem: function(item) {
                     if (item) {
-                        self._handler.removePublicKey(item.id);
+                        self._pgpKeys.removePublicKey(item.id);
                     }
                 },
-                publicKeys: this._handler.publicKeys
+                publicKeys: this._pgpKeys.getPublicKeys()
             });
             return publicKeyList;
         } else {
@@ -353,9 +346,11 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
                 this._handler,
                 OpenPGPUtils.prop('keyAddTitle'),
                 function() {
-                    var key = dialog.getPublicKey();
-                    self._handler.addPublicKey(key);
-                    self._publicKeyList.addPublicKey(key);
+                    var pubKey = openpgp.key.readArmored(dialog.getPublicKey());
+                    pubKey.keys.forEach(function(key) {
+                        self._pgpKeys.addPublicKey(key);
+                        self._publicKeyList.addPublicKey(key);
+                    });
                 },
                 false,
                 [DwtDialog.CANCEL_BUTTON, DwtDialog.OK_BUTTON]
@@ -376,9 +371,11 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
                 this._handler,
                 OpenPGPUtils.prop('keyLookupTitle') + ' (' + keyServer + ')',
                 function() {
-                    var key = dialog.getPublicKey();
-                    self._handler.addPublicKey(key);
-                    self._publicKeyList.addPublicKey(key);
+                    var pubKey = openpgp.key.readArmored(dialog.getPublicKey());
+                    pubKey.keys.forEach(function(key) {
+                        self._pgpKeys.addPublicKey(key);
+                        self._publicKeyList.addPublicKey(key);
+                    });
                 },
                 false,
                 [DwtDialog.CANCEL_BUTTON, DwtDialog.OK_BUTTON]

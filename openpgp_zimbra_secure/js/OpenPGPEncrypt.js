@@ -21,7 +21,7 @@
  * Written by nguyennv1981@gmail.com
  */
 
-OpenPGPEncrypt = function(opts, mimeBuilder, pgp) {
+OpenPGPEncrypt = function(opts, mimeBuilder) {
     opts = opts || {
         privateKey: '',
         publicKeys: [],
@@ -32,27 +32,12 @@ OpenPGPEncrypt = function(opts, mimeBuilder, pgp) {
     };
     var self = this;
     this._mimeBuilder = mimeBuilder;
-    this._pgp = pgp || openpgp;
-    this._pgpKey = this._pgp.key;
     this._shouldEncrypt = opts.shouldEncrypt;
     this._onEncrypted = opts.onEncrypted;
     this._onError = opts.onError;
 
-    this._privateKey = false;
-    var privateKey = this._pgpKey.readArmored(opts.privateKey).keys[0];
-    if (privateKey.decrypt(opts.passphrase)) {
-        this._privateKey = privateKey;
-    }
-    else {
-        throw new Error('Wrong passphrase! Could not decrypt the private key!');
-    }
-
-    this._publicKeys = [];
-    if (opts.publicKeys) {
-        opts.publicKeys.forEach(function(key) {
-            self._publicKeys = self._publicKeys.concat(self._pgpKey.readArmored(key).keys);
-        });
-    }
+    this._privateKey = opts.privateKey;
+    this._publicKeys = opts.publicKeys;
 };
 
 OpenPGPEncrypt.prototype = new Object();
@@ -68,7 +53,7 @@ OpenPGPEncrypt.prototype.encrypt = function() {
                 data: self._mimeBuilder.toString(),
                 privateKeys: self._privateKey
             };
-            return self._pgp.sign(opts).then(function(signedText) {
+            return openpgp.sign(opts).then(function(signedText) {
                 var signatureHeader = '-----BEGIN PGP SIGNATURE-----';
                 var signature = signatureHeader + signedText.data.split(signatureHeader).pop();
                 self._mimeBuilder.buildSignedMessage(signature);
@@ -85,7 +70,7 @@ OpenPGPEncrypt.prototype.encrypt = function() {
                 data: self._mimeBuilder.toString(),
                 publicKeys: self._publicKeys
             };
-            return self._pgp.encrypt(opts).then(function(cipherText) {
+            return openpgp.encrypt(opts).then(function(cipherText) {
                 self._mimeBuilder.buildEncryptedMessage(cipherText.data);
                 if (AjxUtil.isFunction(self._onEncrypted)) {
                     self._onEncrypted(self, self._mimeBuilder);

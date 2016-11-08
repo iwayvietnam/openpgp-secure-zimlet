@@ -21,35 +21,19 @@
  * Written by nguyennv1981@gmail.com
  */
 
-OpenPGPDecrypt = function(opts, message, pgp) {
+OpenPGPDecrypt = function(opts, message) {
     opts = opts || {
-        privateKey: '',
+        privateKey: false,
         publicKeys: [],
-        passphrase: '',
         onDecrypted: false,
         onError: false
     };
     var self = this;
-    this._pgp = pgp || openpgp;
-    this._pgpKey = this._pgp.key;
     this._onDecrypted = opts.onDecrypted;
     this._onError = opts.onError;
 
-    this._privateKey = false;
-    var privateKey = this._pgpKey.readArmored(opts.privateKey).keys[0];
-    if (privateKey.decrypt(opts.passphrase)) {
-        this._privateKey = privateKey;
-    }
-    else {
-        throw new Error('Wrong passphrase! Could not decrypt the private key!');
-    }
-
-    this._publicKeys = [];
-    if (opts.publicKeys) {
-        opts.publicKeys.forEach(function(key) {
-            self._publicKeys = self._publicKeys.concat(self._pgpKey.readArmored(key).keys);
-        });
-    }
+    this._privateKey = opts.privateKey;
+    this._publicKeys = opts.publicKeys;
     this._message = mimemessage.parse(message);
     if (!this._message) {
         throw new Error('Wrong message! Could not parse the email message!');
@@ -77,10 +61,10 @@ OpenPGPDecrypt.prototype.decrypt = function() {
             });
 
             var opts = {
-                message: self._pgp.message.readArmored(cipherText),
+                message: openpgp.message.readArmored(cipherText),
                 privateKey: self._privateKey
             };
-            return self._pgp.decrypt(opts).then(function(plainText) {
+            return openpgp.decrypt(opts).then(function(plainText) {
                 var data = plainText.data.replace(/\r?\n/g, "\r\n");
                 self._message = mimemessage.parse(data);
                 if (!self._message) {
@@ -121,7 +105,7 @@ OpenPGPDecrypt.prototype.decrypt = function() {
                         bodyContent = body.toString();
                     }
                 });
-                var pgpMessage = self._pgp.message.readSignedContent(bodyContent, signature);
+                var pgpMessage = openpgp.message.readSignedContent(bodyContent, signature);
                 var signatures = pgpMessage.verify(self._publicKeys);
             }
             message.signatures = signatures;

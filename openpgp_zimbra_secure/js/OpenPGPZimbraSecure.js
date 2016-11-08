@@ -32,13 +32,7 @@ function openpgp_zimbra_secure_HandlerObject() {
     this._pgpMimeCache = appCtxt.isChildWindow ? window.opener.openpgp_zimbra_secure_HandlerObject.getInstance()._pgpMimeCache : {};
     this._patchedFuncs = {};
     this._pendingAttachments = [];
-
-    this._fingerprints = [];
-
-    this.privateKey = '';
-    this.privatePass = '';
-    this.publicKey = '';
-    this.publicKeys = [];
+    this._pgpKeys = new OpenPGPSecureKeys(this);
 };
 
 openpgp_zimbra_secure_HandlerObject.prototype = new ZmZimletBase();
@@ -57,6 +51,8 @@ OpenPGPZimbraSecure.USER_SECURITY = 'OPENPGP_USER_SECURITY';
 OpenPGPZimbraSecure.OPENPGP_DONTSIGN = 0;
 OpenPGPZimbraSecure.OPENPGP_SIGN = 1;
 OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT = 2;
+
+OpenPGPZimbraSecure.settings = [];
 
 OpenPGPZimbraSecure.prototype.init = function() {
     var self = this;
@@ -109,8 +105,6 @@ OpenPGPZimbraSecure.prototype.init = function() {
         };
     }));
 
-    OpenPGPZimbraSecure.settings = [];
-
     var pwdKey = 'secure_password_' + this.getUsername();
     if (localStorage[pwdKey]) {
         OpenPGPZimbraSecure.settings['secure_password'] = localStorage[pwdKey];
@@ -138,52 +132,15 @@ OpenPGPZimbraSecure.prototype.init = function() {
             } catch (err) {}
         }
     }
-}
+};
 
 OpenPGPZimbraSecure.getInstance = function() {
     return appCtxt.getZimletMgr().getZimletByName('openpgp_zimbra_secure').handlerObject;
 };
 
-OpenPGPZimbraSecure.prototype.addPublicKey = function(armoredKey) {
-    var self = this;
-    var added = false;
-    var pubKey = openpgp.key.readArmored(armoredKey);
-    pubKey.keys.forEach(function(key) {
-        var priKey = key.primaryKey;
-
-        var fingerprint = priKey.fingerprint;
-        if (!self._fingerprints[fingerprint]) {
-            self._fingerprints[fingerprint] = fingerprint;
-            self.publicKeys.push(key.armor());
-            added = true;
-        }
-    });
-
-    if (added) {
-        var storeKey = 'openpgp_public_keys_' + this.getUsername();
-        localStorage[storeKey] = JSON.stringify(this.publicKeys);
-    }
+OpenPGPZimbraSecure.prototype.getPGPKeys = function() {
+    return this._pgpKeys;
 };
-
-OpenPGPZimbraSecure.prototype.removePublicKey = function(fingerprint) {
-    var self = this;
-    var removed = false;
-    this.publicKeys.forEach(function(armoredKey, index) {
-        var pubKey = openpgp.key.readArmored(armoredKey);
-        pubKey.keys.forEach(function(key) {
-            if (fingerprint == key.primaryKey.fingerprint) {
-                self.publicKeys.splice(index, 1);
-                delete self._fingerprints[fingerprint];
-                removed = true;
-            }
-        });
-    });
-
-    if (removed) {
-        var storeKey = 'openpgp_public_keys_' + this.getUsername();
-        localStorage[storeKey] = JSON.stringify(this.publicKeys);
-    }
-}
 
 /**
  * Additional processing of message from server before handling control back
@@ -295,9 +252,8 @@ OpenPGPZimbraSecure.prototype._loadMessages = function(callback, csfeResult, pgp
 OpenPGPZimbraSecure.prototype._decryptMessage = function(callback, msg, response){
     if (response.success) {
         var decryptor = new OpenPGPDecrypt({
-            privateKey: this.privateKey,
-            passphrase: this.privatePass,
-            publicKeys: this.publicKeys,
+            privateKey: this._pgpKeys.getPrivateKey(),
+            publicKeys: this._pgpKeys.getPublicKeys(),
             onDecrypted: function(decryptor, message) {
                 console.log(message);
                 callback.run();
@@ -507,26 +463,9 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
         }
     });
 
-    var dupes = [];
-    var publicKeys = [];
-    this.publicKeys.forEach(function(armoredKey) {
-        var key = openpgp.key.readArmored(armoredKey).keys[0];
-        receivers.forEach(function(receiver) {
-            for (i = 0; i < key.users.length; i++) {
-                var uid = key.users[i].userId.userid;
-                var fingerprint = key.primaryKey.fingerprint;
-                if (uid.indexOf(receiver) >= 0 && !dupes[fingerprint + uid]) {
-                    publicKeys.push(armoredKey);
-                    dupes[fingerprint + uid] = fingerprint + uid;
-                }
-            }
-        });
-    });
-
     var encryptor = new OpenPGPEncrypt({
-        privateKey: this.privateKey,
-        publicKeys: publicKeys,
-        passphrase: this.privatePass,
+        privateKey: this._pgpKeys.getPrivateKey(),
+        publicKeys: this._pgpKeys.filterPublicKeys(receivers),
         shouldEncrypt: shouldEncrypt,
         onEncrypted: function(signer, builder) {
             builder.importHeaders(input.m);
@@ -776,41 +715,9 @@ OpenPGPZimbraSecure.prototype._initOpenPGP = function() {
         openpgp.initWorker({
             path: path
         });
-        if (localStorage['openpgp_public_keys_' + self.getUsername()]) {
-            self.publicKeys = JSON.parse(localStorage['openpgp_public_keys_' + self.getUsername()]);
-        }
-        self.publicKeys.forEach(function(armoredKey) {
-            var pubKey = openpgp.key.readArmored(armoredKey);
-            pubKey.keys.forEach(function(key) {
-                self._fingerprints[key.primaryKey.fingerprint] = key.primaryKey.fingerprint;
-            });
-        });
-        if (localStorage['openpgp_public_key_' + self.getUsername()]) {
-            self.publicKey = localStorage['openpgp_public_key_' + self.getUsername()];
-            if (self.publicKey.length > 0) {
-                self.addPublicKey(self.publicKey);
-            }
-        }
+        return self._pgpKeys.init(securePwd);
     })
-    .then(function() {
-        return OpenPGPUtils.localStorageRead(
-            'openpgp_private_key_' + self.getUsername(),
-            securePwd
-        )
-        .then(function(privateKey) {
-            self.privateKey = privateKey;
-        });
-    })
-    .then(function() {
-        return OpenPGPUtils.localStorageRead(
-            'openpgp_passphrase_' + self.getUsername(),
-            securePwd
-        )
-        .then(function(passphrase) {
-            self.privatePass = passphrase;
-        });
-    })
-    .then(function() {
+    .then(function(pgpKeys) {
         OpenPGPSecurePrefs.init(self);
     });
 };

@@ -21,7 +21,7 @@
  * Written by nguyennv1981@gmail.com
  */
 
-PublicKeyListView = function(params, pgp) {
+PublicKeyListView = function(params) {
     params.className = params.className || 'DwtListView PublicKeyListView';
     params.headerList = params.headerList || this._getHeaderList();
     DwtListView.call(this, params);
@@ -29,8 +29,6 @@ PublicKeyListView = function(params, pgp) {
     this.setSize('100%', '100%');
 
     this._onDeleteItem = params.onDeleteItem || function(item) {};
-    this._pgp = pgp || openpgp;
-    this._pgpKey = this._pgp.key;
     this._itemIds = [];
 
     var self = this;
@@ -54,34 +52,30 @@ PublicKeyListView.FIELD_FINGERPRINT = 'fingerprint';
 PublicKeyListView.FIELD_KEY_LENGTH = 'key_length';
 PublicKeyListView.FIELD_CREATED = 'created';
 
-PublicKeyListView.prototype.addPublicKey = function(armoredKey) {
-    var self = this;
-    var pubKey = this._pgpKey.readArmored(armoredKey);
-    pubKey.keys.forEach(function(key) {
-        var priKey = key.primaryKey;
+PublicKeyListView.prototype.addPublicKey = function(key) {
+    var priKey = key.primaryKey;
+    var fingerprint = priKey.fingerprint;
 
-        var fingerprint = priKey.fingerprint;
-        if (!self._itemIds[fingerprint]) {
-            self._itemIds[fingerprint] = fingerprint;
+    if (!this._itemIds[fingerprint]) {
+        this._itemIds[fingerprint] = fingerprint;
 
-            var keyUid = '';
-            key.users.forEach(function(user) {
-                keyUid = keyUid + AjxStringUtil.htmlEncode(user.userId.userid) + '<br>';
-            });
+        var keyUid = '';
+        key.users.forEach(function(user) {
+            keyUid = keyUid + AjxStringUtil.htmlEncode(user.userId.userid) + '<br>';
+        });
 
-            var keyLength = '';
-            if (priKey.mpi.length > 0) {
-                keyLength = (priKey.mpi[0].byteLength() * 8);
-            }
-            self.addItem({
-                id: fingerprint,
-                uid: keyUid,
-                fingerprint: fingerprint,
-                key_length: keyLength,
-                created: priKey.created
-            });
+        var keyLength = '';
+        if (priKey.mpi.length > 0) {
+            keyLength = (priKey.mpi[0].byteLength() * 8);
         }
-    });
+        this.addItem({
+            id: fingerprint,
+            uid: keyUid,
+            fingerprint: fingerprint,
+            key_length: keyLength,
+            created: priKey.created
+        });
+    }
 }
 
 PublicKeyListView.prototype._getHeaderList = function () {
