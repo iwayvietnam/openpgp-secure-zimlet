@@ -186,22 +186,22 @@ OpenPGPUtils.fetchPart = function(part, baseUrl) {
                                      { 'X-Zimbra-Encoding': 'x-base64' },
                                      null, true);
         cType = rpcReq.__httpReq.getResponseHeader('Content-Type');
-        cDisposition= rpcReq.__httpReq.getResponseHeader('Content-Disposition');
+        cDisposition = rpcReq.__httpReq.getResponseHeader('Content-Disposition');
 
         iType = rpcReq.__httpReq.getResponseHeader('X-Zimbra-ItemType');
         if (iType == 'message') {
             //this is a attached message
-            cDisposition = 'attachment; ';
+            cDisposition = 'attachment';
             //now set the file name for this attachment.
             var m =  appCtxt.cacheGet(part.id); //get the attached message from cache
             if (m && m.subject) {
-                cDisposition += 'filename="' + m.subject + '"';
+                cDisposition = 'attachment; filename="' + m.subject + '"';
             }
         }
         if (iType == 'document' && !cDisposition) {
-            var iname = rpcReq.__httpReq.getResponseHeader('X-Zimbra-ItemName');
-            if (iname) {
-                cDisposition = 'attachment; filename="' + iname + '"';
+            var iName = rpcReq.__httpReq.getResponseHeader('X-Zimbra-ItemName');
+            if (iName) {
+                cDisposition = 'attachment; filename="' + iName + '"';
             }
         }
 
