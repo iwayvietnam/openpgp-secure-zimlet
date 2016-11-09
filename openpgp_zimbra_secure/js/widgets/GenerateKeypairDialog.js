@@ -40,7 +40,7 @@ GenerateKeypairDialog = function(handler, title, onOk, onCancel, standardButtons
     var emails = [appCtxt.getActiveAccount().name];
     var aliases = appCtxt.get(ZmSetting.MAIL_ALIASES);
     if(aliases) {
-        OpenPGPUtils.forEach(aliases, function(alias) {
+        aliases.forEach(function(alias) {
             emails.push(alias);
         });      
     }
@@ -69,7 +69,7 @@ GenerateKeypairDialog.prototype.generateKey = function() {
 
     var userIds = [];
     var addresses = email.split(', ');
-    OpenPGPUtils.forEach(addresses, function(address) {
+    addresses.forEach(function(address) {
         userIds.push({name: name, email: address});
     });
 

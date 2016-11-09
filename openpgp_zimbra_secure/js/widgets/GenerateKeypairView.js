@@ -63,7 +63,7 @@ GenerateKeypairView.prototype._initialize = function() {
     txtPassphrase.replaceElement(id + '_txtPassphrase');
 
     var selNumBits = this.selNumBits = new DwtSelect({parent: this});
-    OpenPGPUtils.forEach(this._numBits, function(numBits) {
+    this._numBits.forEach(function(numBits) {
         var opt = new DwtSelectOption(numBits, null, numBits);
         selNumBits.addOption(opt);
     });
