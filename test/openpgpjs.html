@@ -1,0 +1,181 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
+    "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">
+<html amp xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" version="XHTML+RDFa 1.0" dir="ltr"
+    xmlns:og="http://ogp.me/ns#"
+    xmlns:article="http://ogp.me/ns/article#"
+    xmlns:book="http://ogp.me/ns/book#"
+    xmlns:profile="http://ogp.me/ns/profile#"
+    xmlns:video="http://ogp.me/ns/video#"
+    xmlns:product="http://ogp.me/ns/product#"
+    xmlns:content="http://purl.org/rss/1.0/modules/content/"
+    xmlns:dc="http://purl.org/dc/terms/"
+    xmlns:foaf="http://xmlns.com/foaf/0.1/"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:sioc="http://rdfs.org/sioc/ns#"
+    xmlns:sioct="http://rdfs.org/sioc/types#"
+    xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>OpenPGP Message Test</title>
+<script type="text/javascript" src="jquery.min.js"></script>
+<script type="text/javascript" src="ready.min.js"></script>
+<script type="text/javascript" src="AjxUtil.js"></script>
+
+<script type="text/javascript" src="../openpgp_zimbra_secure/js/quoted-printable/quoted-printable.js"></script>
+<script type="text/javascript" src="../openpgp_zimbra_secure/js/utf8/utf8.js"></script>
+<script type="text/javascript" src="../openpgp_zimbra_secure/js/mimemessage/mimemessage.js"></script>
+<script type="text/javascript" src="../openpgp_zimbra_secure/js/openpgpjs/openpgp.min.js"></script>
+<script type="text/javascript" src="../openpgp_zimbra_secure/js/OpenPGPMimeBuilder.js"></script>
+<script type="text/javascript" src="../openpgp_zimbra_secure/js/OpenPGPEncrypt.js"></script>
+<script type="text/javascript" src="../openpgp_zimbra_secure/js/OpenPGPDecrypt.js"></script>
+<script type="text/javascript" src="../openpgp_zimbra_secure/js/OpenPGPUtils.js"></script>
+
+<script type="text/javascript">
+    var formatPEM = function(pem) {
+        var length = pem.length;
+        var result = '';
+
+        for(var i = 0, count = 0; i < length; i++, count++) {
+            if(count > 75) {
+                result = result + "\r\n";
+                count = 0;
+            }
+
+            result = result + pem[i];
+        }
+
+        return result;
+    };
+
+    domready(function() {
+        openpgp.initWorker({
+            path: '../openpgp_zimbra_secure/js/openpgpjs/openpgp.worker.min.js'
+        });
+
+        var privKey = false;
+        var pubKey  = false;
+        var passphrase = OpenPGPUtils.randomString();
+
+        var opts = {
+            data: 'hJP2EBpHjKEdpepiyUtntlcW',
+            passwords: ['abc@123'],
+            armor: true
+        };
+        openpgp.encrypt(opts).then(function(ciphertext) {
+            return ciphertext.data;
+        })
+        .then(function(encrypted) {
+            var opts = {
+                message: openpgp.message.readArmored(encrypted),
+                password: 'abc@123'
+            };
+            openpgp.decrypt(opts).then(function(plaintext) {
+                return plaintext.data;
+            });
+        });
+
+        var sequence = Promise.resolve();
+        sequence.then(function() {
+            var contentParts = [], attachments = [];
+
+            contentParts.push({
+                ct: 'text/plain; charset=utf-8',
+                content: {
+                    _content: 'Test signed formatted message with attachment'
+                }
+            });
+            contentParts.push({
+                ct: 'text/html; charset=utf-8',
+                content: {
+                    _content: '<strong>Test signed formatted message with attachment</strong>'
+                }
+            });
+
+            attachments.push({
+                ct: 'image/png; name=image.png',
+                cd: 'attachment',
+                data: formatPEM('iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAvVBMVEUAAAAPug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug/2MSuoAAAAPnRSTlMAAQMEBQYHCQoLDA0QEhQZHyAiIyQmKSwzNDU4Q0RFUVtoc3eFiYuqtLW3vsHFx8zP0dPV2dze4Ojv9fn7/Z3mkNsAAACTSURBVBgZBcGHIhsAAEDBVyE2JWLPmm1V7ZW4//8sd1Ud/MHH+XJVNbwBfB1WNfsGwGnVNQD8rC0Ad3uv7uoC4N+gJVZ65nj8ye2gRuw28avWP//O1MaEw148zNXaTG1Osd8V93NVoymsto3HYY2ncF/9xtPizhcYV8N3AM6qWrgFOKmqfhz9x+RytaqqGizNV1XfgD0jxoFnSPoAAAAASUVORK5CYII=')
+            });
+
+            var mimeBuilder = new OpenPGPMimeBuilder({
+                contentParts: contentParts,
+                attachments: attachments
+            });
+            $('#mime-message').text(mimeBuilder.toString());
+            return mimeBuilder;
+        })
+        .then(function(mimeBuilder) {
+            var opts = {
+                userIds: [
+                    { name: 'Nguyen Van Nguyen', email: 'nguyennv1981@gmail.com' },
+                    { name: 'Nguyen Van Nguyen', email: 'nguyennv1981@yahoo.com' },
+                ],
+                numBits: 2048,
+                passphrase: passphrase
+            };
+            return openpgp.generateKey(opts).then(function(key) {
+                var privateKey = openpgp.key.readArmored(key.privateKeyArmored);
+                privateKey.keys.forEach(function(key) {
+                    if (key.decrypt(passphrase)) {
+                        privKey = key;
+                    }
+                });
+                pubKey = openpgp.key.readArmored(key.publicKeyArmored).keys[0];
+                return mimeBuilder;
+            });
+        })
+        .then(function(mimeBuilder) {
+            var encryptor = new OpenPGPEncrypt({
+                privateKey: privKey,
+                publicKeys: [pubKey],
+                shouldEncrypt: true,
+                onSigned: function(signer, mimeMessage) {
+                    $('#openpgp-signed').text(mimeMessage.toString());
+                },
+                onEncrypted: function(signer, mimeMessage) {
+                    $('#openpgp-encrypted').text(mimeMessage.toString());
+                },
+                onError: function(signer, error) {
+                    console.log(error);
+                }
+            }, mimeBuilder);
+            return encryptor.encrypt().then(function(mimeBuilder) {
+                return mimeBuilder;
+            });
+        })
+        .then(function(mimeBuilder) {
+            var decryptor = new OpenPGPDecrypt({
+                privateKey: privKey,
+                publicKeys: [pubKey],
+                onDecrypted: function(decryptor, mimeMessage) {
+                    if (mimeMessage.signatures.length > 0) {
+                        var signature = mimeMessage.signatures[0];
+                        if (signature.valid) {
+                            $('#openpgp-verify').text('TRUE');
+                        }
+                        else {
+                            $('#openpgp-verify').text('FALSE');
+                        }
+                    }
+                    $('#openpgp-decoded').text(mimeMessage.toString());
+                },
+                onError: function(decryptor, error) {
+                    console.log(error);
+                }
+            }, mimeBuilder.toString());
+            return decryptor.decrypt();
+        });
+    });
+</script>
+<body>
+    <h2>Mime Message</h2>
+    <pre id="mime-message"></pre>
+    <h2>OpenPGP Signed Message</h2>
+    <pre id="openpgp-signed"></pre>
+    <h2>OpenPGP Encrypted Message</h2>
+    <pre id="openpgp-encrypted"></pre>
+    <h2>OpenPGP Decoded Message</h2>
+    <pre id="openpgp-decoded"></pre>
+    <h2>Verify Result: <span id="openpgp-verify"></span></h2>
+</body>
+</html>
