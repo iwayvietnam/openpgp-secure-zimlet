@@ -23,7 +23,7 @@
 
 OpenPGPEncrypt = function(opts, mimeBuilder) {
     opts = opts || {
-        privateKey: '',
+        privateKey: false,
         publicKeys: [],
         passphrase: '',
         shouldEncrypt: false,
