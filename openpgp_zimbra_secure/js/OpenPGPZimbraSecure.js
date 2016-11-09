@@ -162,7 +162,6 @@ OpenPGPZimbraSecure._visitParts = function(part, callback) {
  * @param {ZmCsfeResult} csfeResult
  */
 OpenPGPZimbraSecure.prototype._handleMessageResponse = function(callback, csfeResult) {
-    console.log('handleMessageResponse');
     var self = this;
     var encoded = false;
     if (csfeResult) {
@@ -171,7 +170,6 @@ OpenPGPZimbraSecure.prototype._handleMessageResponse = function(callback, csfeRe
     else {
         response = { _jsns: 'urn:zimbraMail', more: false };
     }
-    console.log(response);
 
     function hasPGPPart(part) {
         var cType = part.ct;
@@ -289,7 +287,6 @@ OpenPGPZimbraSecure.prototype._decryptMessage = function(callback, msg, response
  * @param {Object} PGP mime message.
  */
 OpenPGPZimbraSecure.prototype.onDecrypted = function(callback, msg, pgpMessage) {
-    console.log(mimeMessage);
     this._pgpMessageCache[msg.id] = pgpMessage;
     callback.run();
 };
@@ -301,7 +298,6 @@ OpenPGPZimbraSecure.prototype.onDecrypted = function(callback, msg, pgpMessage) 
 * @param {Object} params the mail params inluding the jsonObj msg.
 */
 OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
-    console.log(params);
     var self = this;
     var shouldSign = false, shouldEncrypt = false;
     var isDraft = false;
