@@ -50,7 +50,7 @@ OpenPGPDecrypt.prototype.decrypt = function() {
     return sequence.then(function() {
         self._message.encrypted = false;
         var ct = self._message.contentType().fulltype;
-        if(OpenPGPUtils.isEncryptedMessage(ct)) {
+        if(OpenPGPUtils.isEncryptedMessage(ct) && self._privateKey) {
             var cipherText = '';
             var messageHeader = '-----BEGIN PGP MESSAGE-----';
             self._message.body.forEach(function(body) {
@@ -94,7 +94,7 @@ OpenPGPDecrypt.prototype.decrypt = function() {
         if (message) {
             var signatures = [];
             var ct = message.contentType().fulltype;
-            if (OpenPGPUtils.isSignedMessage(ct)) {
+            if (OpenPGPUtils.isSignedMessage(ct) && self._publicKeys.length > 0) {
                 var bodyContent = '';
                 var signature = '';
                 message.body.forEach(function(body) {
@@ -106,7 +106,15 @@ OpenPGPDecrypt.prototype.decrypt = function() {
                     }
                 });
                 var pgpMessage = openpgp.message.readSignedContent(bodyContent, signature);
-                var signatures = pgpMessage.verify(self._publicKeys);
+                signatures = pgpMessage.verify(self._publicKeys);
+                signatures.forEach(function(signature) {
+                    self._publicKeys.forEach(function(key) {
+                        var keyid = key.primaryKey.keyid;
+                        if (keyid.equals(signature.keyid)) {
+                            signature.userid = key.getPrimaryUser().user.userId.userid;
+                        }
+                    });
+                });
             }
             message.signatures = signatures;
         }
