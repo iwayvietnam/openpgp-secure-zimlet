@@ -36,7 +36,7 @@ OpenPGPDecrypt = function(opts, message) {
     this._publicKeys = opts.publicKeys;
     this._message = mimemessage.parse(message);
     if (!this._message) {
-        throw new Error('Wrong message! Could not parse the email message!');
+        throw new Error(OpenPGPUtils.prop('parseMessageError'));
     }
 };
 
@@ -68,7 +68,7 @@ OpenPGPDecrypt.prototype.decrypt = function() {
                 var data = plainText.data.replace(/\r?\n/g, "\r\n");
                 self._message = mimemessage.parse(data);
                 if (!self._message) {
-                    throw new Error('Wrong message! Could not parse the decrypted email message!');
+                    throw new Error(OpenPGPUtils.prop('parseDecryptedMessageError'));
                 }
                 else {
                     self._message.encrypted = true;

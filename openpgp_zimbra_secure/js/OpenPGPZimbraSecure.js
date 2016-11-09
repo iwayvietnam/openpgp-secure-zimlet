@@ -270,6 +270,7 @@ OpenPGPZimbraSecure.prototype._decryptMessage = function(callback, msg, response
             },
             onError: function(decryptor, error) {
                 console.log(error);
+                self._onEncryptError('decrypting-error');
             }
         }, OpenPGPUtils.base64Decode(response.text));
         decryptor.decrypt();
@@ -430,7 +431,8 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
             self._onEncrypted(params, input, orig, msg, builder.toString());
         },
         onError: function(signer, error) {
-            self._onEncryptError(error);
+            console.log(error);
+            self._onEncryptError('encrypting-error');
         }
     }, new OpenPGPMimeBuilder({
         contentParts: contentParts,
@@ -472,7 +474,7 @@ OpenPGPZimbraSecure.prototype._onEncrypted = function(params, input, orig, msg, 
             orig.apply(msg, [params]);
         }
         else {
-            this._onEncryptError('Signing failed');
+            this._onEncryptError('encrypting-error');
         }
     });
 
@@ -483,8 +485,7 @@ OpenPGPZimbraSecure.prototype._onEncrypted = function(params, input, orig, msg, 
 };
 
 OpenPGPZimbraSecure.prototype._onEncryptError = function(error){
-    console.error(error);
-    OpenPGPZimbraSecure.popupErrorDialog();
+    OpenPGPZimbraSecure.popupErrorDialog(error);
 };
 
 /**
