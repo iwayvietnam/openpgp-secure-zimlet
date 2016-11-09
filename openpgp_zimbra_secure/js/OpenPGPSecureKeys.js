@@ -87,7 +87,7 @@ OpenPGPSecureKeys.prototype.init = function(securePwd) {
                     self.passphrase = passphrase;
                 }
                 else {
-                    throw new Error('Wrong passphrase! Could not decrypt the private key!');
+                    throw new Error(OpenPGPUtils.prop('decryptPrivateKeyError'));
                 }
             });
             return privateKey;
@@ -155,7 +155,7 @@ OpenPGPSecureKeys.prototype.setPrivateKey = function(privateKey, passphrase) {
             );
         }
         else {
-            throw new Error('Wrong passphrase! Could not decrypt the private key!');
+            throw new Error(OpenPGPUtils.prop('decryptPrivateKeyError'));
         }
     });
 };
