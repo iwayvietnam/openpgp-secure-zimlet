@@ -27,12 +27,14 @@ OpenPGPEncrypt = function(opts, mimeBuilder) {
         publicKeys: [],
         passphrase: '',
         shouldEncrypt: false,
+        onSigned: false,
         onEncrypted: false,
         onError: false
     };
     var self = this;
     this._mimeBuilder = mimeBuilder;
     this._shouldEncrypt = opts.shouldEncrypt;
+    this._onSigned = opts.onSigned;
     this._onEncrypted = opts.onEncrypted;
     this._onError = opts.onError;
 
@@ -57,6 +59,9 @@ OpenPGPEncrypt.prototype.encrypt = function() {
                 var signatureHeader = '-----BEGIN PGP SIGNATURE-----';
                 var signature = signatureHeader + signedText.data.split(signatureHeader).pop();
                 self._mimeBuilder.buildSignedMessage(signature);
+                if (AjxUtil.isFunction(self._onSigned)) {
+                    self._onSigned(self, self._mimeBuilder);
+                }
                 return self._mimeBuilder;
             });
         }
