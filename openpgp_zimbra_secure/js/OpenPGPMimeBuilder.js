@@ -77,7 +77,7 @@ OpenPGPMimeBuilder = function(opts) {
             var attachmentEntity = mimemessage.factory({
                 contentType: mp.ct,
                 contentTransferEncoding: 'base64',
-                body: AjxStringUtil.trim(mp.data.replace(/\r?\n/g, "\r\n"))
+                body: mp.data.replace(/\r?\n/g, "\r\n").trim()
             });
             attachmentEntity.header('Content-Disposition', mp.cd);
             attachmentEntities.push(attachmentEntity);
