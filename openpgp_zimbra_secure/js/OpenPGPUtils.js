@@ -211,12 +211,19 @@ OpenPGPUtils.fetchPart = function(part, baseUrl) {
     }
 };
 
-OpenPGPUtils.mimeMessageToZmMimePart = function(message) {
+OpenPGPUtils.mimeMessageToZmMimePart = function(message, withAttachment) {
     var deep = 0;
     var partIndexes = [];
+    withAttachment = withAttachment | false;
 
     function visitMessage(message) {
         deep++;
+        var cd = message.header('Content-Disposition');
+        if (!withAttachment && cd === 'attachment') {
+            deep--;
+            return false;
+        }
+
         var part = {};
         var cType = message.contentType();
         part.ct = cType.fulltype;
@@ -236,12 +243,7 @@ OpenPGPUtils.mimeMessageToZmMimePart = function(message) {
                 content = message._body;
             }
             if (part.ct == 'text/html' || part.ct == 'text/plain') {
-                if (encode === 'quoted-printable') {
-                    part.content = content;
-                }
-                else {
-                    part.content = content;
-                }
+                part.content = content;
             }
             if (encode === 'base64') {
                 part.s = OpenPGPUtils.base64Decode(message._body).length;
@@ -253,21 +255,17 @@ OpenPGPUtils.mimeMessageToZmMimePart = function(message) {
         if (cType.params.name) {
             part.filename = cType.params.name;
         }
-        var cd = message.header('Content-Disposition');
         if (cd) {
             part.cd = cd;
-            if (cd === 'attachment') {
-                var code = 'OpenPGPUtils.saveCachedPartCallback()';
-                part.url = part.cl = 'javascript:' + AjxStringUtil.urlComponentEncode(code);
-                part.relativeCl = true;
-            }
         }
         if (Array.isArray(message._body)) {
             part.mp = [];
             message._body.forEach(function(entity, index) {
                 partIndexes[deep - 1] = index + 1;
                 var mp = visitMessage(entity);
-                part.mp.push(mp);
+                if (mp) {
+                    part.mp.push(mp);
+                }
             });
         }
         deep--;
@@ -275,8 +273,8 @@ OpenPGPUtils.mimeMessageToZmMimePart = function(message) {
         return part;
     }
 
-    var bodyFound = false;
     function findBody(cType, part) {
+        var bodyFound = false;
         if (part.mp) {
             findBody(cType, part.mp);
         } else if (part.ct) {
@@ -287,14 +285,16 @@ OpenPGPUtils.mimeMessageToZmMimePart = function(message) {
             }
         } else {
             for (var i = 0; !bodyFound && i < part.length; i++) {
-                findBody(cType, part[i]);
+                bodyFound = findBody(cType, part[i]);
             }
         }
+        return bodyFound;
     }
+
     var msg = visitMessage(message);
-    findBody('text/html', msg);
-    if (!bodyFound)
+    if (!findBody('text/html', msg))
         findBody('text/plain', msg);
+
     return msg;
 };
 
