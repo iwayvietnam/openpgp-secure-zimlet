@@ -158,6 +158,9 @@
                         }
                     }
                     $('#openpgp-decoded').text(mimeMessage.toString());
+
+                    var msg = OpenPGPUtils.mimeMessageToZmMimePart(mimeMessage, true);
+                    console.log(msg);
                 },
                 onError: function(decryptor, error) {
                     console.log(error);
