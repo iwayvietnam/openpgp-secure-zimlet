@@ -33,6 +33,16 @@ function openpgp_zimbra_secure_HandlerObject() {
     this._patchedFuncs = {};
     this._pendingAttachments = [];
     this._pgpKeys = new OpenPGPSecureKeys(this);
+    this._securePassword = '';
+    var pwdKey = 'openpgp_secure_password_' + this.getUsername();
+    if (localStorage[pwdKey]) {
+        this._securePassword = localStorage[pwdKey];
+    }
+    else {
+        localStorage[pwdKey] = this._securePassword = OpenPGPUtils.randomString({
+            length: 24
+        });
+    }
 };
 
 openpgp_zimbra_secure_HandlerObject.prototype = new ZmZimletBase();
@@ -105,16 +115,6 @@ OpenPGPZimbraSecure.prototype.init = function() {
         };
     }));
 
-    var pwdKey = 'secure_password_' + this.getUsername();
-    if (localStorage[pwdKey]) {
-        OpenPGPZimbraSecure.settings['secure_password'] = localStorage[pwdKey];
-    }
-    else {
-        localStorage[pwdKey] = OpenPGPZimbraSecure.settings['secure_password'] = OpenPGPUtils.randomString({
-            length: 24
-        });
-    }
-
     try {
         setTimeout(function() {
             self._initOpenPGP();
@@ -140,6 +140,10 @@ OpenPGPZimbraSecure.getInstance = function() {
 
 OpenPGPZimbraSecure.prototype.getPGPKeys = function() {
     return this._pgpKeys;
+};
+
+OpenPGPZimbraSecure.prototype.getSecurePassword = function() {
+    return this._securePassword;
 };
 
 OpenPGPZimbraSecure._visitParts = function(part, callback) {
@@ -727,7 +731,6 @@ OpenPGPZimbraSecure.prototype._addJsScripts = function(paths) {
 
 OpenPGPZimbraSecure.prototype._initOpenPGP = function() {
     var self = this;
-    var securePwd = OpenPGPZimbraSecure.settings['secure_password'];
     var sequence = Promise.resolve();
 
     sequence.then(function() {
@@ -735,7 +738,7 @@ OpenPGPZimbraSecure.prototype._initOpenPGP = function() {
         openpgp.initWorker({
             path: path
         });
-        return self._pgpKeys.init(securePwd);
+        return self._pgpKeys.init();
     })
     .then(function(pgpKeys) {
         OpenPGPSecurePrefs.init(self);

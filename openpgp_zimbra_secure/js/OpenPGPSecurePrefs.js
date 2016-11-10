@@ -99,10 +99,16 @@ OpenPGPSecurePrefs.registerSettings = function(handler) {
     var pgpKeys = handler.getPGPKeys();
 
     var publicKeySetting = zmSettings.getSetting(OpenPGPSecurePrefs.PUBLIC_KEY);
-    publicKeySetting.setValue(pgpKeys.getPublicKey().armor());
+    var publicKey = pgpKeys.getPublicKey();
+    if (publicKey) {
+        publicKeySetting.setValue(publicKey.armor());
+    }
 
     var privateKeySetting = zmSettings.getSetting(OpenPGPSecurePrefs.PRIVATE_KEY);
-    privateKeySetting.setValue(pgpKeys.getPrivateKey().armor());
+    var privateKey = pgpKeys.getPrivateKey();
+    if (privateKey) {
+        privateKeySetting.setValue(pgpKeys.getPrivateKey().armor());
+    }
 
     var passphraseSetting = zmSettings.getSetting(OpenPGPSecurePrefs.PASSPHRASE);
     passphraseSetting.setValue(pgpKeys.getPassphrase());

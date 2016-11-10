@@ -23,7 +23,6 @@
 
 OpenPGPSecureKeys = function(handler) {
     this._handler = handler;
-    this._securePwd = '';
     this._fingerprints = [];
     this._userName = this._handler.getUsername();
 
@@ -36,16 +35,15 @@ OpenPGPSecureKeys = function(handler) {
 OpenPGPSecureKeys.prototype = new Object();
 OpenPGPSecureKeys.prototype.constructor = OpenPGPSecureKeys;
 
-OpenPGPSecureKeys.prototype.init = function(securePwd) {
+OpenPGPSecureKeys.prototype.init = function() {
     var self = this;
-    this._securePwd = securePwd;
     var pgpKey = openpgp.key;
 
     var sequence = Promise.resolve();
     return sequence.then(function() {
         var publicKeys = [];
-        if (localStorage['openpgp_public_keys_' + self._userName]) {
-            publicKeys = JSON.parse(localStorage['openpgp_public_keys_' + self._userName]);
+        if (localStorage['openpgp_secure_public_keys_' + self._userName]) {
+            publicKeys = JSON.parse(localStorage['openpgp_secure_public_keys_' + self._userName]);
         }
 
         publicKeys.forEach(function(armoredKey) {
@@ -59,39 +57,46 @@ OpenPGPSecureKeys.prototype.init = function(securePwd) {
             });
         });
 
-        if (localStorage['openpgp_public_key_' + self._userName]) {
-            var publicKey = localStorage['openpgp_public_key_' + self._userName];
+        if (localStorage['openpgp_secure_public_key_' + self._userName]) {
+            var publicKey = localStorage['openpgp_secure_public_key_' + self._userName];
             self.setPublicKey(publicKey);
         }
         return self;
     })
     .then(function() {
         return OpenPGPUtils.localStorageRead(
-            'openpgp_passphrase_' + self._userName,
-            self._securePwd
+            'openpgp_secure_passphrase_' + self._userName,
+            self._handler.getSecurePassword()
         )
         .then(function(passphrase) {
             return passphrase;
         });
     })
     .then(function(passphrase) {
-        return OpenPGPUtils.localStorageRead(
-            'openpgp_private_key_' + self._userName,
-            self._securePwd
-        )
-        .then(function(privateKey) {
-            var privKey = pgpKey.readArmored(privateKey);
-            privKey.keys.forEach(function(key) {
-                if (key.decrypt(passphrase)) {
-                    self.privateKey = key;
-                    self.passphrase = passphrase;
+        if (passphrase) {
+            return OpenPGPUtils.localStorageRead(
+                'openpgp_secure_private_key_' + self._userName,
+                self._handler.getSecurePassword()
+            )
+            .then(function(privateKey) {
+                if (privateKey) {
+                    var privKey = pgpKey.readArmored(privateKey);
+                    privKey.keys.forEach(function(key) {
+                        if (key.decrypt(passphrase)) {
+                            self.privateKey = key;
+                            self.passphrase = passphrase;
+                        }
+                        else {
+                            throw new Error(OpenPGPUtils.prop('decryptPrivateKeyError'));
+                        }
+                    });
                 }
-                else {
-                    throw new Error(OpenPGPUtils.prop('decryptPrivateKeyError'));
-                }
+                return privateKey;
             });
-            return privateKey;
-        });
+        }
+        else {
+            return self.privateKey;
+        }
     });
 };
 
@@ -144,13 +149,13 @@ OpenPGPSecureKeys.prototype.setPrivateKey = function(privateKey, passphrase) {
             self.passphrase = passphrase;
 
             OpenPGPUtils.localStorageSave(
-                'openpgp_private_key_' + self._userName,
-                self._securePwd,
+                'openpgp_secure_private_key_' + self._userName,
+                self._handler.getSecurePassword(),
                 privateKey
             );
             OpenPGPUtils.localStorageSave(
-                'openpgp_passphrase_' + self._userName,
-                self._securePwd,
+                'openpgp_secure_passphrase_' + self._userName,
+                self._handler.getSecurePassword(),
                 passphrase
             );
         }
@@ -173,7 +178,7 @@ OpenPGPSecureKeys.prototype.setPublicKey = function(publicKey) {
     var pubKey = openpgp.key.readArmored(publicKey);
     pubKey.keys.forEach(function(key) {
         self.publicKey = key;
-        localStorage['openpgp_public_key_' + self._userName] = self.publicKey.armor();
+        localStorage['openpgp_secure_public_key_' + self._userName] = self.publicKey.armor();
         self.addPublicKey(self.publicKey);
     });
 };
@@ -187,7 +192,7 @@ OpenPGPSecureKeys.prototype.filterPublicKeys = function(receivers) {
                 var uid = key.users[i].userId.userid;
                 var fingerprint = key.primaryKey.fingerprint;
                 if (uid.indexOf(receiver) >= 0 && !dupes[fingerprint + uid]) {
-                    publicKeys.push(armoredKey);
+                    publicKeys.push(key);
                     dupes[fingerprint + uid] = fingerprint + uid;
                 }
             }
@@ -201,6 +206,6 @@ OpenPGPSecureKeys.prototype._storePublicKeys = function() {
     this.publicKeys.forEach(function(key) {
         publicKeys.push(key.armor());
     });
-    var storeKey = 'openpgp_public_keys_' + this._userName;
+    var storeKey = 'openpgp_secure_public_keys_' + this._userName;
     localStorage[storeKey] = JSON.stringify(publicKeys);
 };
