@@ -62,14 +62,12 @@ OpenPGPZimbraSecure.OPENPGP_DONTSIGN = 0;
 OpenPGPZimbraSecure.OPENPGP_SIGN = 1;
 OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT = 2;
 
-OpenPGPZimbraSecure.settings = [];
-
 OpenPGPZimbraSecure.prototype.init = function() {
     var self = this;
 
     this._addJsScripts([
-        'js/mimemessage/mimemessage.js',
-        'js/openpgpjs/openpgp.min.js'
+        'js/openpgpjs/openpgp.min.js',
+        'js/mimemessage/mimemessage.js'
     ]);
 
     AjxDispatcher.addPackageLoadFunction('MailCore', new AjxCallback(this, function(){
@@ -174,6 +172,8 @@ OpenPGPZimbraSecure.prototype._handleMessageResponse = function(callback, csfeRe
     else {
         response = { _jsns: 'urn:zimbraMail', more: false };
     }
+    console.log('Handle message response:');
+    console.log(response);
 
     function hasPGPPart(part) {
         var cType = part.ct;
@@ -293,6 +293,13 @@ OpenPGPZimbraSecure.prototype._decryptMessage = function(callback, msg, response
  */
 OpenPGPZimbraSecure.prototype.onDecrypted = function(callback, msg, pgpMessage) {
     this._pgpMessageCache[msg.id] = pgpMessage;
+
+    if (pgpMessage.encrypted) {
+        var mp = OpenPGPUtils.mimeMessageToZmMimePart(pgpMessage);
+        msg.mp = [];
+        msg.mp.push(mp);
+    }
+
     callback.run();
 };
 
@@ -303,6 +310,8 @@ OpenPGPZimbraSecure.prototype.onDecrypted = function(callback, msg, pgpMessage) 
 * @param {Object} params the mail params inluding the jsonObj msg.
 */
 OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
+    console.log('Send message params:');
+    console.log(params);
     var self = this;
     var shouldSign = false, shouldEncrypt = false;
     var isDraft = false;

@@ -211,6 +211,93 @@ OpenPGPUtils.fetchPart = function(part, baseUrl) {
     }
 };
 
+OpenPGPUtils.mimeMessageToZmMimePart = function(message) {
+    var deep = 0;
+    var partIndexes = [];
+
+    function visitMessage(message) {
+        deep++;
+        var part = {};
+        var cType = message.contentType();
+        part.ct = cType.fulltype;
+        if (partIndexes.length == 0) {
+            part.part = 'TEXT';
+        }
+        else {
+            part.part = partIndexes.join('.');
+        }
+        if (typeof message._body === 'string') {
+            var content = '';
+            var encode = message.header('Content-Transfer-Encoding');
+            if (encode === 'quoted-printable') {
+                content = utf8.decode(quotedPrintable.decode(message._body));
+            }
+            else {
+                content = message._body;
+            }
+            if (part.ct == 'text/html' || part.ct == 'text/plain') {
+                if (encode === 'quoted-printable') {
+                    part.content = content;
+                }
+                else {
+                    part.content = content;
+                }
+            }
+            if (encode === 'base64') {
+                part.s = OpenPGPUtils.base64Decode(message._body).length;
+            }
+            else {
+                part.s = content.length;
+            }
+        }
+        if (cType.params.name) {
+            part.filename = cType.params.name;
+        }
+        var cd = message.header('Content-Disposition');
+        if (cd) {
+            part.cd = cd;
+            if (cd === 'attachment') {
+                var code = 'OpenPGPUtils.saveCachedPartCallback()';
+                part.url = part.cl = 'javascript:' + AjxStringUtil.urlComponentEncode(code);
+                part.relativeCl = true;
+            }
+        }
+        if (Array.isArray(message._body)) {
+            part.mp = [];
+            message._body.forEach(function(entity, index) {
+                partIndexes[deep - 1] = index + 1;
+                var mp = visitMessage(entity);
+                part.mp.push(mp);
+            });
+        }
+        deep--;
+        partIndexes.pop();
+        return part;
+    }
+
+    var bodyFound = false;
+    function findBody(cType, part) {
+        if (part.mp) {
+            findBody(cType, part.mp);
+        } else if (part.ct) {
+            if (part.ct == cType) {
+                part.body = bodyFound = true;
+            } else if (part.cd == 'inline') {
+                part.body = true;
+            }
+        } else {
+            for (var i = 0; !bodyFound && i < part.length; i++) {
+                findBody(cType, part[i]);
+            }
+        }
+    }
+    var msg = visitMessage(message);
+    findBody('text/html', msg);
+    if (!bodyFound)
+        findBody('text/plain', msg);
+    return msg;
+};
+
 OpenPGPUtils.getDefaultSenderAddress = function() {
     var account = (appCtxt.accountList.defaultAccount ||
                    appCtxt.accountList.activeAccount ||
