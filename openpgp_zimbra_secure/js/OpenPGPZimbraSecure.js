@@ -65,11 +65,6 @@ OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT = 2;
 OpenPGPZimbraSecure.prototype.init = function() {
     var self = this;
 
-    this._addJsScripts([
-        'js/openpgpjs/openpgp.min.js',
-        'js/mimemessage/mimemessage.js'
-    ]);
-
     AjxDispatcher.addPackageLoadFunction('MailCore', new AjxCallback(this, function(){
         var sendMsgFunc = ZmMailMsg.prototype._sendMessage;
         ZmMailMsg.prototype._sendMessage = function(params) {
@@ -113,23 +108,31 @@ OpenPGPZimbraSecure.prototype.init = function() {
         };
     }));
 
-    try {
-        setTimeout(function() {
-            self._initOpenPGP();
-        }, 1000);
-    } catch (err) {
-        try {
-            setTimeout(function() {
-                self._initOpenPGP();
-            }, 5000);
-        } catch (err) {
-            try {
-                setTimeout(function() {
-                    self._initOpenPGP();
-                }, 10000);
-            } catch (err) {}
-        }
-    }
+
+    this._addJsScripts([
+        'js/openpgpjs/openpgp.min.js',
+        'js/mimemessage/mimemessage.js'
+    ], new AjxCallback(function() {
+        self._initOpenPGP();
+    }));
+
+    // try {
+    //     setTimeout(function() {
+    //         self._initOpenPGP();
+    //     }, 1000);
+    // } catch (err) {
+    //     try {
+    //         setTimeout(function() {
+    //             self._initOpenPGP();
+    //         }, 5000);
+    //     } catch (err) {
+    //         try {
+    //             setTimeout(function() {
+    //                 self._initOpenPGP();
+    //             }, 10000);
+    //         } catch (err) {}
+    //     }
+    // }
 };
 
 OpenPGPZimbraSecure.getInstance = function() {
@@ -143,18 +146,6 @@ OpenPGPZimbraSecure.prototype.getPGPKeys = function() {
 OpenPGPZimbraSecure.prototype.getSecurePassword = function() {
     return this._securePassword;
 };
-
-OpenPGPZimbraSecure._visitParts = function(part, callback) {
-    callback(part);
-
-    if (part.mp) {
-        OpenPGPZimbraSecure._visitParts(part.mp, callback);
-    } else {
-        for (var i = 0; i < part.length; i++) {
-            OpenPGPZimbraSecure._visitParts(part[i], callback);
-        }
-    }
-}
 
 /**
  * Additional processing of message from server before handling control back
@@ -560,6 +551,12 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
         var hdrtable = Dwt.byId(view._hdrTableId);
         hdrtable.firstChild.appendChild(Dwt.parseHtmlFragment(html, true));
     });
+
+    console.log(view);
+    if (pgpMessage.encrypted) {
+        var msgBody = Dwt.byId(view._msgBodyDivId);
+        // to do: insert attachments before message body
+    }
 };
 
 /**
@@ -727,31 +724,62 @@ OpenPGPZimbraSecure.prototype._shouldEncrypt = function(ctlr, useToolbarOnly) {
     return this._getUserSecuritySetting(ctlr, useToolbarOnly) == OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT;
 };
 
-OpenPGPZimbraSecure.prototype._addJsScripts = function(paths) {
+OpenPGPZimbraSecure.prototype._addJsScripts = function(paths, callback) {
     var self = this;
-    var head = document.getElementsByTagName('HEAD').item(0);
-    paths.forEach(function(path) {
-        var script = document.createElement('script');
-        script.type = 'text/javascript';
-        script.src = self.getResource(path);
-        head.appendChild(script);
-    });
+    var head = document.getElementsByTagName('head')[0];
+
+    function loadNextScript(script) {
+        if (AjxEnv.isIE && script && !/loaded|complete/.test(script.readyState))
+            return;
+        window.status = '';
+        if (paths.length > 0) {
+            var path = paths.shift();
+            var script = document.createElement('script');
+            var handler = AjxCallback.simpleClosure(loadNextScript, null, script);
+            if (script.attachEvent) {
+                script.attachEvent('onreadystatechange', handler);
+                script.attachEvent('onerror', handler);
+            }
+            else if (script.addEventListener) {
+                script.addEventListener('load', handler, true);
+                script.addEventListener('error', handler, true);
+            }
+            script.type = 'text/javascript';
+            script.src = self.getResource(path);
+            window.status = 'Loading script: ' + path;
+            head.appendChild(script);
+        }
+        else if (paths.length == 0) {
+            script = null;
+            head = null;
+            if (callback) {
+                callback.run();
+            }
+        }
+    }
+    loadNextScript(null);
 };
 
 OpenPGPZimbraSecure.prototype._initOpenPGP = function() {
-    var self = this;
-    var sequence = Promise.resolve();
-
-    sequence.then(function() {
-        var path = self.getResource('js/openpgpjs/openpgp.worker.min.js');
-        openpgp.initWorker({
-            path: path
-        });
-        return self._pgpKeys.init();
-    })
-    .then(function(pgpKeys) {
-        OpenPGPSecurePrefs.init(self);
+    var path = this.getResource('js/openpgpjs/openpgp.worker.min.js');
+    openpgp.initWorker({
+        path: path
     });
+    this._pgpKeys.init();
+    OpenPGPSecurePrefs.init(this);
+
+    // var self = this;
+    // var sequence = Promise.resolve();
+    // sequence.then(function() {
+    //     var path = self.getResource('js/openpgpjs/openpgp.worker.min.js');
+    //     openpgp.initWorker({
+    //         path: path
+    //     });
+    //     return self._pgpKeys.init();
+    // })
+    // .then(function(pgpKeys) {
+    //     OpenPGPSecurePrefs.init(self);
+    // });
 };
 
 OpenPGPZimbraSecure.popupErrorDialog = function(errorCode){
