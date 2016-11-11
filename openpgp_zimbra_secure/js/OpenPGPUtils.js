@@ -271,7 +271,7 @@ OpenPGPUtils.mimeMessageToZmMimePart = function(message, withAttachment) {
             part.mp = [];
             message._body.forEach(function(entity, index) {
                 partIndexes[deep - 1] = index + 1;
-                var mp = visitMessage(entity);
+                var mp = buildZmMimePart(entity);
                 if (mp) {
                     part.mp.push(mp);
                 }
