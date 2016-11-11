@@ -276,7 +276,7 @@ OpenPGPUtils.mimeMessageToZmMimePart = function(message, withAttachment) {
     function findBody(cType, part) {
         var bodyFound = false;
         if (part.mp) {
-            findBody(cType, part.mp);
+            bodyFound = findBody(cType, part.mp);
         } else if (part.ct) {
             if (part.ct == cType) {
                 part.body = bodyFound = true;
