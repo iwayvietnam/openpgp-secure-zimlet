@@ -211,12 +211,21 @@ OpenPGPUtils.fetchPart = function(part, baseUrl) {
     }
 };
 
+OpenPGPUtils.visitMessage = function(message, callback) {
+    callback(message);
+    if (Array.isArray(message._body)) {
+        message._body.forEach(function(entity) {
+            OpenPGPUtils.visitMessage(entity, callback);
+        });
+    }
+};
+
 OpenPGPUtils.mimeMessageToZmMimePart = function(message, withAttachment) {
     var deep = 0;
     var partIndexes = [];
     withAttachment = withAttachment | false;
 
-    function visitMessage(message) {
+    function buildZmMimePart(message) {
         deep++;
         var cd = message.header('Content-Disposition');
         if (!withAttachment && cd === 'attachment') {
@@ -291,11 +300,11 @@ OpenPGPUtils.mimeMessageToZmMimePart = function(message, withAttachment) {
         return bodyFound;
     }
 
-    var msg = visitMessage(message);
-    if (!findBody('text/html', msg))
-        findBody('text/plain', msg);
+    var mimePart = buildZmMimePart(message);
+    if (!findBody('text/html', mimePart))
+        findBody('text/plain', mimePart);
 
-    return msg;
+    return mimePart;
 };
 
 OpenPGPUtils.getDefaultSenderAddress = function() {
