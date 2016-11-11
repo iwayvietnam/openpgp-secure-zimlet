@@ -145,8 +145,6 @@ OpenPGPZimbraSecure.prototype._handleMessageResponse = function(callback, csfeRe
     else {
         response = { _jsns: 'urn:zimbraMail', more: false };
     }
-    console.log('Handle message response:');
-    console.log(response);
 
     function hasPGPPart(part) {
         var cType = part.ct;
@@ -283,8 +281,6 @@ OpenPGPZimbraSecure.prototype.onDecrypted = function(callback, msg, pgpMessage) 
 * @param {Object} params the mail params inluding the jsonObj msg.
 */
 OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
-    console.log('Send message params:');
-    console.log(params);
     var self = this;
     var shouldSign = false, shouldEncrypt = false;
     var isDraft = false;
@@ -534,10 +530,108 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
         hdrtable.firstChild.appendChild(Dwt.parseHtmlFragment(html, true));
     });
 
-    console.log(view);
     if (pgpMessage.encrypted) {
-        var msgBody = Dwt.byId(view._msgBodyDivId);
-        // to do: insert attachments before message body
+        var attachments = [];
+        OpenPGPUtils.visitMessage(pgpMessage, function(message) {
+            var cd = message.header('Content-Disposition');
+            if (cd === 'attachment' && typeof message._body === 'string') {
+                var content;
+                var encode = message.header('Content-Transfer-Encoding');
+                if (encode === 'base64') {
+                    content = OpenPGPUtils.base64Decode(message._body);
+                }
+                else if (encode === 'quoted-printable') {
+                    content = utf8.decode(quotedPrintable.decode(message._body));
+                }
+                else {
+                    content = message._body;
+                }
+                var contentType = message.contentType();
+                var attachment = {
+                    contentType: contentType.fulltype,
+                    name: 'attachment',
+                    size: content.length,
+                    content: message._body,
+                    raw: content
+                };
+                if (contentType.params.name) {
+                    attachment.name = contentType.params.name;
+                }
+                attachments.push(attachment);
+            }
+        });
+
+        var el = document.getElementById(view._attLinksId);
+        if (el) {
+            return;
+        }
+        if (attachments.length > 0) {
+            var numFormatter = AjxNumberFormat.getInstance();
+            var msgBody = Dwt.byId(view._msgBodyDivId);
+            var div = document.createElement('div');
+            div.id = view._attLinksId;
+            div.className = 'attachments';
+
+            var linkId = '';
+            var attLinkIds = [];
+            var htmlArr = [];
+            htmlArr.push('<table id="' + view._attLinksId + '_table" cellspacing="0" cellpadding="0" border="0">');
+            attachments.forEach(function(attachment, index) {
+                htmlArr.push('<tr><td>');
+                htmlArr.push('<table border=0 cellpadding=0 cellspacing=0 style="margin-right:1em; margin-bottom:1px"><tr>');
+                htmlArr.push('<td style="width:18px">');
+
+                var mimeInfo = ZmMimeTable.getInfo(attachment.contentType);
+                htmlArr.push(AjxImg.getImageHtml(mimeInfo ? mimeInfo.image : 'GenericDoc', "position:relative;", null, false, false, null, 'attachment'));
+                htmlArr.push('</td><td style="white-space:nowrap">');
+
+                var content = attachment.content.replace(/\r?\n/g, '');
+                var linkAttrs = [
+                    'class="AttLink"',
+                    'href="javascript:;//' + attachment.name + '"',
+                    'data-content="' + content.trim() + '"',
+                    'data-name="' + attachment.name + '"',
+                    'data-type="' + attachment.contentType + '"'
+                ].join(' ');
+                htmlArr.push('<span class="Object" role="link">');
+                linkId = view._attLinksId + '_' + msg.id + '_' + index + '_name';
+                htmlArr.push('<a id="' + linkId + '" ' + linkAttrs + ' title="' + attachment.name + '">' + attachment.name + '</a>');
+                attLinkIds.push(linkId);
+                htmlArr.push('</span>');
+
+                if (attachment.size < 1024) {
+                    size = numFormatter.format(attachment.size) + " " + ZmMsg.b;
+                }
+                else if (attachment.size < (1024 * 1024)) {
+                    size = numFormatter.format(Math.round((attachment.size / 1024) * 10) / 10) + " " + ZmMsg.kb;
+                }
+                else {
+                    size = numFormatter.format(Math.round((attachment.size / (1024 * 1024)) * 10) / 10) + " " + ZmMsg.mb;
+                }
+                htmlArr.push('&nbsp;(' + size + ')&nbsp;');
+
+                htmlArr.push('|&nbsp;');
+                linkId = view._attLinksId + '_' + msg.id + '_' + index + '_download';
+                htmlArr.push('<a id="' + linkId + '" ' + linkAttrs + ' style="text-decoration:underline" title="' + ZmMsg.download + '">' + ZmMsg.download + '</a>');
+                attLinkIds.push(linkId);
+
+                htmlArr.push('</td></tr></table>');
+                htmlArr.push('</td></tr>');
+            });
+            htmlArr.push('</table>');
+
+            div.innerHTML = htmlArr.join('');
+            msgBody.parentNode.insertBefore(div, msgBody);
+
+            attLinkIds.forEach(function(id) {
+                var link = document.getElementById(id);
+                if (link) {
+                    link.onclick = function() {
+                        OpenPGPZimbraSecure._download(this);
+                    };
+                }
+            });
+        }
     }
 };
 
@@ -750,6 +844,13 @@ OpenPGPZimbraSecure.prototype._initOpenPGP = function() {
     this._pgpKeys.init();
     OpenPGPSecurePrefs.init(this);
 };
+
+OpenPGPZimbraSecure._download = function(element) {
+    var content = element.getAttribute('data-content');
+    var name = element.getAttribute('data-name');
+    var type = element.getAttribute('data-type');
+    OpenPGPUtils.saveAs(content, name, type);
+}
 
 OpenPGPZimbraSecure.popupErrorDialog = function(errorCode){
     if(!errorCode){
