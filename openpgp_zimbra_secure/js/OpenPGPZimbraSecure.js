@@ -108,7 +108,6 @@ OpenPGPZimbraSecure.prototype.init = function() {
         };
     }));
 
-
     this._addJsScripts([
         'js/openpgpjs/openpgp.min.js',
         'js/mimemessage/mimemessage.js'
@@ -837,12 +836,18 @@ OpenPGPZimbraSecure.prototype._addJsScripts = function(paths, callback) {
 };
 
 OpenPGPZimbraSecure.prototype._initOpenPGP = function() {
-    var path = this.getResource('js/openpgpjs/openpgp.worker.min.js');
-    openpgp.initWorker({
-        path: path
+    var self = this;
+    var sequence = Promise.resolve();
+    sequence.then(function() {
+        var path = self.getResource('js/openpgpjs/openpgp.worker.min.js');
+        openpgp.initWorker({
+            path: path
+        });
+        return self._pgpKeys.init();
+    })
+    .then(function() {
+        OpenPGPSecurePrefs.init(self);
     });
-    this._pgpKeys.init();
-    OpenPGPSecurePrefs.init(this);
 };
 
 OpenPGPZimbraSecure._download = function(element) {

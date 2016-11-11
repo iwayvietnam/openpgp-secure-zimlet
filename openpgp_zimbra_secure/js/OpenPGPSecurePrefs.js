@@ -115,7 +115,6 @@ OpenPGPSecurePrefs.registerSettings = function(handler) {
 };
 
 AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
-
     OpenPGPSecurePrefs.prototype = new ZmPreferencesPage;
     OpenPGPSecurePrefs.prototype.constructor = OpenPGPSecurePrefs;
 
