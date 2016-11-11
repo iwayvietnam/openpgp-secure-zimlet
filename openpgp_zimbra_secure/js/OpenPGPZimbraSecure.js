@@ -115,24 +115,6 @@ OpenPGPZimbraSecure.prototype.init = function() {
     ], new AjxCallback(function() {
         self._initOpenPGP();
     }));
-
-    // try {
-    //     setTimeout(function() {
-    //         self._initOpenPGP();
-    //     }, 1000);
-    // } catch (err) {
-    //     try {
-    //         setTimeout(function() {
-    //             self._initOpenPGP();
-    //         }, 5000);
-    //     } catch (err) {
-    //         try {
-    //             setTimeout(function() {
-    //                 self._initOpenPGP();
-    //             }, 10000);
-    //         } catch (err) {}
-    //     }
-    // }
 };
 
 OpenPGPZimbraSecure.getInstance = function() {
@@ -767,19 +749,6 @@ OpenPGPZimbraSecure.prototype._initOpenPGP = function() {
     });
     this._pgpKeys.init();
     OpenPGPSecurePrefs.init(this);
-
-    // var self = this;
-    // var sequence = Promise.resolve();
-    // sequence.then(function() {
-    //     var path = self.getResource('js/openpgpjs/openpgp.worker.min.js');
-    //     openpgp.initWorker({
-    //         path: path
-    //     });
-    //     return self._pgpKeys.init();
-    // })
-    // .then(function(pgpKeys) {
-    //     OpenPGPSecurePrefs.init(self);
-    // });
 };
 
 OpenPGPZimbraSecure.popupErrorDialog = function(errorCode){
