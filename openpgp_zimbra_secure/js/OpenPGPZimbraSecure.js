@@ -32,6 +32,7 @@ function openpgp_zimbra_secure_HandlerObject() {
     this._pgpMessageCache = appCtxt.isChildWindow ? window.opener.openpgp_zimbra_secure_HandlerObject.getInstance()._pgpMessageCache : {};
     this._patchedFuncs = {};
     this._pendingAttachments = [];
+    this._pgpAttachments = {};
     this._pgpKeys = new OpenPGPSecureKeys(this);
     this._securePassword = '';
     var pwdKey = 'openpgp_secure_password_' + this.getUsername();
@@ -530,6 +531,7 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
     });
 
     if (pgpMessage.encrypted) {
+        attLinksId = view._attLinksId;
         var attachments = [];
         OpenPGPUtils.visitMessage(pgpMessage, function(message) {
             var cd = message.header('Content-Disposition');
@@ -545,9 +547,11 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
                 else {
                     content = message._body;
                 }
+
                 var contentType = message.contentType();
                 var attachment = {
-                    contentType: contentType.fulltype,
+                    id: OpenPGPUtils.randomString(),
+                    type: contentType.fulltype,
                     name: 'attachment',
                     size: content.length,
                     content: message._body,
@@ -557,6 +561,7 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
                     attachment.name = contentType.params.name;
                 }
                 attachments.push(attachment);
+                self._pgpAttachments[attachment.id] = attachment;
             }
         });
 
@@ -580,7 +585,7 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
                 htmlArr.push('<table border=0 cellpadding=0 cellspacing=0 style="margin-right:1em; margin-bottom:1px"><tr>');
                 htmlArr.push('<td style="width:18px">');
 
-                var mimeInfo = ZmMimeTable.getInfo(attachment.contentType);
+                var mimeInfo = ZmMimeTable.getInfo(attachment.type);
                 htmlArr.push(AjxImg.getImageHtml(mimeInfo ? mimeInfo.image : 'GenericDoc', "position:relative;", null, false, false, null, 'attachment'));
                 htmlArr.push('</td><td style="white-space:nowrap">');
 
@@ -588,9 +593,7 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
                 var linkAttrs = [
                     'class="AttLink"',
                     'href="javascript:;//' + attachment.name + '"',
-                    'data-content="' + content.trim() + '"',
-                    'data-name="' + attachment.name + '"',
-                    'data-type="' + attachment.contentType + '"'
+                    'data-id="' + attachment.id + '"'
                 ].join(' ');
                 htmlArr.push('<span class="Object" role="link">');
                 linkId = view._attLinksId + '_' + msg.id + '_' + index + '_name';
@@ -626,7 +629,7 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
                 var link = document.getElementById(id);
                 if (link) {
                     link.onclick = function() {
-                        OpenPGPZimbraSecure._download(this);
+                        self._download(this);
                     };
                 }
             });
@@ -850,11 +853,12 @@ OpenPGPZimbraSecure.prototype._initOpenPGP = function() {
     });
 };
 
-OpenPGPZimbraSecure._download = function(element) {
-    var content = element.getAttribute('data-content');
-    var name = element.getAttribute('data-name');
-    var type = element.getAttribute('data-type');
-    OpenPGPUtils.saveAs(content, name, type);
+OpenPGPZimbraSecure.prototype._download = function(element) {
+    var id = element.getAttribute('data-id');
+    if (this._pgpAttachments[id]) {
+        var attachment = this._pgpAttachments[id];
+        OpenPGPUtils.saveAs(attachment.content, attachment.name, attachment.type);
+    }
 }
 
 OpenPGPZimbraSecure.popupErrorDialog = function(errorCode){

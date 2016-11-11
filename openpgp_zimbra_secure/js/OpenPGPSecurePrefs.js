@@ -101,13 +101,13 @@ OpenPGPSecurePrefs.registerSettings = function(handler) {
     var publicKeySetting = zmSettings.getSetting(OpenPGPSecurePrefs.PUBLIC_KEY);
     var publicKey = pgpKeys.getPublicKey();
     if (publicKey) {
-        publicKeySetting.setValue(publicKey.armor());
+        publicKeySetting.setValue(publicKey.armor().trim());
     }
 
     var privateKeySetting = zmSettings.getSetting(OpenPGPSecurePrefs.PRIVATE_KEY);
     var privateKey = pgpKeys.getPrivateKey();
     if (privateKey) {
-        privateKeySetting.setValue(pgpKeys.getPrivateKey().armor());
+        privateKeySetting.setValue(pgpKeys.getPrivateKey().armor().trim());
     }
 
     var passphraseSetting = zmSettings.getSetting(OpenPGPSecurePrefs.PASSPHRASE);
