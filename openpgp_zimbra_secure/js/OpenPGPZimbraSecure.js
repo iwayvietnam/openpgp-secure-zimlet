@@ -531,7 +531,11 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
     });
 
     if (pgpMessage.encrypted) {
-        attLinksId = view._attLinksId;
+        var el = document.getElementById(view._attLinksId);
+        if (el) {
+            return;
+        }
+
         var attachments = [];
         OpenPGPUtils.visitMessage(pgpMessage, function(message) {
             var cd = message.header('Content-Disposition');
@@ -565,10 +569,6 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
             }
         });
 
-        var el = document.getElementById(view._attLinksId);
-        if (el) {
-            return;
-        }
         if (attachments.length > 0) {
             var numFormatter = AjxNumberFormat.getInstance();
             var msgBody = Dwt.byId(view._msgBodyDivId);
