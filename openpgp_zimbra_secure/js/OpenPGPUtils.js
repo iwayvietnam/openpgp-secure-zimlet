@@ -160,6 +160,20 @@ OpenPGPUtils.hexToBin = function(hex) {
     return String.fromCharCode.apply(String, bytes);;
 };
 
+OpenPGPUtils.stringToBin = function(string){
+      var length = string.length;
+
+      var resultBuffer = new ArrayBuffer(length);
+      var resultView = new Uint8Array(resultBuffer);
+
+      for(var i = 0; i < length; i++) {
+          resultView[i] = string.charCodeAt(i);
+      }
+
+      return resultBuffer;
+  }
+
+
 OpenPGPUtils.fetchPart = function(part, baseUrl) {
     var url, cType, cDisposition, iType;
     var addTimestamp = true;
@@ -318,6 +332,20 @@ OpenPGPUtils.getDefaultSenderAddress = function() {
 
 OpenPGPUtils.prop = function(key) {
     return openpgp_zimbra_secure[key];
+};
+
+OpenPGPUtils.saveAs = function(data, name, type) {
+    data = OpenPGPUtils.base64Decode(data);
+    if (type.indexOf('text/html') >= 0 || type.indexOf('text/plain') >= 0) {
+        saveTextAs(data, name);
+    }
+    else {
+        if (typeof data === 'string') {
+            data = OpenPGPUtils.stringToBin(data);
+        }
+        var blob = new Blob([data], {type: type});
+        saveAs(blob, name);
+    }
 };
 
 /*
