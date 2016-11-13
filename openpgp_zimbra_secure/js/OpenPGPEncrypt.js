@@ -26,7 +26,6 @@ OpenPGPEncrypt = function(opts, mimeBuilder) {
         privateKey: false,
         publicKeys: [],
         passphrase: '',
-        shouldEncrypt: false,
         beforeSign: false,
         onSigned: false,
         beforeEncrypt: false,
@@ -45,8 +44,8 @@ OpenPGPEncrypt = function(opts, mimeBuilder) {
     this._privateKey = opts.privateKey;
     this._publicKeys = opts.publicKeys;
 
-    this._shouldSign = true;
-    this._shouldEncrypt = opts.shouldEncrypt ? true : false;
+    this._shouldSign = false;
+    this._shouldEncrypt = false;
     this._isSigned = false;
     this._isEncrypted = false;
 };
