@@ -191,7 +191,7 @@ OpenPGPSecureKeys.prototype.filterPublicKeys = function(receivers) {
             for (i = 0; i < key.users.length; i++) {
                 var uid = key.users[i].userId.userid;
                 var fingerprint = key.primaryKey.fingerprint;
-                if (uid.indexOf(receiver) >= 0 && !dupes[fingerprint + uid]) {
+                if (uid.indexOf(receiver.address) >= 0 && !dupes[fingerprint + uid]) {
                     publicKeys.push(key);
                     dupes[fingerprint + uid] = fingerprint + uid;
                 }
@@ -200,6 +200,24 @@ OpenPGPSecureKeys.prototype.filterPublicKeys = function(receivers) {
     });
     return publicKeys;
 };
+
+OpenPGPSecureKeys.prototype.notHasPublicKey = function(receivers) {
+    var uidAddresses = [];
+    this.publicKeys.forEach(function(key) {
+        for (i = 0; i < key.users.length; i++) {
+            var address = emailAddresses.parseOneAddress(key.users[i].userId.userid);
+            uidAddresses[address.address] = address.address;
+        }
+    });
+
+    var addresses = [];
+    receivers.forEach(function(receiver) {
+        if (!uidAddresses[receiver.address]) {
+            addresses.push(receiver.address);
+        }
+    });
+    return addresses;
+}
 
 OpenPGPSecureKeys.prototype._storePublicKeys = function() {
     var publicKeys = [];

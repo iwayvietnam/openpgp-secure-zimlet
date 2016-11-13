@@ -129,6 +129,10 @@ OpenPGPZimbraSecure.prototype.getSecurePassword = function() {
     return this._securePassword;
 };
 
+OpenPGPZimbraSecure.prototype.getClientVersion = function() {
+    return appCtxt.get(ZmSetting.CLIENT_VERSION);
+};
+
 /**
  * Additional processing of message from server before handling control back
  * to Zimbra.
@@ -267,8 +271,7 @@ OpenPGPZimbraSecure.prototype.onDecrypted = function(callback, msg, pgpMessage) 
 
     if (pgpMessage.encrypted) {
         var mp = OpenPGPUtils.mimeMessageToZmMimePart(pgpMessage);
-        msg.mp = [];
-        msg.mp.push(mp);
+        msg.mp = [mp];
     }
 
     callback.run();
@@ -289,8 +292,6 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
         // Get preference setting, and use it if the toolbar does not override it.
         shouldSign = this._shouldSign();
         shouldEncrypt = this._shouldEncrypt();
-
-        var view = appCtxt.getCurrentView();
     }
 
     if (params.jsonObj.SaveDraftRequest) {
@@ -391,26 +392,59 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
         attachments.push(this._pendingAttachments.pop());
     }
 
-    var receivers = [];
+    var addresses = [];
     input.m.e.forEach(function(e) {
         if (e.t == 't') {
-            receivers.push(e.a);
+            addresses.push(e.a);
         }
         if (e.t == 'c') {
-            receivers.push(e.a);
+            addresses.push(e.a);
         }
         if (e.t == 'b') {
-            receivers.push(e.a);
+            addresses.push(e.a);
         }
     });
+    var receivers = emailAddresses.parseAddressList(addresses.join(', '));
+    var notHasAddresses = this._pgpKeys.notHasPublicKey(receivers);
 
     var encryptor = new OpenPGPEncrypt({
         privateKey: this._pgpKeys.getPrivateKey(),
         publicKeys: this._pgpKeys.filterPublicKeys(receivers),
         shouldEncrypt: shouldEncrypt,
+        beforeSign: function(signer, builder) {
+            if (!self._pgpKeys.getPrivateKey()) {
+                var ps = self._popShield = appCtxt.getYesNoMsgDialog();
+                ps.setMessage('You not have private key for signing. Do you want to send this message without signing?', DwtMessageDialog.WARNING_STYLE);
+                ps.registerCallback(DwtDialog.YES_BUTTON, function() {
+                    self._popShield.popdown();
+                }, self);
+                ps.registerCallback(DwtDialog.NO_BUTTON, function() {
+                    self._dismissSendMessageCallback();
+                    signer.shouldSign(false);
+                    signer.shouldEncrypt(false);
+                }, self);
+                ps.popup();
+            }
+        },
+        beforeEncrypt: function(signer, builder) {
+            if (notHasAddresses.length > 0 && signer.shouldEncrypt()) {
+                var ps = this._popShield = appCtxt.getYesNoMsgDialog();
+                ps.setMessage(notHasAddresses.join(', ') + ' not have public key for encrypting. Do you want to send this message?', DwtMessageDialog.WARNING_STYLE);
+                ps.registerCallback(DwtDialog.YES_BUTTON, function() {
+                    self._popShield.popdown();
+                }, this);
+                ps.registerCallback(DwtDialog.NO_BUTTON, function() {
+                    self._dismissSendMessageCallback();
+                    signer.shouldEncrypt(false);
+                }, this);
+                ps.popup();
+            }
+        },
         onEncrypted: function(signer, builder) {
-            builder.importHeaders(input.m);
-            self._onEncrypted(params, input, orig, msg, builder.toString());
+            if (signer.shouldSign() || signer.shouldEncrypt()) {
+                builder.importHeaders(input.m);
+                self._onEncrypted(params, input, orig, msg, builder.toString());
+            }
         },
         onError: function(signer, error) {
             console.log(error);
@@ -470,6 +504,16 @@ OpenPGPZimbraSecure.prototype._onEncryptError = function(error){
     OpenPGPZimbraSecure.popupErrorDialog(error);
 };
 
+OpenPGPZimbraSecure.prototype._dismissSendMessageCallback = function(){
+    var view = appCtxt.getCurrentView();
+    var composeCtrl = view && view.getController && view.getController();
+    var toolbar = composeCtrl._toolbar;
+    if (toolbar) {
+        toolbar.enableAll(true);
+    }
+    this._popShield.popdown();
+};
+
 /**
  * This method is called when a message is viewed in Zimbra.
  * This method is called by the Zimlet framework when a user clicks-on a message in the mail application.
@@ -526,12 +570,12 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
         };
         var html = AjxTemplate.expand('openpgp_zimbra_secure#securityHeader', params);
 
-        var hdrtable = Dwt.byId(view._hdrTableId);
-        hdrtable.firstChild.appendChild(Dwt.parseHtmlFragment(html, true));
+        var hdrTable = Dwt.byId(view._hdrTableId);
+        hdrTable.firstChild.appendChild(Dwt.parseHtmlFragment(html, true));
     });
 
     if (pgpMessage.encrypted) {
-        var el = document.getElementById(view._attLinksId);
+        var el = Dwt.byId(view._attLinksId);
         if (el) {
             return;
         }
@@ -585,8 +629,18 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
                 htmlArr.push('<table border=0 cellpadding=0 cellspacing=0 style="margin-right:1em; margin-bottom:1px"><tr>');
                 htmlArr.push('<td style="width:18px">');
 
+                var clientVersion = this.getClientVersion();
                 var mimeInfo = ZmMimeTable.getInfo(attachment.type);
-                htmlArr.push(AjxImg.getImageHtml(mimeInfo ? mimeInfo.image : 'GenericDoc', "position:relative;", null, false, false, null, 'attachment'));
+                if (clientVersion.indexOf('8.7.0_GA') >= 0 || clientVersion.indexOf('8.7.1_GA') >= 0) {
+                    htmlArr.push(AjxImg.getImageHtml({
+                        imageName: mimeInfo ? mimeInfo.image : 'GenericDoc',
+                        styles: "position:relative;",
+                        altText: ZmMsg.attachment
+                    }));
+                }
+                else {
+                    htmlArr.push(AjxImg.getImageHtml(mimeInfo ? mimeInfo.image : 'GenericDoc', "position:relative;", null, false, false, null, ZmMsg.attachment));
+                }
                 htmlArr.push('</td><td style="white-space:nowrap">');
 
                 var content = attachment.content.replace(/\r?\n/g, '');
@@ -626,7 +680,7 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
             msgBody.parentNode.insertBefore(div, msgBody);
 
             attLinkIds.forEach(function(id) {
-                var link = document.getElementById(id);
+                var link = Dwt.byId(id);
                 if (link) {
                     link.onclick = function() {
                         self._download(this);
@@ -715,6 +769,9 @@ OpenPGPZimbraSecure.prototype.initializeToolbar = function(app, toolbar, control
         }
     }
 };
+
+OpenPGPZimbraSecure.prototype.onSendButtonClicked = function(controller, msg) {
+}
 
 OpenPGPZimbraSecure.prototype._setSecurityImage = function(button, value) {
     button.setImage(OPENPGP_SECURITY_TYPES[value].className);
@@ -854,8 +911,8 @@ OpenPGPZimbraSecure.prototype._initOpenPGP = function() {
 };
 
 OpenPGPZimbraSecure.prototype._download = function(element) {
-    var id = element.getAttribute('data-id');
-    if (this._pgpAttachments[id]) {
+    var id = Dwt.getAttr(element, 'data-id');
+    if (id && this._pgpAttachments[id]) {
         var attachment = this._pgpAttachments[id];
         OpenPGPUtils.saveAs(attachment.content, attachment.name, attachment.type);
     }
