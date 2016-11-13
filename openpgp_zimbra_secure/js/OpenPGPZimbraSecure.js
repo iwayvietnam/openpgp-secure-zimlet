@@ -300,14 +300,6 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
         shouldEncrypt = false;
     }
 
-    if (!this._pgpKeys.getPrivateKey()) {
-        shouldSign = false;
-    }
-
-    if (this._pgpKeys.getPublicKeys().length === 0) {
-        shouldEncrypt = false;
-    }
-
     if (!shouldSign && !shouldEncrypt) {
         // call the wrapped function
         orig.apply(msg, [params]);
