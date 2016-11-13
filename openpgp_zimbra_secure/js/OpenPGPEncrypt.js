@@ -27,19 +27,28 @@ OpenPGPEncrypt = function(opts, mimeBuilder) {
         publicKeys: [],
         passphrase: '',
         shouldEncrypt: false,
+        beforeSign: false,
         onSigned: false,
+        beforeEncrypt: false,
         onEncrypted: false,
         onError: false
     };
     var self = this;
     this._mimeBuilder = mimeBuilder;
-    this._shouldEncrypt = opts.shouldEncrypt;
+
+    this._beforeSign = opts.beforeSign;
     this._onSigned = opts.onSigned;
+    this._beforeEncrypt = opts.beforeEncrypt;
     this._onEncrypted = opts.onEncrypted;
     this._onError = opts.onError;
 
     this._privateKey = opts.privateKey;
     this._publicKeys = opts.publicKeys;
+
+    this._shouldSign = true;
+    this._shouldEncrypt = opts.shouldEncrypt ? true : false;
+    this._isSigned = false;
+    this._isEncrypted = false;
 };
 
 OpenPGPEncrypt.prototype = new Object();
@@ -50,7 +59,11 @@ OpenPGPEncrypt.prototype.encrypt = function() {
     var sequence = Promise.resolve();
 
     return sequence.then(function() {
-        if (self._privateKey) {
+        if (AjxUtil.isFunction(self._beforeSign)) {
+            self._beforeSign(self, self._mimeBuilder);
+        }
+
+        if (self._shouldSign && self._privateKey) {
             var opts = {
                 data: self._mimeBuilder.toString(),
                 privateKeys: self._privateKey
@@ -59,6 +72,7 @@ OpenPGPEncrypt.prototype.encrypt = function() {
                 var signatureHeader = '-----BEGIN PGP SIGNATURE-----';
                 var signature = signatureHeader + signedText.data.split(signatureHeader).pop();
                 self._mimeBuilder.buildSignedMessage(signature);
+                self._isSigned = true;
                 if (AjxUtil.isFunction(self._onSigned)) {
                     self._onSigned(self, self._mimeBuilder);
                 }
@@ -70,6 +84,10 @@ OpenPGPEncrypt.prototype.encrypt = function() {
         }
     })
     .then(function(builder) {
+        if (AjxUtil.isFunction(self._beforeEncrypt)) {
+            self._beforeEncrypt(self, self._mimeBuilder);
+        }
+
         if (self._shouldEncrypt && self._publicKeys.length > 0) {
             var opts = {
                 data: self._mimeBuilder.toString(),
@@ -77,6 +95,7 @@ OpenPGPEncrypt.prototype.encrypt = function() {
             };
             return openpgp.encrypt(opts).then(function(cipherText) {
                 self._mimeBuilder.buildEncryptedMessage(cipherText.data);
+                self._isEncrypted = true;
                 if (AjxUtil.isFunction(self._onEncrypted)) {
                     self._onEncrypted(self, self._mimeBuilder);
                 }
@@ -95,3 +114,39 @@ OpenPGPEncrypt.prototype.encrypt = function() {
         }
     });
 };
+
+OpenPGPEncrypt.prototype.shouldSign = function(shouldSign) {
+    if (typeof shouldSign === 'undefined') {
+        return this._shouldSign;
+    }
+    else {
+        this._shouldSign = shouldSign ? true : false;
+    }
+}
+
+OpenPGPEncrypt.prototype.shouldEncrypt = function(shouldEncrypt) {
+    if (typeof shouldEncrypt === 'undefined') {
+        return this._shouldEncrypt;
+    }
+    else {
+        this._shouldEncrypt = shouldEncrypt ? true : false;
+    }
+}
+
+OpenPGPEncrypt.prototype.isSigned = function(isSigned) {
+    if (typeof isSigned === 'undefined') {
+        return this._isSigned;
+    }
+    else {
+        this._isSigned = isSigned ? true : false;
+    }
+}
+
+OpenPGPEncrypt.prototype.isEncrypted = function(isEncrypted) {
+    if (typeof isEncrypted === 'undefined') {
+        return this._isEncrypted;
+    }
+    else {
+        this._isEncrypted = isEncrypted ? true : false;
+    }
+}
