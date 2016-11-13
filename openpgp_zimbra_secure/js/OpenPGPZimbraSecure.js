@@ -397,43 +397,53 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
         }
     });
     var receivers = emailAddresses.parseAddressList(addresses.join(', '));
-    var notHasAddresses = this._pgpKeys.notHasPublicKey(receivers);
 
     var encryptor = new OpenPGPEncrypt({
         privateKey: this._pgpKeys.getPrivateKey(),
         publicKeys: this._pgpKeys.filterPublicKeys(receivers),
-        shouldEncrypt: shouldEncrypt,
         beforeSign: function(signer, builder) {
+            console.log('beforeEncrypt:');
             if (!self._pgpKeys.getPrivateKey()) {
                 var ps = self._popShield = appCtxt.getYesNoMsgDialog();
                 ps.setMessage('You not have private key for signing. Do you want to send this message without signing?', DwtMessageDialog.WARNING_STYLE);
                 ps.registerCallback(DwtDialog.YES_BUTTON, function() {
                     self._popShield.popdown();
+                    signer.shouldSign(shouldSign);
                 }, self);
                 ps.registerCallback(DwtDialog.NO_BUTTON, function() {
                     self._dismissSendMessageCallback();
-                    signer.shouldSign(false);
-                    signer.shouldEncrypt(false);
                 }, self);
                 ps.popup();
+            }
+            else {
+                signer.shouldSign(shouldSign);
             }
         },
         beforeEncrypt: function(signer, builder) {
-            if (notHasAddresses.length > 0 && signer.shouldEncrypt()) {
-                var ps = this._popShield = appCtxt.getYesNoMsgDialog();
-                ps.setMessage(notHasAddresses.join(', ') + ' not have public key for encrypting. Do you want to send this message?', DwtMessageDialog.WARNING_STYLE);
-                ps.registerCallback(DwtDialog.YES_BUTTON, function() {
-                    self._popShield.popdown();
-                }, this);
-                ps.registerCallback(DwtDialog.NO_BUTTON, function() {
-                    self._dismissSendMessageCallback();
-                    signer.shouldEncrypt(false);
-                }, this);
-                ps.popup();
+            console.log('beforeEncrypt:');
+            console.log(signer);
+            if (signer.shouldSign()) {
+                var notHasAddresses = self._pgpKeys.notHasPublicKey(receivers);
+                if (notHasAddresses.length > 0) {
+                    var ps = self._popShield = appCtxt.getYesNoMsgDialog();
+                    ps.setMessage(notHasAddresses.join(', ') + ' not have public key for encrypting. Do you want to send this message?', DwtMessageDialog.WARNING_STYLE);
+                    ps.registerCallback(DwtDialog.YES_BUTTON, function() {
+                        self._popShield.popdown();
+                        signer.shouldEncrypt(shouldEncrypt);
+                    }, this);
+                    ps.registerCallback(DwtDialog.NO_BUTTON, function() {
+                        self._dismissSendMessageCallback();
+                    }, this);
+                    ps.popup();
+                }
+                else {
+                    signer.shouldEncrypt(shouldEncrypt);
+                }
             }
         },
         onEncrypted: function(signer, builder) {
-            if (signer.shouldSign() || signer.shouldEncrypt()) {
+            console.log('onEncrypted:');
+            if (signer.shouldSign() && signer.shouldEncrypt()) {
                 builder.importHeaders(input.m);
                 self._onEncrypted(params, input, orig, msg, builder.toString());
             }
