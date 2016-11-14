@@ -202,9 +202,9 @@
     </table>
 </template>
 
-<template id='openpgp_zimbra_secure#SendPubicKeyView'>
-    <table border=0 cellspacing=0 cellpadding=0 width=100% class='SendPubicKeyTable'>
-        <tr class='SendPubicKeyRow'>
+<template id='openpgp_zimbra_secure#SendPublicKeyView'>
+    <table border=0 cellspacing=0 cellpadding=0 width=100% class='SendPublicKeyTable'>
+        <tr class='SendPublicKeyRow'>
             <td><$=openpgp_zimbra_secure.sendPublicKeyEmail$></td>
             <td><div id='${id}_txtEmail'></div></td>
         </tr>
