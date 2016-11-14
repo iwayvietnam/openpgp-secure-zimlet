@@ -306,6 +306,30 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
         return;
     }
 
+    if (shouldSign) {
+        if (!this._pgpKeys.getPrivateKey()) {
+            var ps = this._popShield = appCtxt.getYesNoMsgDialog();
+            ps.setMessage(OpenPGPUtils.prop('notHavePrivateKeyWarning'), DwtMessageDialog.WARNING_STYLE);
+            ps.registerCallback(DwtDialog.YES_BUTTON, function() {
+                self._popShield.popdown();
+                self._signMessage(orig, msg, params, shouldEncrypt);
+            }, this);
+            ps.registerCallback(DwtDialog.NO_BUTTON, function() {
+                self._dismissSendMessageCallback();
+            }, this);
+            ps.popup();
+        }
+        else {
+            this._signMessage(orig, msg, params,  shouldEncrypt);
+        }
+    }
+    else if (shouldEncrypt) {
+        this._signMessage(orig, msg, params,  shouldEncrypt);
+    }
+};
+
+OpenPGPZimbraSecure.prototype._signMessage = function(orig, msg, params, shouldEncrypt) {
+    var self = this;
     var input = (params.jsonObj.SendMsgRequest || params.jsonObj.SaveDraftRequest);
     var hasFrom = false;
 
@@ -314,11 +338,49 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
             hasFrom = true;
         }
     }
-
     if (!hasFrom) {
         var addr = OpenPGPUtils.getDefaultSenderAddress();
         input.m.e.push({ 'a': addr.toString(), 't': 'f' });
     }
+
+    var addresses = [];
+    input.m.e.forEach(function(e) {
+        if (e.t == 't') {
+            addresses.push(e.a);
+        }
+        if (e.t == 'c') {
+            addresses.push(e.a);
+        }
+        if (e.t == 'b') {
+            addresses.push(e.a);
+        }
+        if (e.t == 'f') {
+            addresses.push(e.a);
+        }
+    });
+    var receivers = emailAddresses.parseAddressList(addresses.join(', '));
+    var notHasAddresses = this._pgpKeys.notHasPublicKey(receivers);
+
+    if (shouldEncrypt && notHasAddresses.length > 0) {
+        var ps = this._popShield = appCtxt.getYesNoMsgDialog();
+        ps.setMessage(AjxMessageFormat.format(OpenPGPUtils.prop('notHavePublicKeyWarning'), notHasAddresses.join(', ')), DwtMessageDialog.WARNING_STYLE);
+        ps.registerCallback(DwtDialog.YES_BUTTON, function() {
+            self._popShield.popdown();
+            self._encryptMessage(orig, msg, params, shouldEncrypt, receivers);
+        }, this);
+        ps.registerCallback(DwtDialog.NO_BUTTON, function() {
+            self._dismissSendMessageCallback();
+        }, this);
+        ps.popup();
+    }
+    else {
+        this._encryptMessage(orig, msg, params, shouldEncrypt, receivers);
+    }
+}
+
+OpenPGPZimbraSecure.prototype._encryptMessage = function(orig, msg, params, shouldEncrypt, receivers) {
+    var self = this;
+    var input = (params.jsonObj.SendMsgRequest || params.jsonObj.SaveDraftRequest);
 
     function checkAttachments(list, cid, fmt) {
         for (var i = 0; list && i < list.length; i++) {
@@ -384,69 +446,12 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
         attachments.push(this._pendingAttachments.pop());
     }
 
-    var addresses = [];
-    input.m.e.forEach(function(e) {
-        if (e.t == 't') {
-            addresses.push(e.a);
-        }
-        if (e.t == 'c') {
-            addresses.push(e.a);
-        }
-        if (e.t == 'b') {
-            addresses.push(e.a);
-        }
-    });
-    var receivers = emailAddresses.parseAddressList(addresses.join(', '));
-
     var encryptor = new OpenPGPEncrypt({
         privateKey: this._pgpKeys.getPrivateKey(),
         publicKeys: this._pgpKeys.filterPublicKeys(receivers),
-        beforeSign: function(signer, builder) {
-            console.log('beforeEncrypt:');
-            if (!self._pgpKeys.getPrivateKey()) {
-                var ps = self._popShield = appCtxt.getYesNoMsgDialog();
-                ps.setMessage('You not have private key for signing. Do you want to send this message without signing?', DwtMessageDialog.WARNING_STYLE);
-                ps.registerCallback(DwtDialog.YES_BUTTON, function() {
-                    self._popShield.popdown();
-                    signer.shouldSign(shouldSign);
-                }, self);
-                ps.registerCallback(DwtDialog.NO_BUTTON, function() {
-                    self._dismissSendMessageCallback();
-                }, self);
-                ps.popup();
-            }
-            else {
-                signer.shouldSign(shouldSign);
-            }
-        },
-        beforeEncrypt: function(signer, builder) {
-            console.log('beforeEncrypt:');
-            console.log(signer);
-            if (signer.shouldSign()) {
-                var notHasAddresses = self._pgpKeys.notHasPublicKey(receivers);
-                if (notHasAddresses.length > 0) {
-                    var ps = self._popShield = appCtxt.getYesNoMsgDialog();
-                    ps.setMessage(notHasAddresses.join(', ') + ' not have public key for encrypting. Do you want to send this message?', DwtMessageDialog.WARNING_STYLE);
-                    ps.registerCallback(DwtDialog.YES_BUTTON, function() {
-                        self._popShield.popdown();
-                        signer.shouldEncrypt(shouldEncrypt);
-                    }, this);
-                    ps.registerCallback(DwtDialog.NO_BUTTON, function() {
-                        self._dismissSendMessageCallback();
-                    }, this);
-                    ps.popup();
-                }
-                else {
-                    signer.shouldEncrypt(shouldEncrypt);
-                }
-            }
-        },
         onEncrypted: function(signer, builder) {
-            console.log('onEncrypted:');
-            if (signer.shouldSign() && signer.shouldEncrypt()) {
-                builder.importHeaders(input.m);
-                self._onEncrypted(params, input, orig, msg, builder.toString());
-            }
+            builder.importHeaders(input.m);
+            self._onEncrypted(params, input, orig, msg, builder.toString());
         },
         onError: function(signer, error) {
             console.log(error);
@@ -456,8 +461,9 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
         contentParts: contentParts,
         attachments: attachments
     }));
+    encryptor.shouldEncrypt(shouldEncrypt);
     encryptor.encrypt();
-};
+}
 
 OpenPGPZimbraSecure.prototype._onEncrypted = function(params, input, orig, msg, message) {
     var url = appCtxt.get(ZmSetting.CSFE_ATTACHMENT_UPLOAD_URI) + '?fmt=raw';
@@ -543,7 +549,7 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
     var self = this;
     pgpMessage.signatures.forEach(function(signature) {
         var userid = AjxStringUtil.htmlEncode(signature.userid);
-        var desc = signature.valid ? AjxMessageFormat.format(openpgp_zimbra_secure.goodSignatureFrom, userid) : AjxMessageFormat.format(openpgp_zimbra_secure.badSignatureFrom, userid);
+        var desc = signature.valid ? AjxMessageFormat.format(OpenPGPUtils.prop('goodSignatureFrom'), userid) : AjxMessageFormat.format(OpenPGPUtils.prop('badSignatureFrom'), userid);
 
         var htmls = [];
         htmls.push(AjxMessageFormat.format('<span style="color: {0};">', signature.valid ? 'green' : 'red'));

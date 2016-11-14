@@ -44,7 +44,7 @@ OpenPGPEncrypt = function(opts, mimeBuilder) {
     this._privateKey = opts.privateKey;
     this._publicKeys = opts.publicKeys;
 
-    this._shouldSign = false;
+    this._shouldSign = true;
     this._shouldEncrypt = false;
     this._isSigned = false;
     this._isEncrypted = false;
@@ -132,20 +132,10 @@ OpenPGPEncrypt.prototype.shouldEncrypt = function(shouldEncrypt) {
     }
 }
 
-OpenPGPEncrypt.prototype.isSigned = function(isSigned) {
-    if (typeof isSigned === 'undefined') {
-        return this._isSigned;
-    }
-    else {
-        this._isSigned = isSigned ? true : false;
-    }
+OpenPGPEncrypt.prototype.isSigned = function() {
+    return this._isSigned;
 }
 
-OpenPGPEncrypt.prototype.isEncrypted = function(isEncrypted) {
-    if (typeof isEncrypted === 'undefined') {
-        return this._isEncrypted;
-    }
-    else {
-        this._isEncrypted = isEncrypted ? true : false;
-    }
+OpenPGPEncrypt.prototype.isEncrypted = function() {
+    return this._isEncrypted;
 }
