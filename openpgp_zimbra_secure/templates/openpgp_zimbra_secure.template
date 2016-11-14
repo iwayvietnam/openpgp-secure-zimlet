@@ -208,6 +208,10 @@
             <td><$=openpgp_zimbra_secure.sendPublicKeyEmail$></td>
             <td><div id='${id}_txtEmail'></div></td>
         </tr>
+        <tr class='GenKeypairRow'>
+            <td></td>
+            <td><$=openpgp_zimbra_secure.sendPublicKeyEmailDesc$></td>
+        </tr>
     </table>
 </template>
 

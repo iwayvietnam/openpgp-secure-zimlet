@@ -44,32 +44,36 @@ SendPublicKeyDialog.prototype.toString = function() {
 };
 
 SendPublicKeyDialog.prototype.sendPubicKey = function(callback) {
-    var privateKey = this._handler.getPGPKeys().getPrivateKey();
-    if (privateKey) {
+    var publicKey = this._handler.getPGPKeys().getPublicKey();
+    var email = this.getView().txtEmail.getValue();
+    var addresses = emailAddresses.parseAddressList(email);
+    if (publicKey && addresses.length > 0) {
         var addr = OpenPGPUtils.getDefaultSenderAddress();
-        var email = this.getView().txtEmail.getValue();
-        var addresses = emailAddresses.parseAddressList(email);
 
         var msg = new ZmMailMsg();
         msg.setSubject(AjxMessageFormat.format(OpenPGPUtils.prop('sendPublicKeySubject'), addr.toString()));
+        console.log(msg);
         msg.setAddress(AjxEmailAddress.FROM, addr);
+        var addrs = new AjxVector();
         addresses.forEach(function(address) {
-            msg.addAddress(AjxEmailAddress.TO, new AjxEmailAddress(address.address, AjxEmailAddress.TO, address.name));
+            addrs.add(new AjxEmailAddress(address.address, AjxEmailAddress.TO, address.name));
         });
+        msg.setAddresses(AjxEmailAddress.TO, addrs);
 
         var top = new ZmMimePart();
         top.setContentType(ZmMimeTable.MULTI_MIXED);
 
         var textContents = [];
-        privateKey.users.forEach(function(user, index) {
+        publicKey.users.forEach(function(user, index) {
             textContents.push('User ID[' + index + ']: ' + user.userId.userid);
         });
-        textContents.push('Fingerprint: ' + privateKey.primaryKey.fingerprint);
-        textContents.push('Key ID: ' + privateKey.keyid.toHex());
-        textContents.push('Created: ' + privateKey.primaryKey.created);
+        var priKey = publicKey.primaryKey;
+        textContents.push('Fingerprint: ' + priKey.fingerprint);
+        textContents.push('Key ID: ' + priKey.keyid.toHex());
+        textContents.push('Created: ' + priKey.created);
         var keyLength = '';
-        if (privateKey.primaryKey.mpi.length > 0) {
-            keyLength = (privateKey.primaryKey.mpi[0].byteLength() * 8);
+        if (priKey.mpi.length > 0) {
+            keyLength = (priKey.mpi[0].byteLength() * 8);
         }
         textContents.push('Key Length: ' + keyLength);
 
@@ -80,8 +84,8 @@ SendPublicKeyDialog.prototype.sendPubicKey = function(callback) {
         top.children.add(textPart);
 
         var keyPart = new ZmMimePart();
-        keyPart.setContentType('application/pgp-keys');
-        keyPart.setContent(privateKey.armor());
+        keyPart.setContentType(OpenPGPUtils.OPENPGP_KEYS_CONTENT_TYPE);
+        keyPart.setContent(publicKey.armor());
         top.children.add(keyPart);
 
         msg.setTopPart(top);

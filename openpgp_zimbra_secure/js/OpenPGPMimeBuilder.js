@@ -47,15 +47,24 @@ OpenPGPMimeBuilder = function(opts) {
             body: []
         });
         this._contentParts.forEach(function(cp){
+            var contentEntity;
             var contentType = cp.ct;
-            if (contentType == 'text/plain' || contentType == 'text/html') {
+            if (contentType === 'text/plain' || contentType === 'text/html') {
                 contentType += '; charset=utf-8';
+                contentEntity = mimemessage.factory({
+                    contentType: contentType,
+                    contentTransferEncoding: 'quoted-printable',
+                    body: quotedPrintable.encode(utf8.encode(cp.content._content.replace(/\r?\n/g, "\r\n")))
+                });
             }
-            var contentEntity = mimemessage.factory({
-                contentType: contentType,
-                contentTransferEncoding: 'quoted-printable',
-                body: quotedPrintable.encode(utf8.encode(cp.content._content.replace(/\r?\n/g, "\r\n")))
-            });
+            else if (OpenPGPUtils.isOPENPGPContentType(contentType)) {} {
+                contentEntity = mimemessage.factory({
+                    contentType: contentType,
+                    contentTransferEncoding: '7bit',
+                    body: cp.content._content.replace(/\r?\n/g, "\r\n")
+                });
+                contentEntity.header('Content-Description', 'OpenPGP message');
+            }
             alternateEntity.body.push(contentEntity);
         });
     }

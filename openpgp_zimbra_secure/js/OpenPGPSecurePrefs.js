@@ -348,7 +348,9 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
             this._handler._keySendDialog = new SendPublicKeyDialog(
                 this._handler,
                 function(dialog) {
-                    self._handler.displayStatusMessage(OpenPGPUtils.prop('sendPublicKeySubmitted'));
+                    dialog.sendPubicKey(new AjxCallback(function() {
+                        self._handler.displayStatusMessage(OpenPGPUtils.prop('sendPublicKeySubmitted'));
+                    }));
                 }
             );
         }
