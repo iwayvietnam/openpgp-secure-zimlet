@@ -43,11 +43,11 @@ SendPublicKeyDialog.prototype.toString = function() {
     return 'SendPublicKeyDialog';
 };
 
-KeyAddDialog.prototype.getEmail = function() {
+SendPublicKeyDialog.prototype.getEmail = function() {
     return this.getView().txtEmail.getValue();
 };
 
-KeyAddDialog.prototype.setEmail = function(email) {
+SendPublicKeyDialog.prototype.setEmail = function(email) {
     return this.getView().txtEmail.setValue(email);
 };
 
