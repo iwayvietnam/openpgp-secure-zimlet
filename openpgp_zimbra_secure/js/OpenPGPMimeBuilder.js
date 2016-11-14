@@ -57,14 +57,25 @@ OpenPGPMimeBuilder = function(opts) {
                     body: quotedPrintable.encode(utf8.encode(cp.content._content.replace(/\r?\n/g, "\r\n")))
                 });
             }
-            else if (OpenPGPUtils.isOPENPGPContentType(contentType)) {} {
+            else if (OpenPGPUtils.isOPENPGPContentType(contentType)) {
                 contentEntity = mimemessage.factory({
-                    contentType: contentType,
+                    contentType: contentType + '; name="key.asc"',
                     contentTransferEncoding: '7bit',
                     body: cp.content._content.replace(/\r?\n/g, "\r\n")
                 });
+                contentEntity.header('Content-Disposition', 'inline; filename="key.asc"');
                 contentEntity.header('Content-Description', 'OpenPGP message');
-                alternateEntity.contentType(ZmMimeTable.MULTI_MIXED);
+                var ctParts = [
+                    ZmMimeTable.MULTI_MIXED,
+                    'boundary=' + OpenPGPUtils.randomString()
+                ];
+                alternateEntity.contentType(ctParts.join('; '));
+            }
+            else {
+                contentEntity = mimemessage.factory({
+                    contentType: contentType,
+                    body: cp.content._content.replace(/\r?\n/g, "\r\n")
+                });
             }
             alternateEntity.body.push(contentEntity);
         });
