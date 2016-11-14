@@ -349,7 +349,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
             dialog.setEmail('');
         }
         else {
-            var dialog = this._handler._keySendDialog = new KeyAddDialog(
+            var dialog = this._handler._keySendDialog = new SendPublicKeyDialog(
                 this._handler,
                 function(dialog) {
                     dialog.sendPubicKey(new AjxCallback(function() {
