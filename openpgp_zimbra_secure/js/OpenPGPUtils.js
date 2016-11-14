@@ -108,6 +108,13 @@ OpenPGPUtils.localStorageRead = function(key, pwd) {
     });
 }
 
+/*
+ * base64 encode
+ * https://github.com/open-eid/hwcrypto.js
+ *
+ * Copyright (c) 2015 Martin Paljak, Estonian Information System Authority
+ * Licensed under the MIT license.
+ */
 OpenPGPUtils.base64Encode = function(bin) {
     if (!window.btoa) {
         for (var i = 0, j = 0, len = bin.length / 3, base64 = []; i < len; ++i) {
@@ -124,6 +131,13 @@ OpenPGPUtils.base64Encode = function(bin) {
     }
 };
 
+/*
+ * base64 decode
+ * https://github.com/open-eid/hwcrypto.js
+ *
+ * Copyright (c) 2015 Martin Paljak, Estonian Information System Authority
+ * Licensed under the MIT license.
+ */
 OpenPGPUtils.base64Decode = function(base64) {
     if (!window.atob) {
         if (/(=[^=]+|={3,})$/.test(base64)) throw new Error("String contains an invalid character");
@@ -145,6 +159,13 @@ OpenPGPUtils.base64Decode = function(base64) {
     }
 };
 
+/*
+ * hex to base64
+ * https://github.com/open-eid/hwcrypto.js
+ *
+ * Copyright (c) 2015 Martin Paljak, Estonian Information System Authority
+ * Licensed under the MIT license.
+ */
 OpenPGPUtils.hexToBase64 = function(hex) {
     return OpenPGPUtils.base64Encode(String.fromCharCode.apply(null,
         hex.replace(/\r|\n/g, "").replace(/([\da-fA-F]{2}) ?/g, "0x$1 ").replace(/ +$/, "").split(" "))
