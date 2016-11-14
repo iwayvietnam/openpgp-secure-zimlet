@@ -637,7 +637,7 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
                 htmlArr.push('<table border=0 cellpadding=0 cellspacing=0 style="margin-right:1em; margin-bottom:1px"><tr>');
                 htmlArr.push('<td style="width:18px">');
 
-                var clientVersion = this.getClientVersion();
+                var clientVersion = self.getClientVersion();
                 var mimeInfo = ZmMimeTable.getInfo(attachment.type);
                 if (clientVersion.indexOf('8.7.0_GA') >= 0 || clientVersion.indexOf('8.7.1_GA') >= 0) {
                     htmlArr.push(AjxImg.getImageHtml({
