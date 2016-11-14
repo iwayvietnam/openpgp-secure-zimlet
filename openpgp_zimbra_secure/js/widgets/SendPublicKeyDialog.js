@@ -43,9 +43,17 @@ SendPublicKeyDialog.prototype.toString = function() {
     return 'SendPublicKeyDialog';
 };
 
+KeyAddDialog.prototype.getEmail = function() {
+    return this.getView().txtEmail.getValue();
+};
+
+KeyAddDialog.prototype.setEmail = function(email) {
+    return this.getView().txtEmail.setValue(email);
+};
+
 SendPublicKeyDialog.prototype.sendPubicKey = function(callback) {
     var publicKey = this._handler.getPGPKeys().getPublicKey();
-    var email = this.getView().txtEmail.getValue();
+    var email = this.getEmail();
     var addresses = emailAddresses.parseAddressList(email);
     if (publicKey && addresses.length > 0) {
         var addr = OpenPGPUtils.getDefaultSenderAddress();

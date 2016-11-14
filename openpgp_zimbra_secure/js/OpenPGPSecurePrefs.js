@@ -344,8 +344,12 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
 
     OpenPGPSecurePrefs.prototype._keySend = function() {
         var self = this;
-        if (!this._handler._keySendDialog) {
-            this._handler._keySendDialog = new SendPublicKeyDialog(
+        if (this._handler._keySendDialog) {
+            var dialog = this._handler._keySendDialog;
+            dialog.setEmail('');
+        }
+        else {
+            var dialog = this._handler._keySendDialog = new KeyAddDialog(
                 this._handler,
                 function(dialog) {
                     dialog.sendPubicKey(new AjxCallback(function() {
@@ -354,7 +358,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
                 }
             );
         }
-        this._handler._keySendDialog.popup();
+        dialog.popup();
     }
 
     OpenPGPSecurePrefs.prototype._togglePassphrase = function() {
