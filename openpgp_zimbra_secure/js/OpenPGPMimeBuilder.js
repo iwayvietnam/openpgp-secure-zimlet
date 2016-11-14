@@ -59,11 +59,11 @@ OpenPGPMimeBuilder = function(opts) {
             }
             else if (OpenPGPUtils.isOPENPGPContentType(contentType)) {
                 contentEntity = mimemessage.factory({
-                    contentType: contentType + '; name="key.asc"',
+                    contentType: contentType + '; name="message.asc"',
                     contentTransferEncoding: '7bit',
                     body: cp.content._content.replace(/\r?\n/g, "\r\n")
                 });
-                contentEntity.header('Content-Disposition', 'inline; filename="key.asc"');
+                contentEntity.header('Content-Disposition', 'inline; filename="message.asc"');
                 contentEntity.header('Content-Description', 'OpenPGP message');
                 var ctParts = [
                     ZmMimeTable.MULTI_MIXED,
