@@ -67,6 +67,7 @@
                                 <tr>
                                     <td><div id='${id}_OPENPGP_KEYPAIR_GEN'></div></td>
                                     <td><div id='${id}_OPENPGP_KEY_SUBMIT'></div></td>
+                                    <td><div id='${id}_OPENPGP_KEY_SEND'></div></td>
                                     <td width=100%></td>
                                 </tr>
                             </table>
@@ -197,6 +198,15 @@
             <td>
                 <div id='${id}_txtKey'></div>
             </td>
+        </tr>
+    </table>
+</template>
+
+<template id='openpgp_zimbra_secure#SendPubicKeyView'>
+    <table border=0 cellspacing=0 cellpadding=0 width=100% class='SendPubicKeyTable'>
+        <tr class='SendPubicKeyRow'>
+            <td><$=openpgp_zimbra_secure.sendPublicKeyEmail$></td>
+            <td><div id='${id}_txtEmail'></div></td>
         </tr>
     </table>
 </template>

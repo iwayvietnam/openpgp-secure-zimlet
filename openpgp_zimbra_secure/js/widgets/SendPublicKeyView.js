@@ -21,37 +21,29 @@
  * Written by nguyennv1981@gmail.com
  */
 
-KeyLookupDialog = function(handler, onOk, onCancel) {
-    var keyServer = handler.getZimletContext().getConfig('openpgp-key-server');
-    OpenPGPDialog.call(
-        this,
-        handler,
-        AjxMessageFormat.format(OpenPGPUtils.prop('keyLookupTitle'), keyServer),
-        onOk,
-        onCancel,
-        [DwtDialog.CANCEL_BUTTON, DwtDialog.OK_BUTTON]
-    );
+SendPubicKeyView = function(params) {
+    params.className = params.className || 'DwtComposite SendPubicKeyView';
+    DwtComposite.call(this, params);
 
-    this.setView(new KeyLookupView({
-        parent: this,
-        handler: handler
-    }));
+    this._createHtmlFromTemplate(this.TEMPLATE, {
+        id: this.getHTMLElId()
+    });
+
+    this._initialize();
 };
 
-KeyLookupDialog.prototype = new OpenPGPDialog;
-KeyLookupDialog.prototype.constructor = KeyLookupDialog;
+SendPubicKeyView.prototype = new DwtComposite;
+SendPubicKeyView.prototype.constructor = SendPubicKeyView;
 
-KeyLookupDialog.prototype.toString = function() {
-    return 'KeyLookupDialog';
+SendPubicKeyView.prototype.toString = function() {
+    return 'SendPubicKeyView';
 };
 
-KeyLookupDialog.prototype.getPublicKey = function() {
-    var publicKey = '';
-    var keyLookup = document.getElementsByName('keyLookupValue');
-    for(var i = 0; i < keyLookup.length; i++) {
-        if (keyLookup[i].checked == true) {
-            publicKey = keyLookup[i].value;
-        }
-    }
-    return publicKey;
+SendPubicKeyView.prototype.TEMPLATE = 'openpgp_zimbra_secure#SendPubicKeyView';
+
+SendPubicKeyView.prototype._initialize = function() {
+    var id = this.getHTMLElId();
+
+    var txtEmail = this.txtEmail = new DwtInputField({parent: this, className: 'SendPubicKeyInput'});
+    txtEmail.replaceElement(id + '_txtEmail');
 };

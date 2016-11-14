@@ -39,6 +39,8 @@
     <include>js/widgets/KeyLookupView.js</include>
     <include>js/widgets/KeyAddDialog.js</include>
     <include>js/widgets/KeyAddView.js</include>
+    <include>js/widgets/SendPubicKeyDialog.js</include>
+    <include>js/widgets/SendPubicKeyView.js</include>
 
     <include>js/json/json2.js</include>
     <include>js/quoted-printable/quoted-printable.js</include>

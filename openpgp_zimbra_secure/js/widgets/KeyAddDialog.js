@@ -21,14 +21,14 @@
  * Written by nguyennv1981@gmail.com
  */
 
-KeyAddDialog = function(handler, title, onOk, onCancel, standardButtons) {
+KeyAddDialog = function(handler, onOk, onCancel) {
     OpenPGPDialog.call(
         this,
         handler,
-        title,
+        OpenPGPUtils.prop('keyAddTitle'),
         onOk,
         onCancel,
-        standardButtons
+        [DwtDialog.CANCEL_BUTTON, DwtDialog.OK_BUTTON]
     );
 
     this.setView(new KeyAddView({

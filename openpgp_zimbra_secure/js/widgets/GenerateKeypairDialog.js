@@ -21,14 +21,14 @@
  * Written by nguyennv1981@gmail.com
  */
 
-GenerateKeypairDialog = function(handler, title, onOk, onCancel, standardButtons) {
+GenerateKeypairDialog = function(handler, onOk, onCancel) {
     OpenPGPDialog.call(
         this,
         handler,
-        title,
+        OpenPGPUtils.prop('keyPairGenTitle'),
         onOk,
         onCancel,
-        standardButtons
+        [DwtDialog.CANCEL_BUTTON, DwtDialog.OK_BUTTON]
     );
 
     if (appCtxt.get(ZmSetting.DISPLAY_NAME)) {
