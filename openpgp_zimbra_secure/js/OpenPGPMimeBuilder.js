@@ -43,7 +43,7 @@ OpenPGPMimeBuilder = function(opts) {
 
     if (this._contentParts.length > 1) {
         alternateEntity = mimemessage.factory({
-            contentType: 'multipart/alternative',
+            contentType: ZmMimeTable.MULTI_ALT,
             body: []
         });
         this._contentParts.forEach(function(cp){
@@ -64,6 +64,7 @@ OpenPGPMimeBuilder = function(opts) {
                     body: cp.content._content.replace(/\r?\n/g, "\r\n")
                 });
                 contentEntity.header('Content-Description', 'OpenPGP message');
+                alternateEntity.contentType(ZmMimeTable.MULTI_MIXED);
             }
             alternateEntity.body.push(contentEntity);
         });
@@ -94,7 +95,11 @@ OpenPGPMimeBuilder = function(opts) {
     }
 
     if (attachmentEntities.length > 0) {
-        this._message.contentType('multipart/mixed; boundary=' + OpenPGPUtils.randomString());
+        var ctParts = [
+            ZmMimeTable.MULTI_MIXED,
+            'boundary=' + OpenPGPUtils.randomString()
+        ];
+        this._message.contentType(ctParts.join('; '));
         if (alternateEntity) {
             this._message.body.push(alternateEntity);
         }
