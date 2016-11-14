@@ -21,7 +21,7 @@
  * Written by nguyennv1981@gmail.com
  */
 
-SendPubicKeyDialog = function(handler, onOk, onCancel) {
+SendPublicKeyDialog = function(handler, onOk, onCancel) {
     OpenPGPDialog.call(
         this,
         handler,
@@ -31,19 +31,19 @@ SendPubicKeyDialog = function(handler, onOk, onCancel) {
         [DwtDialog.CANCEL_BUTTON, DwtDialog.OK_BUTTON]
     );
 
-    this.setView(new SendPubicKeyView({
+    this.setView(new SendPublicKeyView({
         parent: this
     }));
 };
 
-SendPubicKeyDialog.prototype = new OpenPGPDialog;
-SendPubicKeyDialog.prototype.constructor = SendPubicKeyDialog;
+SendPublicKeyDialog.prototype = new OpenPGPDialog;
+SendPublicKeyDialog.prototype.constructor = SendPublicKeyDialog;
 
-SendPubicKeyDialog.prototype.toString = function() {
-    return 'SendPubicKeyDialog';
+SendPublicKeyDialog.prototype.toString = function() {
+    return 'SendPublicKeyDialog';
 };
 
-SendPubicKeyDialog.prototype.sendPubicKey = function(callback) {
+SendPublicKeyDialog.prototype.sendPubicKey = function(callback) {
     var privateKey = this._handler.getPGPKeys().getPrivateKey();
     if (privateKey) {
         var addr = OpenPGPUtils.getDefaultSenderAddress();

@@ -345,7 +345,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
     OpenPGPSecurePrefs.prototype._keySend = function() {
         var self = this;
         if (!this._handler._keySendDialog) {
-            this._handler._keySendDialog = new SendPubicKeyDialog(
+            this._handler._keySendDialog = new SendPublicKeyDialog(
                 this._handler,
                 function(dialog) {
                     self._handler.displayStatusMessage(OpenPGPUtils.prop('sendPublicKeySubmitted'));

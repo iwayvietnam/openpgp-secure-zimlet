@@ -44,7 +44,7 @@
     height: 150px;
 }
 
-.SendPubicKeyInput input[type="text"],
+.SendPublicKeyInput input[type="text"],
 .KeyLookupInput input[type="text"],
 .GenKeyInput input[type="password"],
 .GenKeyInput input[type="text"] {

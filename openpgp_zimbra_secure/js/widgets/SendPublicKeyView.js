@@ -21,8 +21,8 @@
  * Written by nguyennv1981@gmail.com
  */
 
-SendPubicKeyView = function(params) {
-    params.className = params.className || 'DwtComposite SendPubicKeyView';
+SendPublicKeyView = function(params) {
+    params.className = params.className || 'DwtComposite SendPublicKeyView';
     DwtComposite.call(this, params);
 
     this._createHtmlFromTemplate(this.TEMPLATE, {
@@ -32,18 +32,18 @@ SendPubicKeyView = function(params) {
     this._initialize();
 };
 
-SendPubicKeyView.prototype = new DwtComposite;
-SendPubicKeyView.prototype.constructor = SendPubicKeyView;
+SendPublicKeyView.prototype = new DwtComposite;
+SendPublicKeyView.prototype.constructor = SendPublicKeyView;
 
-SendPubicKeyView.prototype.toString = function() {
-    return 'SendPubicKeyView';
+SendPublicKeyView.prototype.toString = function() {
+    return 'SendPublicKeyView';
 };
 
-SendPubicKeyView.prototype.TEMPLATE = 'openpgp_zimbra_secure#SendPubicKeyView';
+SendPublicKeyView.prototype.TEMPLATE = 'openpgp_zimbra_secure#SendPublicKeyView';
 
-SendPubicKeyView.prototype._initialize = function() {
+SendPublicKeyView.prototype._initialize = function() {
     var id = this.getHTMLElId();
 
-    var txtEmail = this.txtEmail = new DwtInputField({parent: this, className: 'SendPubicKeyInput'});
+    var txtEmail = this.txtEmail = new DwtInputField({parent: this, className: 'SendPublicKeyInput'});
     txtEmail.replaceElement(id + '_txtEmail');
 };
