@@ -172,15 +172,27 @@ OpenPGPUtils.hexToBase64 = function(hex) {
     );
 };
 
+/*
+ * hex to bin
+ */
 OpenPGPUtils.hexToBin = function(hex) {
-    var bytes = [];
+    var chars = [];
+    var hexLength = hex.length;
 
-    for(var i = 0; i < hex.length - 1; i += 2) {
-        bytes.push(parseInt(hex.substr(i, 2), 16));
+    for(var i = 0; i < hexLength - 1; i += 2) {
+        var charCode = parseInt(hex.substr(i, 2), 16);
+        chars.push(charCode);
     }
-    return String.fromCharCode.apply(String, bytes);;
+    return String.fromCharCode.apply(String, chars);;
 };
 
+/*
+ * string to bin
+ * http://pkijs.org/
+ *
+ * Copyright (c) 2014, GMO GlobalSign
+ * Licensed under the BSD-3-Clause license.
+ */
 OpenPGPUtils.stringToBin = function(string){
       var length = string.length;
 
@@ -370,7 +382,7 @@ OpenPGPUtils.saveAs = function(data, name, type) {
 };
 
 /*
- * random-string
+ * random string
  * https://github.com/valiton/node-random-string
  *
  * Copyright (c) 2013 Valiton GmbH, Bastian 'hereandnow' Behrens
