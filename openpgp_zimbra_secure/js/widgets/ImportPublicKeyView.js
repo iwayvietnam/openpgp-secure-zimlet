@@ -42,6 +42,6 @@ ImportPublicKeyView.prototype.toString = function() {
 ImportPublicKeyView.prototype.TEMPLATE = 'openpgp_zimbra_secure#ImportPublicKeyView';
 
 ImportPublicKeyView.prototype._initialize = function(keyInfo) {
-    var id = self.getHTMLElId();
+    var id = this.getHTMLElId();
     document.getElementById(id + '_KeyInfo').innerHTML = AjxTemplate.expand('openpgp_zimbra_secure#KeyInfo', keyInfo);
 };

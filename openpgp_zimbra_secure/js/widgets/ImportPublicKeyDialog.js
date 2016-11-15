@@ -30,7 +30,6 @@ ImportPublicKeyDialog = function(handler, onOk, onCancel, keyInfo) {
         onCancel,
         [DwtDialog.CANCEL_BUTTON, DwtDialog.OK_BUTTON]
     );
-    this._keyInfo = keyInfo;
 
     this.setView(new ImportPublicKeyView({
         parent: this
@@ -42,9 +41,4 @@ ImportPublicKeyDialog.prototype.constructor = ImportPublicKeyDialog;
 
 ImportPublicKeyDialog.prototype.toString = function() {
     return 'ImportPublicKeyDialog';
-};
-
-ImportPublicKeyDialog.prototype.importPubicKey = function(callback) {
-    this._handler._pgpKeys.addPublicKey(key);
-    callback.run();
 };
