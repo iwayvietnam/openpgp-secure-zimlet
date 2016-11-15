@@ -154,12 +154,15 @@ OpenPGPZimbraSecure.prototype._handleMessageResponse = function(callback, csfeRe
         var cType = part.ct;
 
         if (OpenPGPUtils.isOPENPGPContentType(cType)) {
+            if (OpenPGPUtils.isPGPKeysContentType(cType)) {
+                part.isPGPKey = true;
+            }
             return true;
         } else if (!part.mp) {
             return false;
         }
+
         if (cType != ZmMimeTable.MSG_RFC822) {
-            //do not look at subparts in attached message
             for (var i = 0; i < part.mp.length; i++) {
                 if (hasPGPPart(part.mp[i]))
                     return true;
@@ -304,6 +307,10 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
         // call the wrapped function
         orig.apply(msg, [params]);
         return;
+    }
+
+    if (typeof msg.shouldEncrypt !== 'undefined') {
+        shouldEncrypt = msg.shouldEncrypt ? true : false;
     }
 
     if (shouldSign) {
