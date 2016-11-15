@@ -58,13 +58,27 @@ OpenPGPMimeBuilder = function(opts) {
                 });
             }
             else if (OpenPGPUtils.isOPENPGPContentType(contentType)) {
+                var name = 'message.asc';
+                var desc = 'OpenPGP message';
+                if (OpenPGPUtils.isSignatureContentType(contentType)) {
+                    name = 'signature.asc';
+                    desc = 'OpenPGP signed message';
+                }
+                if (OpenPGPUtils.isEncryptedContentType(contentType)) {
+                    name = 'encrypted.asc';
+                    desc = 'OpenPGP encrypted message';
+                }
+                if (OpenPGPUtils.isPGPKeysContentType(contentType)) {
+                    name = 'key.asc';
+                    desc = 'OpenPGP key message';
+                }
                 contentEntity = mimemessage.factory({
-                    contentType: contentType + '; name="message.asc"',
+                    contentType: contentType + '; name="' + name + '"',
                     contentTransferEncoding: '7bit',
                     body: cp.content._content.replace(/\r?\n/g, "\r\n")
                 });
-                contentEntity.header('Content-Disposition', 'inline; filename="message.asc"');
-                contentEntity.header('Content-Description', 'OpenPGP message');
+                contentEntity.header('Content-Disposition', 'inline; filename="' + name + '"');
+                contentEntity.header('Content-Description', desc);
                 var ctParts = [
                     ZmMimeTable.MULTI_MIXED,
                     'boundary=' + OpenPGPUtils.randomString()
@@ -152,10 +166,14 @@ OpenPGPMimeBuilder.prototype.buildSignedMessage = function(signature) {
     });
 
     var pgpMime = mimemessage.factory({
-        contentType: OpenPGPUtils.OPENPGP_SIGNATURE_CONTENT_TYPE,
+        contentType: [
+            OpenPGPUtils.OPENPGP_SIGNATURE_CONTENT_TYPE,
+            'name="signature.asc"'
+        ].join('; '),
         contentTransferEncoding: '7bit',
         body: signature
     });
+    pgpMime.header('Content-Disposition', 'inline; filename="signature.asc"');
     pgpMime.header('Content-Description', 'OpenPGP signed message');
     this._message.body.push(message);
     this._message.body.push(pgpMime);
