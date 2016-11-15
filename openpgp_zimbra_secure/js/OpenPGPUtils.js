@@ -78,6 +78,10 @@ OpenPGPUtils.isEncryptedContentType = function(cType) {
     return AjxUtil.indexOf([OpenPGPUtils.OPENPGP_ENCRYPTED_CONTENT_TYPE], cType) !== -1;
 };
 
+OpenPGPUtils.isPGPKeysContentType = function(cType) {
+    return AjxUtil.indexOf([OpenPGPUtils.OPENPGP_KEYS_CONTENT_TYPE], cType) !== -1;
+};
+
 OpenPGPUtils.localStorageSave = function(key, pwd, data) {
     var opts = {
         data: data,
