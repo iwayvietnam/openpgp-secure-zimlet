@@ -98,10 +98,11 @@ OpenPGPDecrypt.prototype.decrypt = function() {
                 var bodyContent = '';
                 var signature = '';
                 message.body.forEach(function(body) {
-                    if (OpenPGPUtils.isSignatureContentType(body.contentType().fulltype)) {
+                    var ct = body.contentType().fulltype;
+                    if (OpenPGPUtils.isSignatureContentType(ct)) {
                         signature = body.toString({noHeaders: true});
                     }
-                    else {
+                    else if (!OpenPGPUtils.isOPENPGPContentType(ct)) {
                         bodyContent = body.toString();
                     }
                 });

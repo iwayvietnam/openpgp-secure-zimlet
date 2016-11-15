@@ -438,14 +438,11 @@ OpenPGPZimbraSecure.prototype._encryptMessage = function(orig, msg, params, shou
 
     var contentParts = [];
     input.m.mp.forEach(function(part) {
-        if (part.mp) {
-            part.mp.forEach(function(mp) {
+        OpenPGPUtils.visitMimePart(part, function(mp) {
+            if (!mp.mp) {
                 contentParts.push(mp);
-            });
-        }
-        else {
-            contentParts.push(part);
-        }
+            }
+        });
     });
 
     var attachments = [];
@@ -455,6 +452,7 @@ OpenPGPZimbraSecure.prototype._encryptMessage = function(orig, msg, params, shou
 
     var encryptor = new OpenPGPEncrypt({
         privateKey: this._pgpKeys.getPrivateKey(),
+        publicKey: (msg.attachPublicKey === true) ? this._pgpKeys.getPublicKey() : false,
         publicKeys: this._pgpKeys.filterPublicKeys(receivers),
         onEncrypted: function(signer, builder) {
             builder.importHeaders(input.m);

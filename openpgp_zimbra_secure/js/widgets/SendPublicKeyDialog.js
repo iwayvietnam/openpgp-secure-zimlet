@@ -60,6 +60,7 @@ SendPublicKeyDialog.prototype.sendPubicKey = function(callback) {
 
         var msg = new ZmMailMsg();
         msg.shouldEncrypt = false;
+        msg.attachPublicKey = true;
         msg.setSubject(AjxMessageFormat.format(OpenPGPUtils.prop('sendPublicKeySubject'), addr.toString()));
         msg.setAddress(AjxEmailAddress.FROM, addr);
         var addrs = new AjxVector();
@@ -86,11 +87,6 @@ SendPublicKeyDialog.prototype.sendPubicKey = function(callback) {
         textPart.setContent(textContents.join("\r\n"));
         textPart.setIsBody(true);
         top.children.add(textPart);
-
-        var keyPart = new ZmMimePart();
-        keyPart.setContentType(OpenPGPUtils.OPENPGP_KEYS_CONTENT_TYPE);
-        keyPart.setContent(publicKey.armor());
-        top.children.add(keyPart);
 
         msg.setTopPart(top);
         msg.send(false, callback);

@@ -24,6 +24,7 @@
 OpenPGPEncrypt = function(opts, mimeBuilder) {
     opts = opts || {
         privateKey: false,
+        publicKey: false,
         publicKeys: [],
         passphrase: '',
         beforeSign: false,
@@ -42,6 +43,7 @@ OpenPGPEncrypt = function(opts, mimeBuilder) {
     this._onError = opts.onError;
 
     this._privateKey = opts.privateKey;
+    this._publicKey = opts.publicKey;
     this._publicKeys = opts.publicKeys;
 
     this._shouldSign = true;
@@ -70,7 +72,12 @@ OpenPGPEncrypt.prototype.encrypt = function() {
             return openpgp.sign(opts).then(function(signedText) {
                 var signatureHeader = '-----BEGIN PGP SIGNATURE-----';
                 var signature = signatureHeader + signedText.data.split(signatureHeader).pop();
-                self._mimeBuilder.buildSignedMessage(signature);
+                if (self._publicKey) {
+                    self._mimeBuilder.buildSignedMessage(signature, self._publicKey.armor());
+                }
+                else {
+                    self._mimeBuilder.buildSignedMessage(signature);
+                }
                 self._isSigned = true;
                 if (AjxUtil.isFunction(self._onSigned)) {
                     self._onSigned(self, self._mimeBuilder);

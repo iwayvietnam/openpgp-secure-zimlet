@@ -262,6 +262,15 @@ OpenPGPUtils.fetchPart = function(part, baseUrl) {
     }
 };
 
+OpenPGPUtils.visitMimePart = function(part, callback) {
+    callback(part);
+    if (part.mp) {
+        part.mp.forEach(function(mp) {
+            OpenPGPUtils.visitMimePart(mp, callback);
+        });
+    }
+};
+
 OpenPGPUtils.visitMessage = function(message, callback) {
     callback(message);
     if (Array.isArray(message._body)) {

@@ -151,8 +151,9 @@ OpenPGPMimeBuilder.prototype.constructor = OpenPGPMimeBuilder;
 /**
  * Build pgp signed mime message and attach signature
  * @param {String} The signature of message.
+ * @param {String} The public key of message.
  */
-OpenPGPMimeBuilder.prototype.buildSignedMessage = function(signature) {
+OpenPGPMimeBuilder.prototype.buildSignedMessage = function(signature, publicKey) {
     var message = this._message;
     var ctParts = [
         OpenPGPUtils.SIGNED_MESSAGE_CONTENT_TYPE,
@@ -177,6 +178,20 @@ OpenPGPMimeBuilder.prototype.buildSignedMessage = function(signature) {
     pgpMime.header('Content-Description', 'OpenPGP signed message');
     this._message.body.push(message);
     this._message.body.push(pgpMime);
+
+    if (publicKey) {
+        var keyMime = mimemessage.factory({
+            contentType: [
+                OpenPGPUtils.OPENPGP_KEYS_CONTENT_TYPE,
+                'name="key.asc"'
+            ].join('; '),
+            contentTransferEncoding: '7bit',
+            body: publicKey
+        });
+        keyMime.header('Content-Disposition', 'inline; filename="key.asc"');
+        keyMime.header('Content-Description', 'OpenPGP key message');
+        this._message.body.push(keyMime);
+    }
 }
 
 OpenPGPMimeBuilder.prototype.buildEncryptedMessage = function(encryptedText) {
