@@ -92,7 +92,7 @@ OpenPGPSecureKeys.prototype.init = function() {
                             self.passphrase = passphrase;
                         }
                         else {
-                            throw new Error(OpenPGPUtils.prop('decryptPrivateKeyError'));
+                            throw new Error(self._handler.getMessage('decryptPrivateKeyError'));
                         }
                     });
                 }
@@ -180,7 +180,7 @@ OpenPGPSecureKeys.prototype.setPrivateKey = function(privateKey, passphrase) {
             );
         }
         else {
-            throw new Error(OpenPGPUtils.prop('decryptPrivateKeyError'));
+            throw new Error(this._handler.getMessage('decryptPrivateKeyError'));
         }
     });
 };

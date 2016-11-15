@@ -320,7 +320,7 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
     if (shouldSign) {
         if (!this._pgpKeys.getPrivateKey()) {
             var ps = this._popShield = appCtxt.getYesNoMsgDialog();
-            ps.setMessage(OpenPGPUtils.prop('notHavePrivateKeyWarning'), DwtMessageDialog.WARNING_STYLE);
+            ps.setMessage(this.getMessage('notHavePrivateKeyWarning'), DwtMessageDialog.WARNING_STYLE);
             ps.registerCallback(DwtDialog.YES_BUTTON, function() {
                 self._popShield.popdown();
                 self._signMessage(orig, msg, params, shouldEncrypt);
@@ -374,7 +374,7 @@ OpenPGPZimbraSecure.prototype._signMessage = function(orig, msg, params, shouldE
 
     if (shouldEncrypt && notHasAddresses.length > 0) {
         var ps = this._popShield = appCtxt.getYesNoMsgDialog();
-        ps.setMessage(AjxMessageFormat.format(OpenPGPUtils.prop('notHavePublicKeyWarning'), notHasAddresses.join(', ')), DwtMessageDialog.WARNING_STYLE);
+        ps.setMessage(AjxMessageFormat.format(this.getMessage('notHavePublicKeyWarning'), notHasAddresses.join(', ')), DwtMessageDialog.WARNING_STYLE);
         ps.registerCallback(DwtDialog.YES_BUTTON, function() {
             self._popShield.popdown();
             self._encryptMessage(orig, msg, params, shouldEncrypt, receivers);
@@ -561,7 +561,7 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
         if (!userid) {
             userid = self.getMessage('keyInfoKeyId') + ': ' + signature.keyid.toHex();
         }
-        var desc = signature.valid ? AjxMessageFormat.format(OpenPGPUtils.prop('goodSignatureFrom'), userid) : AjxMessageFormat.format(OpenPGPUtils.prop('badSignatureFrom'), userid);
+        var desc = signature.valid ? AjxMessageFormat.format(self.getMessage('goodSignatureFrom'), userid) : AjxMessageFormat.format(self.getMessage('badSignatureFrom'), userid);
 
         var htmls = [];
         htmls.push(AjxMessageFormat.format('<span style="color: {0};">', signature.valid ? 'green' : 'red'));
@@ -726,7 +726,7 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
                         self,
                         function(dialog) {
                             self._pgpKeys.addPublicKey(key);
-                            self.displayStatusMessage(OpenPGPUtils.prop('publicKeyImported'));
+                            self.displayStatusMessage(self.getMessage('publicKeyImported'));
                         },
                         false,
                         OpenPGPSecureKeys.keyInfo(key)
@@ -789,17 +789,17 @@ OpenPGPZimbraSecure.prototype.initializeToolbar = function(app, toolbar, control
             var listener = new AjxListener(this, this._handleSelectSigning, [securityButton]);
 
             var nosignButton = new DwtMenuItem({parent: securityMenu, style: DwtMenuItem.RADIO_STYLE, radioGroupId: signingRadioId});
-            nosignButton.setText(OpenPGPUtils.prop('dontSignMessage'));
+            nosignButton.setText(this.getMessage('dontSignMessage'));
             nosignButton.addSelectionListener(listener);
             nosignButton.setData('sign', OpenPGPZimbraSecure.OPENPGP_DONTSIGN);
 
             var signButton = new DwtMenuItem({parent: securityMenu, style: DwtMenuItem.RADIO_STYLE, radioGroupId: signingRadioId});
-            signButton.setText(OpenPGPUtils.prop('signMessage'));
+            signButton.setText(this.getMessage('signMessage'));
             signButton.addSelectionListener(listener);
             signButton.setData('sign', OpenPGPZimbraSecure.OPENPGP_SIGN);
 
             var signAndEncryptButton = new DwtMenuItem({parent: securityMenu, style: DwtMenuItem.RADIO_STYLE, radioGroupId: signingRadioId});
-            signAndEncryptButton.setText(OpenPGPUtils.prop('signAndEncryptMessage'));
+            signAndEncryptButton.setText(this.getMessage('signAndEncryptMessage'));
             signAndEncryptButton.addSelectionListener(listener);
             signAndEncryptButton.setData('sign', OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT);
 
@@ -969,8 +969,8 @@ OpenPGPZimbraSecure.popupErrorDialog = function(errorCode){
     if(!errorCode){
         errorCode = 'unknown-error';
     }
-    var msg = OpenPGPUtils.prop(errorCode);
-    var title = OpenPGPUtils.prop(errorCode + '-title');
+    var msg = this.getMessage(errorCode);
+    var title = this.getMessage(errorCode + '-title');
 
     var dialog = appCtxt.getHelpMsgDialog();
     dialog.setMessage(msg, DwtMessageDialog.CRITICAL_STYLE, title);

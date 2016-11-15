@@ -25,7 +25,7 @@ GenerateKeypairDialog = function(handler, onOk, onCancel) {
     OpenPGPDialog.call(
         this,
         handler,
-        OpenPGPUtils.prop('keyPairGenTitle'),
+        handler.getMessage('keyPairGenTitle'),
         onOk,
         onCancel,
         [DwtDialog.CANCEL_BUTTON, DwtDialog.OK_BUTTON]

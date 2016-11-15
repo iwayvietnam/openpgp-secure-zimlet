@@ -26,7 +26,7 @@ KeyLookupDialog = function(handler, onOk, onCancel) {
     OpenPGPDialog.call(
         this,
         handler,
-        AjxMessageFormat.format(OpenPGPUtils.prop('keyLookupTitle'), keyServer),
+        AjxMessageFormat.format(handler.getMessage('keyLookupTitle'), keyServer),
         onOk,
         onCancel,
         [DwtDialog.CANCEL_BUTTON, DwtDialog.OK_BUTTON]

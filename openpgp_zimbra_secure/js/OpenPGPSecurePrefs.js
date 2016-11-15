@@ -133,16 +133,16 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
             displayContainer: ZmPref.TYPE_RADIO_GROUP,
             orientation:      ZmPref.ORIENT_VERTICAL,
             displayOptions:   [
-                OpenPGPUtils.prop('prefSecurityAuto'),
-                OpenPGPUtils.prop('prefSecurityNone'),
-                OpenPGPUtils.prop('prefSecuritySign'),
-                OpenPGPUtils.prop('prefSecurityBoth')
+                handler.getMessage('prefSecurityAuto'),
+                handler.getMessage('prefSecurityNone'),
+                handler.getMessage('prefSecuritySign'),
+                handler.getMessage('prefSecurityBoth')
             ],
             options:          ['auto', '0', '1', '2']
         });
 
         ZmPref.registerPref(OpenPGPSecurePrefs.PRIVATE_KEY, {
-            displayName:      OpenPGPUtils.prop('prefPrivateKey'),
+            displayName:      handler.getMessage('prefPrivateKey'),
             displayContainer: ZmPref.TYPE_TEXTAREA
         });
 
@@ -151,7 +151,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
         });
 
         ZmPref.registerPref(OpenPGPSecurePrefs.PUBLIC_KEY, {
-            displayName:      OpenPGPUtils.prop('prefPublicKey'),
+            displayName:      handler.getMessage('prefPublicKey'),
             displayContainer: ZmPref.TYPE_TEXTAREA
         });
     
@@ -178,7 +178,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
         });
 
         var section = {
-            title: OpenPGPUtils.prop('prefSection'),
+            title: handler.getMessage('prefSection'),
             icon: 'TrustedAddresses',
             templateId: 'openpgp_zimbra_secure#Preferences',
             priority: 49,
@@ -247,22 +247,22 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
     OpenPGPSecurePrefs.prototype._setupStatic = function(id, setup, value) {
         if (id == OpenPGPSecurePrefs.KEYPAIR_GEN) {
             var button = new DwtButton({parent: this, id: id});
-            button.setText(OpenPGPUtils.prop('btnKeyGen'));
+            button.setText(this._handler.getMessage('btnKeyGen'));
             button.setHandler(DwtEvent.ONCLICK, AjxCallback.simpleClosure(this._keyGen, this));
             return button;
         } else if(id == OpenPGPSecurePrefs.KEY_SUBMIT) {
             var button = new DwtButton({parent: this, id: id});
-            button.setText(OpenPGPUtils.prop('btnKeySubmit'));
+            button.setText(this._handler.getMessage('btnKeySubmit'));
             button.setHandler(DwtEvent.ONCLICK, AjxCallback.simpleClosure(this._keySubmit, this));
             return button;
         } else if(id == OpenPGPSecurePrefs.KEY_SEND) {
             var button = new DwtButton({parent: this, id: id});
-            button.setText(OpenPGPUtils.prop('btnKeySend'));
+            button.setText(this._handler.getMessage('btnKeySend'));
             button.setHandler(DwtEvent.ONCLICK, AjxCallback.simpleClosure(this._keySend, this));
             return button;
         } else if(id == OpenPGPSecurePrefs.PASSPHRASE_TOGGLE) {
             var button = new DwtButton({parent: this, id: id});
-            button.setText(OpenPGPUtils.prop('btnShowHide'));
+            button.setText(this._handler.getMessage('btnShowHide'));
             button.setHandler(DwtEvent.ONCLICK, AjxCallback.simpleClosure(this._togglePassphrase, this));
             return button;
         } else if (id == OpenPGPSecurePrefs.PASSPHRASE) {
@@ -273,12 +273,12 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
             return input;
         } else if(id == OpenPGPSecurePrefs.KEY_ADD) {
             var button = new DwtButton({parent: this, id: id});
-            button.setText(OpenPGPUtils.prop('btnKeyAdd'));
+            button.setText(this._handler.getMessage('btnKeyAdd'));
             button.setHandler(DwtEvent.ONCLICK, AjxCallback.simpleClosure(this._keyAdd, this));
             return button;
         } else if(id == OpenPGPSecurePrefs.KEY_LOOKUP) {
             var button = new DwtButton({parent: this, id: id});
-            button.setText(OpenPGPUtils.prop('btnKeyLookup'));
+            button.setText(this._handler.getMessage('btnKeyLookup'));
             button.setHandler(DwtEvent.ONCLICK, AjxCallback.simpleClosure(this._keyLookup, this));
             return button;
         } else {
@@ -340,7 +340,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
             var keyServer = this._handler.getZimletContext().getConfig('openpgp-key-server');
             var hkp = new openpgp.HKP(keyServer);
             hkp.upload(publicKey).then(function() {
-                self._handler.displayStatusMessage(OpenPGPUtils.prop('publicKeySubmitted'));
+                self._handler.displayStatusMessage(self._handler.getMessage('publicKeySubmitted'));
             });
         }
     }
@@ -356,7 +356,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
                 this._handler,
                 function(dialog) {
                     dialog.sendPubicKey(new AjxCallback(function() {
-                        self._handler.displayStatusMessage(OpenPGPUtils.prop('sendPublicKeySubmitted'));
+                        self._handler.displayStatusMessage(self._handler.getMessage('sendPublicKeySubmitted'));
                     }));
                 }
             );

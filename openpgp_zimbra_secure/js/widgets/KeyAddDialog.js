@@ -25,7 +25,7 @@ KeyAddDialog = function(handler, onOk, onCancel) {
     OpenPGPDialog.call(
         this,
         handler,
-        OpenPGPUtils.prop('keyAddTitle'),
+        handler.getMessage('keyAddTitle'),
         onOk,
         onCancel,
         [DwtDialog.CANCEL_BUTTON, DwtDialog.OK_BUTTON]

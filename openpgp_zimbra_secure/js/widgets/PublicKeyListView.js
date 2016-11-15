@@ -80,27 +80,26 @@ PublicKeyListView.prototype.addPublicKey = function(key) {
 
 PublicKeyListView.prototype._getHeaderList = function () {
     var headers = [];
-
     headers.push(new DwtListHeaderItem({
         field: PublicKeyListView.FIELD_UID,
-        text: OpenPGPUtils.prop('prefUid')
+        text: OpenPGPUtils.getMessage('prefUid')
     }));
 
     headers.push(new DwtListHeaderItem({
         field: PublicKeyListView.FIELD_FINGERPRINT,
-        text: OpenPGPUtils.prop('prefFingerprint'),
+        text: OpenPGPUtils.getMessage('prefFingerprint'),
         width: 330
     }));
 
     headers.push(new DwtListHeaderItem({
         field: PublicKeyListView.FIELD_KEY_LENGTH,
-        text: OpenPGPUtils.prop('prefKeyLength'),
+        text: OpenPGPUtils.getMessage('prefKeyLength'),
         width: 100
     }));
 
     headers.push(new DwtListHeaderItem({
         field: PublicKeyListView.FIELD_CREATED,
-        text: OpenPGPUtils.prop('prefCreated'),
+        text: OpenPGPUtils.getMessage('prefCreated'),
         width: 170
     }));
 

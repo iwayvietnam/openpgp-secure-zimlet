@@ -376,8 +376,8 @@ OpenPGPUtils.getDefaultSenderAddress = function() {
     return new AjxEmailAddress(identity.sendFromAddress, AjxEmailAddress.FROM, identity.sendFromDisplay);
 };
 
-OpenPGPUtils.prop = function(key) {
-    return openpgp_zimbra_secure[key];
+OpenPGPUtils.getMessage = function(key) {
+    return OpenPGPZimbraSecure.getInstance().getMessage(key);
 };
 
 OpenPGPUtils.saveAs = function(data, name, type) {

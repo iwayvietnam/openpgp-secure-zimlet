@@ -52,7 +52,7 @@ KeyLookupView.prototype._initialize = function() {
     txtQuery.replaceElement(id + '_txtQuery');
 
     var btnSearch = this.btnSearch = new DwtButton({parent: this});
-    btnSearch.setText(OpenPGPUtils.prop('btnSearch'));
+    btnSearch.setText(this._handler.getMessage('btnSearch'));
     btnSearch.setHandler(DwtEvent.ONCLICK, AjxCallback.simpleClosure(this._keyLookup, this));
     btnSearch.replaceElement(id + '_btnSearch');
 };

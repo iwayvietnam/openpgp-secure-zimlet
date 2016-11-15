@@ -25,7 +25,7 @@ SendPublicKeyDialog = function(handler, onOk, onCancel) {
     OpenPGPDialog.call(
         this,
         handler,
-        OpenPGPUtils.prop('sendPublicKeyTitle'),
+        handler.getMessage('sendPublicKeyTitle'),
         onOk,
         onCancel,
         [DwtDialog.CANCEL_BUTTON, DwtDialog.OK_BUTTON]
@@ -61,7 +61,7 @@ SendPublicKeyDialog.prototype.sendPubicKey = function(callback) {
         var msg = new ZmMailMsg();
         msg.shouldEncrypt = false;
         msg.attachPublicKey = true;
-        msg.setSubject(AjxMessageFormat.format(OpenPGPUtils.prop('sendPublicKeySubject'), addr.toString()));
+        msg.setSubject(AjxMessageFormat.format(this._handler.getMessage('sendPublicKeySubject'), addr.toString()));
         msg.setAddress(AjxEmailAddress.FROM, addr);
         var addrs = new AjxVector();
         addresses.forEach(function(address) {

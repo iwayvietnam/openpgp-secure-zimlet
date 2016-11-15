@@ -25,7 +25,7 @@ ImportPublicKeyDialog = function(handler, onOk, onCancel, keyInfo) {
     OpenPGPDialog.call(
         this,
         handler,
-        OpenPGPUtils.prop('importPublicKeyTitle'),
+        handler.getMessage('importPublicKeyTitle'),
         onOk,
         onCancel,
         [DwtDialog.CANCEL_BUTTON, DwtDialog.OK_BUTTON]

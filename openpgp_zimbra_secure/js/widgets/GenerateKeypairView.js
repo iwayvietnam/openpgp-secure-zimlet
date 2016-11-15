@@ -70,12 +70,12 @@ GenerateKeypairView.prototype._initialize = function() {
     selNumBits.replaceElement(id + '_selNumBits');
 
     var btnPwdGen = this.btnPwdGen = new DwtButton({parent: this});
-    btnPwdGen.setText(OpenPGPUtils.prop('btnPwdGen'));
+    btnPwdGen.setText(OpenPGPUtils.getMessage('btnPwdGen'));
     btnPwdGen.setHandler(DwtEvent.ONCLICK, AjxCallback.simpleClosure(this._genPw, this));
     btnPwdGen.replaceElement(id + '_btnPwdGen');
 
     var btnShowHide = this.btnShowHide = new DwtButton({parent: this});
-    btnShowHide.setText(OpenPGPUtils.prop('btnShowHide'));
+    btnShowHide.setText(OpenPGPUtils.getMessage('btnShowHide'));
     btnShowHide.setHandler(DwtEvent.ONCLICK, AjxCallback.simpleClosure(this._showHide, this));
     btnShowHide.replaceElement(id + '_btnShowHide');
 };
