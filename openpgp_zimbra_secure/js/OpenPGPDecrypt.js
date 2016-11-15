@@ -102,7 +102,7 @@ OpenPGPDecrypt.prototype.decrypt = function() {
                     if (OpenPGPUtils.isSignatureContentType(ct)) {
                         signature = body.toString({noHeaders: true});
                     }
-                    else if (!OpenPGPUtils.isOPENPGPContentType(ct)) {
+                    else if (!OpenPGPUtils.isPGPContentType(ct)) {
                         bodyContent = body.toString();
                     }
                 });

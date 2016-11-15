@@ -150,26 +150,28 @@ OpenPGPZimbraSecure.prototype._handleMessageResponse = function(callback, csfeRe
         response = { _jsns: 'urn:zimbraMail', more: false };
     }
 
-    function hasPGPPart(part) {
-        var cType = part.ct;
+    function hasPGPPart(part, msg) {
+        var ct = part.ct;
+        var hasPGP = false;
 
-        if (OpenPGPUtils.isOPENPGPContentType(cType)) {
-            if (OpenPGPUtils.isPGPKeysContentType(cType)) {
-                part.isPGPKey = true;
-            }
-            return true;
+        if (OpenPGPUtils.isPGPKeysContentType(ct) && msg) {
+            msg.hasPGPKey = true;
+        }
+        if (OpenPGPUtils.isPGPContentType(ct)) {
+            hasPGP = true;
         } else if (!part.mp) {
-            return false;
+            hasPGP = false;
         }
-
-        if (cType != ZmMimeTable.MSG_RFC822) {
-            for (var i = 0; i < part.mp.length; i++) {
-                if (hasPGPPart(part.mp[i]))
-                    return true;
+        else {
+            if (ct != ZmMimeTable.MSG_RFC822) {
+                for (var i = 0; i < part.mp.length; i++) {
+                    if (hasPGPPart(part.mp[i], msg))
+                        hasPGP = true;
+                }
             }
         }
 
-        return false;
+        return hasPGP;
     }
 
     var pgpMsgs = [];
@@ -190,7 +192,7 @@ OpenPGPZimbraSecure.prototype._handleMessageResponse = function(callback, csfeRe
     }
 
     msgs.forEach(function(msg) {
-        if (hasPGPPart(msg)) {
+        if (hasPGPPart(msg, msg)) {
             pgpMsgs.push(msg);
         }
     });
@@ -242,6 +244,7 @@ OpenPGPZimbraSecure.prototype._loadMessages = function(callback, csfeResult, pgp
  * @param {Object} response
  */
 OpenPGPZimbraSecure.prototype._decryptMessage = function(callback, msg, response){
+    console.log(msg);
     var self = this;
     if (response.success) {
         var decryptor = new OpenPGPDecrypt({
@@ -270,6 +273,7 @@ OpenPGPZimbraSecure.prototype._decryptMessage = function(callback, msg, response
  * @param {Object} PGP mime message.
  */
 OpenPGPZimbraSecure.prototype.onDecrypted = function(callback, msg, pgpMessage) {
+    pgpMessage.hasPGPKey = (msg.hasPGPKey === true) ? true : false;
     this._pgpMessageCache[msg.id] = pgpMessage;
 
     if (pgpMessage.encrypted) {

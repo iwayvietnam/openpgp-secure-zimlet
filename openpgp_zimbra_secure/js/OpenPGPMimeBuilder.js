@@ -57,7 +57,7 @@ OpenPGPMimeBuilder = function(opts) {
                     body: quotedPrintable.encode(utf8.encode(cp.content._content.replace(/\r?\n/g, "\r\n")))
                 });
             }
-            else if (OpenPGPUtils.isOPENPGPContentType(contentType)) {
+            else if (OpenPGPUtils.isPGPContentType(contentType)) {
                 var name = 'message.asc';
                 var desc = 'OpenPGP message';
                 if (OpenPGPUtils.isSignatureContentType(contentType)) {

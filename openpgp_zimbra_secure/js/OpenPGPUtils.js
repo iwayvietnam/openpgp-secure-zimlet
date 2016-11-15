@@ -66,7 +66,7 @@ OpenPGPUtils.hasOPENPGPContentType = function(msg) {
     return has;
 };
 
-OpenPGPUtils.isOPENPGPContentType = function(cType) {
+OpenPGPUtils.isPGPContentType = function(cType) {
     return AjxUtil.indexOf(OpenPGPUtils.OPENPGP_CONTENT_TYPES, cType) !== -1;
 };
 
