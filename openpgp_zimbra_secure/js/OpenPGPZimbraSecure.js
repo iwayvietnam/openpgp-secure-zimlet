@@ -35,7 +35,7 @@ function openpgp_zimbra_secure_HandlerObject() {
     this._pgpAttachments = {};
     this._pgpKeys = new OpenPGPSecureKeys(this);
     this._securePassword = '';
-    var pwdKey = 'openpgp_secure_password_' + this.getUsername();
+    var pwdKey = 'openpgp_secure_password_' + this.getUserID();
     if (localStorage[pwdKey]) {
         this._securePassword = localStorage[pwdKey];
     }
@@ -613,17 +613,17 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
                     content = message._body;
                 }
 
-                var contentType = message.contentType();
+                var ct = message.contentType();
                 var attachment = {
                     id: OpenPGPUtils.randomString(),
-                    type: contentType.fulltype,
+                    type: ct.fulltype,
                     name: 'attachment',
                     size: content.length,
                     content: message._body,
                     raw: content
                 };
-                if (contentType.params.name) {
-                    attachment.name = contentType.params.name;
+                if (ct.params.name) {
+                    attachment.name = ct.params.name;
                 }
                 attachments.push(attachment);
                 self._pgpAttachments[attachment.id] = attachment;
@@ -702,6 +702,33 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
                     link.onclick = function() {
                         self._download(this);
                     };
+                }
+            });
+        }
+    }
+
+    if (pgpMessage.hasPGPKey) {
+        var pgpKey = false;
+        OpenPGPUtils.visitMessage(pgpMessage, function(message) {
+            var ct = message.contentType();
+            if (OpenPGPUtils.isPGPKeysContentType(ct.fulltype)) {
+                pgpKey = message.toString({noHeaders: true});
+            }
+        });
+        if (pgpKey) {
+            var pubKey = openpgp.key.readArmored(pgpKey);
+            pubKey.keys.forEach(function(key) {
+                if (!self._pgpKeys.publicKeyExisted(key.primaryKey.fingerprint)) {
+                    var dialog = self._keyImportDialog = new ImportPublicKeyDialog(
+                        self,
+                        function(dialog) {
+                            self._pgpKeys.addPublicKey(key);
+                            self.displayStatusMessage(OpenPGPUtils.prop('publicKeyImported'));
+                        },
+                        false,
+                        OpenPGPSecureKeys.keyInfo(key)
+                    );
+                    dialog.popup();
                 }
             });
         }
