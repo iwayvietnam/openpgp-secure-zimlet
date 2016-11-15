@@ -74,7 +74,7 @@ SendPublicKeyDialog.prototype.sendPubicKey = function(callback) {
         var textContents = [];
         var keyInfo = OpenPGPSecureKeys.keyInfo(publicKey);
         keyInfo.uids.forEach(function(uid, index) {
-            textContents.push('User ID[' + index + ']: ' + uid);
+            textContents.push('User ID[' + index + ']: ' + AjxStringUtil.htmlDecode(uid));
         });
         textContents.push('Fingerprint: ' + keyInfo.fingerprint);
         textContents.push('Key ID: ' + keyInfo.keyid);
