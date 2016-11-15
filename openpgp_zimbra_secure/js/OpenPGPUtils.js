@@ -279,7 +279,7 @@ OpenPGPUtils.mimeMessageToZmMimePart = function(message, withAttachment) {
     function buildZmMimePart(message) {
         deep++;
         var cd = message.header('Content-Disposition');
-        if (!withAttachment && cd === 'attachment') {
+        if (!withAttachment && cd && (cd.indexOf('attachment') >= 0 || cd.indexOf('inline') >= 0)) {
             deep--;
             return false;
         }
