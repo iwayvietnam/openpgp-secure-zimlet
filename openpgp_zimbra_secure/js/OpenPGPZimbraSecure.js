@@ -558,6 +558,9 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
     var self = this;
     pgpMessage.signatures.forEach(function(signature) {
         var userid = AjxStringUtil.htmlEncode(signature.userid);
+        if (!userid) {
+            userid = self.getMessage('keyInfoKeyId') + ': ' + signature.keyid.toHex();
+        }
         var desc = signature.valid ? AjxMessageFormat.format(OpenPGPUtils.prop('goodSignatureFrom'), userid) : AjxMessageFormat.format(OpenPGPUtils.prop('badSignatureFrom'), userid);
 
         var htmls = [];
