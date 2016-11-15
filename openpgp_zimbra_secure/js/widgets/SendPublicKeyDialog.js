@@ -59,8 +59,8 @@ SendPublicKeyDialog.prototype.sendPubicKey = function(callback) {
         var addr = OpenPGPUtils.getDefaultSenderAddress();
 
         var msg = new ZmMailMsg();
+        msg.shouldEncrypt = false;
         msg.setSubject(AjxMessageFormat.format(OpenPGPUtils.prop('sendPublicKeySubject'), addr.toString()));
-        console.log(msg);
         msg.setAddress(AjxEmailAddress.FROM, addr);
         var addrs = new AjxVector();
         addresses.forEach(function(address) {
@@ -72,18 +72,14 @@ SendPublicKeyDialog.prototype.sendPubicKey = function(callback) {
         top.setContentType(ZmMimeTable.MULTI_MIXED);
 
         var textContents = [];
-        publicKey.users.forEach(function(user, index) {
-            textContents.push('User ID[' + index + ']: ' + user.userId.userid);
+        var keyInfo = OpenPGPSecureKeys.keyInfo(publicKey);
+        keyInfo.uids.forEach(function(uid, index) {
+            textContents.push('User ID[' + index + ']: ' + uid);
         });
-        var priKey = publicKey.primaryKey;
-        textContents.push('Fingerprint: ' + priKey.fingerprint);
-        textContents.push('Key ID: ' + priKey.keyid.toHex());
-        textContents.push('Created: ' + priKey.created);
-        var keyLength = '';
-        if (priKey.mpi.length > 0) {
-            keyLength = (priKey.mpi[0].byteLength() * 8);
-        }
-        textContents.push('Key Length: ' + keyLength);
+        textContents.push('Fingerprint: ' + keyInfo.fingerprint);
+        textContents.push('Key ID: ' + keyInfo.keyid);
+        textContents.push('Created: ' + keyInfo.created);
+        textContents.push('Key Length: ' + keyInfo.keyLength);
 
         var textPart = new ZmMimePart();
         textPart.setContentType(ZmMimeTable.TEXT_PLAIN);

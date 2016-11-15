@@ -173,20 +173,64 @@
 <template id='openpgp_zimbra_secure#KeyLookupResult'>
     <table border=0 cellspacing=0 cellpadding=0 width=100% class='KeyLookupResult'>
         <tr>
-            <td><input name="keyLookupValue" value="${keyValue}" type="radio"></td>
-            <td><b>${keyUid}</b></td>
+            <td><input name="keyLookupValue" value="${value}" type="radio"></td>
+            <td><b>
+                <$ for (var i = 0; i < data.uids.length; i++) { $>
+                    <$=openpgp_zimbra_secure.keyInfoUid$>: <$= data.uids[i] $> </br>
+                <$ } $>
+            </b></td>
         </tr>
         <tr>
             <td></td>
-            <td><b><$=openpgp_zimbra_secure.keyLookupFingerprint$>: ${fingerprint}</b></td>
+            <td><b><$=openpgp_zimbra_secure.keyInfoFingerprint$>: ${fingerprint}</b></td>
         </tr>
         <tr>
             <td></td>
-            <td><$=openpgp_zimbra_secure.keyLookupKeylength$>: ${keyLength}</td>
+            <td><$=openpgp_zimbra_secure.keyInfoKeyId$>: ${keyid}</td>
         </tr>
         <tr>
             <td></td>
-            <td><$=openpgp_zimbra_secure.keyLookupCreated$>: ${created}</td>
+            <td><$=openpgp_zimbra_secure.keyInfoKeylength$>: ${keyLength}</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><$=openpgp_zimbra_secure.keyInfoCreated$>: ${created}</td>
+        </tr>
+    </table>
+    <hr style="width:550px; color: #bbbbbb; background-color: #bbbbbb; height: 1px; border: 0;">
+</template>
+
+<template id='openpgp_zimbra_secure#ImportPublicKeyView'>
+    <div class='KeyImportTableWrap'>
+        <table border=0 cellspacing=0 cellpadding=0 width=100% class='KeyLookupTable'>
+            <tr class='KeyLookupRow'>
+                <td><div id='${id}_KeyInfo'></div></td>
+            </tr>
+        </table>
+    </div>
+</template>
+
+<template id='openpgp_zimbra_secure#KeyInfo'>
+    <table border=0 cellspacing=0 cellpadding=0 width=100% class='KeyInfo'>
+        <tr>
+            <td>
+                <$ for (var i = 0; i < data.uids.length; i++) { $>
+                    <$=openpgp_zimbra_secure.keyInfoUid$>: <$=data.uids[i]$>
+                    </br>
+                <$ } $>
+            </td>
+        </tr>
+        <tr>
+            <td><$=openpgp_zimbra_secure.keyInfoFingerprint$>: ${fingerprint}</td>
+        </tr>
+        <tr>
+            <td><$=openpgp_zimbra_secure.keyInfoKeyId$>: ${keyid}</td>
+        </tr>
+        <tr>
+            <td><$=openpgp_zimbra_secure.keyInfoKeylength$>: ${keyLength}</td>
+        </tr>
+        <tr>
+            <td><$=openpgp_zimbra_secure.keyInfoCreated$>: ${created}</td>
         </tr>
     </table>
     <hr style="width:550px; color: #bbbbbb; background-color: #bbbbbb; height: 1px; border: 0;">

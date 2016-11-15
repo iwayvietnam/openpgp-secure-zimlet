@@ -74,22 +74,7 @@ KeyLookupView.prototype._keyLookup = function() {
             var pubKey = openpgp.key.readArmored(publicKey);
             var html = '';
             pubKey.keys.forEach(function(key) {
-                var keyUid = '';
-                key.users.forEach(function(user) {
-                    keyUid = keyUid + OpenPGPUtils.prop('keyLookupUid') + ': ' + AjxStringUtil.htmlEncode(user.userId.userid) + '<br>';
-                });
-                var keyLength = '';
-                var priKey = key.primaryKey;
-                if (priKey.mpi.length > 0) {
-                    keyLength = (priKey.mpi[0].byteLength() * 8);
-                }
-                html = html + AjxTemplate.expand('openpgp_zimbra_secure#KeyLookupResult', {
-                    keyValue: key.armor(),
-                    keyUid: keyUid,
-                    fingerprint: priKey.fingerprint,
-                    keyLength: keyLength,
-                    created: priKey.created
-                });
+                html = html + AjxTemplate.expand('openpgp_zimbra_secure#KeyLookupResult', OpenPGPSecureKeys.keyInfo(key));
             });
             document.getElementById(id + '_Result').innerHTML = html;
         });
