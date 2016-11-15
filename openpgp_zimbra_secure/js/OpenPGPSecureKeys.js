@@ -24,6 +24,8 @@
 OpenPGPSecureKeys = function(handler) {
     this._handler = handler;
     this._fingerprints = [];
+    this._addCallbacks = [];
+    this._removeCallbacks = [];
     this._userName = this._handler.getUsername();
 
     this.passphrase = '';
@@ -31,6 +33,9 @@ OpenPGPSecureKeys = function(handler) {
     this.publicKey = false;
     this.publicKeys = [];
 };
+
+OpenPGPSecureKeys.ADD_CALLBACK = 'add';
+OpenPGPSecureKeys.REMOVE_CALLBACK = 'remove';
 
 OpenPGPSecureKeys.prototype = new Object();
 OpenPGPSecureKeys.prototype.constructor = OpenPGPSecureKeys;
@@ -112,6 +117,9 @@ OpenPGPSecureKeys.prototype.addPublicKey = function(key) {
     }
 
     if (added) {
+        this._addCallbacks.forEach(function(callback) {
+            callback.run(key);
+        });
         this._storePublicKeys();
     }
 };
@@ -128,7 +136,19 @@ OpenPGPSecureKeys.prototype.removePublicKey = function(fingerprint) {
     });
 
     if (removed) {
+        this._removeCallbacks.forEach(function(callback) {
+            callback.run(fingerprint);
+        });
         this._storePublicKeys();
+    }
+};
+
+OpenPGPSecureKeys.prototype.addCallback = function(callback, type) {
+    if (type === OpenPGPSecureKeys.REMOVE_CALLBACK) {
+        this._removeCallbacks.push(callback);
+    }
+    else {
+        this._addCallbacks.push(callback);
     }
 };
 
@@ -217,6 +237,31 @@ OpenPGPSecureKeys.prototype.notHasPublicKey = function(receivers) {
         }
     });
     return addresses;
+}
+
+OpenPGPSecureKeys.prototype.publicKeyExisted = function(fingerprint) {
+    return this._fingerprints[fingerprint] ? true : false;
+}
+
+OpenPGPSecureKeys.keyInfo = function(key) {
+    var uids = [];
+    key.users.forEach(function(user) {
+        uids.push(AjxStringUtil.htmlEncode(user.userId.userid));
+    });
+    var priKey = key.primaryKey;
+    var keyLength = '';
+    if (priKey.mpi.length > 0) {
+        keyLength = (priKey.mpi[0].byteLength() * 8);
+    }
+    return {
+        value: key.armor(),
+        uids: uids,
+        fingerprint: priKey.fingerprint,
+        keyid: priKey.keyid.toHex(),
+        algorithm: priKey.algorithm,
+        keyLength: keyLength,
+        created: priKey.created
+    };
 }
 
 OpenPGPSecureKeys.prototype._storePublicKeys = function() {

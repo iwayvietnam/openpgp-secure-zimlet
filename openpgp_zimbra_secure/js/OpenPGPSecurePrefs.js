@@ -299,6 +299,9 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
                 },
                 publicKeys: this._pgpKeys.getPublicKeys()
             });
+            this._pgpKeys.addCallback(new AjxCallback(function(key) {
+                publicKeyList.addPublicKey(key);
+            }));
             return publicKeyList;
         } else {
             return ZmPreferencesPage.prototype._setupCustom.call(this, id, setup, value);
@@ -383,7 +386,6 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
                     var pubKey = openpgp.key.readArmored(dialog.getPublicKey());
                     pubKey.keys.forEach(function(key) {
                         self._pgpKeys.addPublicKey(key);
-                        self._publicKeyList.addPublicKey(key);
                     });
                 }
             );
@@ -404,7 +406,6 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
                     var pubKey = openpgp.key.readArmored(dialog.getPublicKey());
                     pubKey.keys.forEach(function(key) {
                         self._pgpKeys.addPublicKey(key);
-                        self._publicKeyList.addPublicKey(key);
                     });
                 }
             );
