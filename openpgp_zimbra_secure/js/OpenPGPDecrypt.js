@@ -162,10 +162,10 @@ OpenPGPDecrypt.decryptContent = function(content, publicKeys, privateKey, onDecr
     .then(function(content) {
         if (content.indexOf(OpenPGPUtils.OPENPGP_SIGNED_MESSAGE_HEADER) > 0) {
             var opts = {
-                message: openpgp.message.readArmored(content),
+                message: openpgp.cleartext.readArmored(content),
                 publicKeys: publicKeys
             };
-            openpgp.verify(opts).then(function(signature) {
+            return openpgp.verify(opts).then(function(signature) {
                 var signatures = signature.signatures;
                 signatures.forEach(function(signature) {
                     publicKeys.forEach(function(key) {
