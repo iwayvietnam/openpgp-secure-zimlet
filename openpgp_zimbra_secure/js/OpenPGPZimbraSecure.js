@@ -809,13 +809,13 @@ OpenPGPZimbraSecure.prototype.onSendButtonClicked = function(controller, msg) {
 OpenPGPZimbraSecure.prototype._setSecurityImage = function(button, value) {
     var security_types = {
         OpenPGPZimbraSecure.OPENPGP_DONTSIGN: {
-            {label: this.getMessage('dontSignMessage'), className: 'DontSign'}
+            label: this.getMessage('dontSignMessage'), className: 'DontSign'
         },
         OpenPGPZimbraSecure.OPENPGP_SIGN: {
-            {label: this.getMessage('signMessage'), className: 'Sign'}
+            label: this.getMessage('signMessage'), className: 'Sign'
         },
         OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT: {
-            {label: this.getMessage('signAndEncryptMessage'), className: 'SignEncrypt'}
+            label: this.getMessage('signAndEncryptMessage'), className: 'SignEncrypt'
         }
     };
 
