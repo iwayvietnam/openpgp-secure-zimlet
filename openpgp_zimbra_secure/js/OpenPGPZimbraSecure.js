@@ -323,7 +323,6 @@ OpenPGPZimbraSecure.prototype._loadPGPMessages = function(callback, csfeResult, 
  * @param {Object} response
  */
 OpenPGPZimbraSecure.prototype._decryptMessage = function(callback, msg, response){
-    console.log(msg);
     var self = this;
     if (response.success) {
         var decryptor = new OpenPGPDecrypt({
