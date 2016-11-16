@@ -293,18 +293,18 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
         shouldEncrypt = false;
     }
 
-    if (!shouldSign && !shouldEncrypt) {
-        // call the wrapped function
-        orig.apply(msg, [params]);
-        return;
-    }
-
     if (typeof msg.shouldSign !== 'undefined') {
         shouldSign = msg.shouldSign ? true : false;
     }
 
     if (typeof msg.shouldEncrypt !== 'undefined') {
         shouldEncrypt = msg.shouldEncrypt ? true : false;
+    }
+
+    if (!shouldSign && !shouldEncrypt) {
+        // call the wrapped function
+        orig.apply(msg, [params]);
+        return;
     }
 
     if (shouldSign) {
