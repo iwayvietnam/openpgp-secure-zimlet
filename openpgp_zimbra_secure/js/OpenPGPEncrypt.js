@@ -60,9 +60,7 @@ OpenPGPEncrypt.prototype.encrypt = function() {
     var sequence = Promise.resolve();
 
     return sequence.then(function() {
-        if (AjxUtil.isFunction(self._beforeSign)) {
-            self._beforeSign(self, self._mimeBuilder);
-        }
+        self.onCallback(self._beforeSign);
 
         if (self._shouldSign && self._privateKey) {
             var opts = {
@@ -79,20 +77,17 @@ OpenPGPEncrypt.prototype.encrypt = function() {
                     self._mimeBuilder.buildSignedMessage(signature);
                 }
                 self._isSigned = true;
-                if (AjxUtil.isFunction(self._onSigned)) {
-                    self._onSigned(self, self._mimeBuilder);
-                }
+                self.onCallback(self._onSigned);
                 return self._mimeBuilder;
             });
         }
         else {
+            self.onCallback(self._onSigned);
             return self._mimeBuilder;
         }
     })
     .then(function(builder) {
-        if (AjxUtil.isFunction(self._beforeEncrypt)) {
-            self._beforeEncrypt(self, self._mimeBuilder);
-        }
+        self.onCallback(self._beforeEncrypt);
 
         if (self._shouldEncrypt && self._publicKeys.length > 0) {
             var opts = {
@@ -102,24 +97,34 @@ OpenPGPEncrypt.prototype.encrypt = function() {
             return openpgp.encrypt(opts).then(function(cipherText) {
                 self._mimeBuilder.buildEncryptedMessage(cipherText.data);
                 self._isEncrypted = true;
-                if (AjxUtil.isFunction(self._onEncrypted)) {
-                    self._onEncrypted(self, self._mimeBuilder);
-                }
+                self.onCallback(self._onEncrypted);
                 return self._mimeBuilder;
             }, function(err) {
-                if (AjxUtil.isFunction(self._onError)) {
-                    self._onError(self, err);
-                }
+                self.onError(err);
             });
         }
         else {
-            if (AjxUtil.isFunction(self._onEncrypted)) {
-                self._onEncrypted(self, self._mimeBuilder);
-            }
+            self.onCallback(self._onEncrypted);
             return self._mimeBuilder;
         }
     });
 };
+
+OpenPGPDecrypt.prototype.onCallback = function(callback) {
+    if (callback instanceof AjxCallback) {
+        callback.run(this, this._mimeBuilder);
+    } else if (AjxUtil.isFunction(callback)) {
+        callback(this, this._mimeBuilder);
+    }
+}
+
+OpenPGPDecrypt.prototype.onError = function(err) {
+    if (this._onError instanceof AjxCallback) {
+        this._onError.run(this, err);
+    } else if (AjxUtil.isFunction(this._onError)) {
+        this._onError(this, err);
+    }
+}
 
 OpenPGPEncrypt.prototype.shouldSign = function(shouldSign) {
     if (typeof shouldSign === 'undefined') {

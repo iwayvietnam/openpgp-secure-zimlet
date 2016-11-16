@@ -75,9 +75,7 @@ OpenPGPDecrypt.prototype.decrypt = function() {
                 }
                 return self._message;
             }, function(err) {
-                if (AjxUtil.isFunction(self._onError)) {
-                    self._onError(self, err);
-                }
+                self.onError(err);
                 return self._message;
             });
         }
@@ -85,9 +83,7 @@ OpenPGPDecrypt.prototype.decrypt = function() {
             return self._message; 
         }
     }, function(err) {
-        if (AjxUtil.isFunction(self._onError)) {
-            self._onError(self, err);
-        }
+        self.onError(err);
         return self._message;
     })
     .then(function(message) {
@@ -121,18 +117,30 @@ OpenPGPDecrypt.prototype.decrypt = function() {
         }
         return message;
     }, function(err) {
-        if (AjxUtil.isFunction(self._onError)) {
-            self._onError(self, err);
-        }
+        self.onError(err);
         return self._message;
     })
     .then(function(message) {
-        if (AjxUtil.isFunction(self._onDecrypted)) {
-            self._onDecrypted(self, message);
-        }
+        self.onDecrypted(message);
         return message;
     });
 };
+
+OpenPGPDecrypt.prototype.onDecrypted = function(message) {
+    if (this._onDecrypted instanceof AjxCallback) {
+        this._onDecrypted.run(this, message);
+    } else if (AjxUtil.isFunction(this._onDecrypted)) {
+        this._onDecrypted(this, message);
+    }
+}
+
+OpenPGPDecrypt.prototype.onError = function(err) {
+    if (this._onError instanceof AjxCallback) {
+        this._onError.run(this, err);
+    } else if (AjxUtil.isFunction(this._onError)) {
+        this._onError(this, err);
+    }
+}
 
 OpenPGPDecrypt.decryptContent = function(content, publicKeys, privateKey, onDecrypted) {
     var sequence = Promise.resolve();
@@ -144,7 +152,7 @@ OpenPGPDecrypt.decryptContent = function(content, publicKeys, privateKey, onDecr
                 privateKey: privateKey
             };
             return openpgp.decrypt(opts).then(function(plainText) {
-                return plainText.data.replace(/\r?\n/g, "\r\n");
+                return plainText.data;
             });
         }
         else {
