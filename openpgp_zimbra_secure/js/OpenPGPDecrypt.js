@@ -176,7 +176,7 @@ OpenPGPDecrypt.decryptContent = function(content, publicKeys, privateKey, onDecr
                     });
                 });
                 return {
-                    content: content,
+                    content: signature.data,
                     signatures: signatures
                 };
             });
