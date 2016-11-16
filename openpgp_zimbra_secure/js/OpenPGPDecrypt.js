@@ -183,7 +183,7 @@ OpenPGPDecrypt.decryptContent = function(content, publicKeys, privateKey, onDecr
         }
         else {
             return {
-                content: content,
+                content: plainText,
                 signatures: []
             };
         }
