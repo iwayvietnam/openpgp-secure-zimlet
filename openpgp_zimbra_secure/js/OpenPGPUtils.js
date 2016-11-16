@@ -39,6 +39,13 @@ OpenPGPUtils.OPENPGP_CONTENT_TYPES = [
     OpenPGPUtils.OPENPGP_KEYS_CONTENT_TYPE
 ];
 
+OpenPGPUtils.OPENPGP_MESSAGE_HEADERS = [
+    'BEGIN PGP MESSAGE',
+    'BEGIN PGP SIGNED MESSAGE',
+    'BEGIN PGP PRIVATE KEY BLOCK',
+    'BEGIN PGP PUBLIC KEY BLOCK',
+];
+
 OpenPGPUtils.isSignedMessage = function(cType) {
     return AjxUtil.indexOf([OpenPGPUtils.SIGNED_MESSAGE_CONTENT_TYPE], cType) !== -1;
 };
@@ -80,6 +87,16 @@ OpenPGPUtils.isEncryptedContentType = function(cType) {
 
 OpenPGPUtils.isPGPKeysContentType = function(cType) {
     return AjxUtil.indexOf([OpenPGPUtils.OPENPGP_KEYS_CONTENT_TYPE], cType) !== -1;
+};
+
+OpenPGPUtils.hasInlinePGPContent = function(content) {
+    for (var i = 0; i < OpenPGPUtils.OPENPGP_MESSAGE_HEADERS.length; i++) {
+        var header = OpenPGPUtils.OPENPGP_MESSAGE_HEADERS[i];
+        if (content.indexOf(header) > 0) {
+            return true;
+        }
+    }
+    return false;
 };
 
 OpenPGPUtils.localStorageSave = function(key, pwd, data) {
