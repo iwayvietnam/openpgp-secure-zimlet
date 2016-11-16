@@ -21,17 +21,10 @@
  * Written by nguyennv1981@gmail.com
  */
 
-var OPENPGP_SECURITY_TYPES = [
-    {label: openpgp_zimbra_secure.dontSignMessage, className: 'DontSign'},
-    {label: openpgp_zimbra_secure.signMessage, className: 'Sign'},
-    {label: openpgp_zimbra_secure.signAndEncryptMessage, className: 'SignEncrypt'}
-];
-
 function openpgp_zimbra_secure_HandlerObject() {
     this._msgDivCache = {};
     this._pgpMessageCache = appCtxt.isChildWindow ? window.opener.openpgp_zimbra_secure_HandlerObject.getInstance()._pgpMessageCache : {};
-    this._patchedFuncs = {};
-    this._pendingAttachments = [];
+    this._sendingAttachments = [];
     this._pgpAttachments = {};
     this._pgpKeys = new OpenPGPSecureKeys(this);
     this._securePassword = '';
@@ -59,9 +52,10 @@ OpenPGPZimbraSecure.BUTTON_CLASS = 'openpgp_zimbra_secure_button';
 OpenPGPZimbraSecure.PREF_SECURITY = 'OPENPGP_SECURITY';
 OpenPGPZimbraSecure.USER_SECURITY = 'OPENPGP_USER_SECURITY';
 
-OpenPGPZimbraSecure.OPENPGP_DONTSIGN = 0;
-OpenPGPZimbraSecure.OPENPGP_SIGN = 1;
-OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT = 2;
+OpenPGPZimbraSecure.OPENPGP_AUTO = 'openpgp_auto';
+OpenPGPZimbraSecure.OPENPGP_DONTSIGN = 'openpgp_dontsign';
+OpenPGPZimbraSecure.OPENPGP_SIGN = 'openpgp_sign';
+OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT = 'openpgp_signencrypt';
 
 OpenPGPZimbraSecure.prototype.init = function() {
     var self = this;
@@ -117,20 +111,12 @@ OpenPGPZimbraSecure.prototype.init = function() {
     }));
 };
 
-OpenPGPZimbraSecure.getInstance = function() {
-    return appCtxt.getZimletMgr().getZimletByName('openpgp_zimbra_secure').handlerObject;
-};
-
 OpenPGPZimbraSecure.prototype.getPGPKeys = function() {
     return this._pgpKeys;
 };
 
 OpenPGPZimbraSecure.prototype.getSecurePassword = function() {
     return this._securePassword;
-};
-
-OpenPGPZimbraSecure.prototype.getClientVersion = function() {
-    return appCtxt.get(ZmSetting.CLIENT_VERSION);
 };
 
 /**
@@ -413,7 +399,7 @@ OpenPGPZimbraSecure.prototype._encryptMessage = function(orig, msg, params, shou
                         view._htmlEditor.replaceImageSrc(oldSrc, newSrc);
                     }
                 }
-                self._pendingAttachments.push(part);
+                self._sendingAttachments.push(part);
             }
         }
     };
@@ -450,8 +436,8 @@ OpenPGPZimbraSecure.prototype._encryptMessage = function(orig, msg, params, shou
     });
 
     var attachments = [];
-    while (this._pendingAttachments.length > 0) {
-        attachments.push(this._pendingAttachments.pop());
+    while (this._sendingAttachments.length > 0) {
+        attachments.push(this._sendingAttachments.pop());
     }
 
     var encryptor = new OpenPGPEncrypt({
@@ -649,7 +635,7 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
                 htmlArr.push('<table border=0 cellpadding=0 cellspacing=0 style="margin-right:1em; margin-bottom:1px"><tr>');
                 htmlArr.push('<td style="width:18px">');
 
-                var clientVersion = self.getClientVersion();
+                var clientVersion = OpenPGPZimbraSecure.getClientVersion();
                 var mimeInfo = ZmMimeTable.getInfo(attachment.type);
                 if (clientVersion.indexOf('8.7.0_GA') >= 0 || clientVersion.indexOf('8.7.1_GA') >= 0) {
                     htmlArr.push(AjxImg.getImageHtml({
@@ -821,8 +807,14 @@ OpenPGPZimbraSecure.prototype.onSendButtonClicked = function(controller, msg) {
 }
 
 OpenPGPZimbraSecure.prototype._setSecurityImage = function(button, value) {
-    button.setImage(OPENPGP_SECURITY_TYPES[value].className);
-    button.setText(OPENPGP_SECURITY_TYPES[value].label);
+    var security_types = [
+        {label: this.getMessage('dontSignMessage'), className: 'DontSign'},
+        {label: this.getMessage('signMessage'), className: 'Sign'},
+        {label: this.getMessage('signAndEncryptMessage'), className: 'SignEncrypt'}
+    ];
+
+    button.setImage(security_types[value].className);
+    button.setText(security_types[value].label);
 };
 
 /*
@@ -848,8 +840,9 @@ OpenPGPZimbraSecure._fixFormVisibility = function(element, visible) {
     if (AjxEnv.supportsHTML5File) {
         var forms = element.getElementsByTagName('form');
 
-        for (var i = 0; i < forms.length; i++)
+        for (var i = 0; i < forms.length; i++) {
             Dwt.setVisible(forms.item(i), visible);
+        }
     }
 };
 
@@ -889,10 +882,10 @@ OpenPGPZimbraSecure.prototype._getSecuritySetting = function() {
         return window.opener.appCtxt.getZimletMgr().getZimletByName('openpgp_zimbra_secure').handlerObject._getUserSecuritySetting();
     } else {
         var setting = appCtxt.get(OpenPGPZimbraSecure.PREF_SECURITY);
-        if (setting == 'auto') {
-            return Number(this.getUserProperty(OpenPGPZimbraSecure.USER_SECURITY) || 0);
+        if (setting == OpenPGPZimbraSecure.OPENPGP_AUTO) {
+            return this.getUserProperty(OpenPGPZimbraSecure.USER_SECURITY) || OpenPGPZimbraSecure.OPENPGP_DONTSIGN;
         } else {
-            return Number(setting);
+            return setting;
         }
     }
 };
@@ -969,11 +962,19 @@ OpenPGPZimbraSecure.popupErrorDialog = function(errorCode){
     if(!errorCode){
         errorCode = 'unknown-error';
     }
-    var msg = this.getMessage(errorCode);
-    var title = this.getMessage(errorCode + '-title');
+    var msg = OpenPGPUtils.getMessage(errorCode);
+    var title = OpenPGPUtils.getMessage(errorCode + '-title');
 
     var dialog = appCtxt.getHelpMsgDialog();
     dialog.setMessage(msg, DwtMessageDialog.CRITICAL_STYLE, title);
     dialog.setHelpURL(appCtxt.get(ZmSetting.SMIME_HELP_URI));
     dialog.popup();
+};
+
+OpenPGPZimbraSecure.getInstance = function() {
+    return appCtxt.getZimletMgr().getZimletByName('openpgp_zimbra_secure').handlerObject;
+};
+
+OpenPGPZimbraSecure.getClientVersion = function() {
+    return appCtxt.get(ZmSetting.CLIENT_VERSION);
 };

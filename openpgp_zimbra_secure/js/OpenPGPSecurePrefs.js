@@ -53,7 +53,7 @@ OpenPGPSecurePrefs.registerSettings = function(handler) {
     zmSettings.registerSetting(OpenPGPSecurePrefs.SECURITY, {
         type: ZmSetting.T_PREF,
         dataType: ZmSetting.D_STRING,
-        defaultValue: 'auto'
+        defaultValue: OpenPGPZimbraSecure.OPENPGP_AUTO
     });
     zmSettings.registerSetting(OpenPGPSecurePrefs.PRIVATE_KEY, {
         type: ZmSetting.T_PREF,
@@ -138,7 +138,12 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
                 handler.getMessage('prefSecuritySign'),
                 handler.getMessage('prefSecurityBoth')
             ],
-            options:          ['auto', '0', '1', '2']
+            options: [
+                OpenPGPZimbraSecure.OPENPGP_AUTO,
+                OpenPGPZimbraSecure.OPENPGP_DONTSIGN,
+                OpenPGPZimbraSecure.OPENPGP_SIGN,
+                OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT
+            ]
         });
 
         ZmPref.registerPref(OpenPGPSecurePrefs.PRIVATE_KEY, {
