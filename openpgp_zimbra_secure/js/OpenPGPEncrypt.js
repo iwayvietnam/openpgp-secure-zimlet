@@ -110,7 +110,7 @@ OpenPGPEncrypt.prototype.encrypt = function() {
     });
 };
 
-OpenPGPDecrypt.prototype.onCallback = function(callback) {
+OpenPGPEncrypt.prototype.onCallback = function(callback) {
     if (callback instanceof AjxCallback) {
         callback.run(this, this._mimeBuilder);
     } else if (AjxUtil.isFunction(callback)) {
@@ -118,7 +118,7 @@ OpenPGPDecrypt.prototype.onCallback = function(callback) {
     }
 }
 
-OpenPGPDecrypt.prototype.onError = function(err) {
+OpenPGPEncrypt.prototype.onError = function(err) {
     if (this._onError instanceof AjxCallback) {
         this._onError.run(this, err);
     } else if (AjxUtil.isFunction(this._onError)) {
