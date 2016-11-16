@@ -159,10 +159,10 @@ OpenPGPDecrypt.decryptContent = function(content, publicKeys, privateKey, onDecr
             return content;
         }
     })
-    .then(function(content) {
-        if (content.indexOf(OpenPGPUtils.OPENPGP_SIGNED_MESSAGE_HEADER) > 0) {
+    .then(function(plainText) {
+        if (plainText.indexOf(OpenPGPUtils.OPENPGP_SIGNED_MESSAGE_HEADER) > 0) {
             var opts = {
-                message: openpgp.cleartext.readArmored(content),
+                message: openpgp.cleartext.readArmored(plainText),
                 publicKeys: publicKeys
             };
             return openpgp.verify(opts).then(function(signature) {
