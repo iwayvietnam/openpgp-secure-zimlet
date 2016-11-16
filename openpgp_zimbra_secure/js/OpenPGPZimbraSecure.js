@@ -299,6 +299,10 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
         return;
     }
 
+    if (typeof msg.shouldSign !== 'undefined') {
+        shouldSign = msg.shouldSign ? true : false;
+    }
+
     if (typeof msg.shouldEncrypt !== 'undefined') {
         shouldEncrypt = msg.shouldEncrypt ? true : false;
     }

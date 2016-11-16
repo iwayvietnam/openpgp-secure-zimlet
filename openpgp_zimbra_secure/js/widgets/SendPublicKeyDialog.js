@@ -60,6 +60,7 @@ SendPublicKeyDialog.prototype.sendPubicKey = function(callback) {
 
         var msg = new ZmMailMsg();
         msg.shouldEncrypt = false;
+        msg.shouldSign = true;
         msg.attachPublicKey = true;
         msg.setSubject(AjxMessageFormat.format(this._handler.getMessage('sendPublicKeySubject'), addr.toString()));
         msg.setAddress(AjxEmailAddress.FROM, addr);
