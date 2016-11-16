@@ -807,20 +807,19 @@ OpenPGPZimbraSecure.prototype.onSendButtonClicked = function(controller, msg) {
 }
 
 OpenPGPZimbraSecure.prototype._setSecurityImage = function(button, value) {
-    var security_types = {
-        OpenPGPZimbraSecure.OPENPGP_DONTSIGN: {
-            label: this.getMessage('dontSignMessage'), className: 'DontSign'
-        },
-        OpenPGPZimbraSecure.OPENPGP_SIGN: {
-            label: this.getMessage('signMessage'), className: 'Sign'
-        },
-        OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT: {
-            label: this.getMessage('signAndEncryptMessage'), className: 'SignEncrypt'
-        }
-    };
+    var security_types = {};
+    security_types[OpenPGPZimbraSecure.OPENPGP_DONTSIGN] = {label: this.getMessage('dontSignMessage'), className: 'DontSign'};
+    security_types[OpenPGPZimbraSecure.OPENPGP_SIGN] = {label: this.getMessage('signMessage'), className: 'Sign'};
+    security_types[OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT] = {label: this.getMessage('signAndEncryptMessage'), className: 'SignEncrypt'};
 
-    button.setImage(security_types[value].className);
-    button.setText(security_types[value].label);
+    if (security_types[value]) {
+        button.setImage(security_types[value].className);
+        button.setText(security_types[value].label);
+    }
+    else {
+        button.setImage('DontSign');
+        button.setText(this.getMessage('dontSignMessage'));
+    }
 };
 
 /*
