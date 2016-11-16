@@ -133,3 +133,59 @@ OpenPGPDecrypt.prototype.decrypt = function() {
         return message;
     });
 };
+
+OpenPGPDecrypt.decryptContent = function(content, publicKeys, privateKey, onDecrypted) {
+    var sequence = Promise.resolve();
+
+    return sequence.then(function() {
+        if (content.indexOf(OpenPGPUtils.OPENPGP_MESSAGE_HEADER) > 0) {
+            var opts = {
+                message: openpgp.message.readArmored(content),
+                privateKey: privateKey
+            };
+            return openpgp.decrypt(opts).then(function(plainText) {
+                return plainText.data.replace(/\r?\n/g, "\r\n");
+            });
+        }
+        else {
+            return content;
+        }
+    })
+    .then(function(content) {
+        if (content.indexOf(OpenPGPUtils.OPENPGP_SIGNED_MESSAGE_HEADER) > 0) {
+            var opts = {
+                message: openpgp.message.readArmored(content),
+                publicKeys: publicKeys
+            };
+            openpgp.verify(opts).then(function(signature) {
+                var signatures = signature.signatures;
+                signatures.forEach(function(signature) {
+                    publicKeys.forEach(function(key) {
+                        var keyid = key.primaryKey.keyid;
+                        if (keyid.equals(signature.keyid)) {
+                            signature.userid = key.getPrimaryUser().user.userId.userid;
+                        }
+                    });
+                });
+                return {
+                    content: content,
+                    signatures: signatures
+                };
+            });
+        }
+        else {
+            return {
+                content: content,
+                signatures: []
+            };
+        }
+    })
+    .then(function(result) {
+        if (onDecrypted instanceof AjxCallback) {
+            onDecrypted.run(result);
+        } else if (AjxUtil.isFunction(onDecrypted)) {
+            onDecrypted(result);
+        }
+        return result;
+    });
+}
