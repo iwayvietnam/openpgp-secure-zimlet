@@ -42,13 +42,17 @@ OpenPGPSecurePrefs.KEY_ADD = 'OPENPGP_KEY_ADD';
 OpenPGPSecurePrefs.KEY_LOOKUP = 'OPENPGP_KEY_LOOKUP';
 OpenPGPSecurePrefs.PASSPHRASE_TOGGLE = 'OPENPGP_PASSPHRASE_TOGGLE';
 
-OpenPGPSecurePrefs.SETTINGS = [
+OpenPGPSecurePrefs.SECURITY_SETTINGS = [
     OpenPGPSecurePrefs.SECURITY
 ];
 
 OpenPGPSecurePrefs._loadCallbacks = [];
 
 OpenPGPSecurePrefs.registerSettings = function(handler) {
+    var pgpKeys = handler.getPGPKeys();
+    var privateKey = pgpKeys.getPrivateKey();
+    var publicKey = pgpKeys.getPublicKey();
+
     var zmSettings = appCtxt.getSettings();
     zmSettings.registerSetting(OpenPGPSecurePrefs.SECURITY, {
         type: ZmSetting.T_PREF,
@@ -57,15 +61,18 @@ OpenPGPSecurePrefs.registerSettings = function(handler) {
     });
     zmSettings.registerSetting(OpenPGPSecurePrefs.PRIVATE_KEY, {
         type: ZmSetting.T_PREF,
-        dataType: ZmSetting.D_STRING
+        dataType: ZmSetting.D_STRING,
+        defaultValue: privateKey ? privateKey.armor().trim() : ''
     });
     zmSettings.registerSetting(OpenPGPSecurePrefs.PASSPHRASE, {
         type: ZmSetting.T_PREF,
-        dataType: ZmSetting.D_STRING
+        dataType: ZmSetting.D_STRING,
+        defaultValue: pgpKeys.getPassphrase()
     });
     zmSettings.registerSetting(OpenPGPSecurePrefs.PUBLIC_KEY, {
         type: ZmSetting.T_PREF,
-        dataType: ZmSetting.D_STRING
+        dataType: ZmSetting.D_STRING,
+        defaultValue: publicKey ? publicKey.armor().trim() : ''
     });
     zmSettings.registerSetting(OpenPGPSecurePrefs.KEYPAIR_GEN, {
         type: ZmSetting.T_PREF,
@@ -96,27 +103,10 @@ OpenPGPSecurePrefs.registerSettings = function(handler) {
         dataType: ZmSetting.D_NONE
     });
 
-    OpenPGPSecurePrefs.SETTINGS.forEach(function(name) {
+    OpenPGPSecurePrefs.SECURITY_SETTINGS.forEach(function(name) {
         var setting = zmSettings.getSetting(name);
         setting.setValue(handler.getUserProperty(setting.id));
     });
-
-    var pgpKeys = handler.getPGPKeys();
-
-    var publicKeySetting = zmSettings.getSetting(OpenPGPSecurePrefs.PUBLIC_KEY);
-    var publicKey = pgpKeys.getPublicKey();
-    if (publicKey) {
-        publicKeySetting.setValue(publicKey.armor().trim());
-    }
-
-    var privateKeySetting = zmSettings.getSetting(OpenPGPSecurePrefs.PRIVATE_KEY);
-    var privateKey = pgpKeys.getPrivateKey();
-    if (privateKey) {
-        privateKeySetting.setValue(pgpKeys.getPrivateKey().armor().trim());
-    }
-
-    var passphraseSetting = zmSettings.getSetting(OpenPGPSecurePrefs.PASSPHRASE);
-    passphraseSetting.setValue(pgpKeys.getPassphrase());
 };
 
 AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
@@ -218,15 +208,26 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
 
     OpenPGPSecurePrefs.prototype._savePrefs = function(batchCommand) {
         var self = this;
-        var settings = OpenPGPSecurePrefs.SETTINGS;
         var zmSettings = appCtxt.getSettings();
 
-        settings.forEach(function(name) {
+        OpenPGPSecurePrefs.SECURITY_SETTINGS.forEach(function(name) {
             var setting = zmSettings.getSetting(name);
             var value = setting.getValue();
             self._handler.setUserProperty(setting.id, value);
             setting.origValue = value;
         });
+
+        var privateKeySetting = zmSettings.getSetting(OpenPGPSecurePrefs.PRIVATE_KEY);
+        var privateKey = privateKeySetting.origValue = privateKeySetting.getValue();
+
+        var passphraseSetting = zmSettings.getSetting(OpenPGPSecurePrefs.PASSPHRASE);
+        var passphrase = passphraseSetting.origValue = passphraseSetting.getValue();
+
+        var publicKeySetting = zmSettings.getSetting(OpenPGPSecurePrefs.PUBLIC_KEY);
+        var publicKey = publicKeySetting.origValue = publicKeySetting.getValue();
+
+        this._pgpKeys.setPrivateKey(privateKey, passphrase);
+        this._pgpKeys.setPublicKey(publicKey);
 
         this._controller.setDirty(this._section.id, false);
 
@@ -235,18 +236,6 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
             batchCommand.addRequestParams(soapDoc);
         }
         this._handler.saveUserProperties();
-
-        var privKeyInput = document.getElementById(self._id + '_' + OpenPGPSecurePrefs.PRIVATE_KEY);
-        var privateKey = privKeyInput.value;
-
-        var pubKeyInput = document.getElementById(self._id + '_' + OpenPGPSecurePrefs.PUBLIC_KEY);
-        var publicKey = pubKeyInput.value;
-
-        var passphraseInput = document.getElementById(self._id + '_' + OpenPGPSecurePrefs.PASSPHRASE);
-        var passphrase = passphraseInput.value;
-
-        this._pgpKeys.setPrivateKey(privateKey, passphrase);
-        this._pgpKeys.setPublicKey(publicKey);
     };
 
     OpenPGPSecurePrefs.prototype._setupStatic = function(id, setup, value) {
@@ -320,14 +309,20 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
                 this._handler,
                 function(dialog) {
                     return dialog.generateKey().then(function(key) {
-                        var privKeyInput = document.getElementById(self._id + '_' + OpenPGPSecurePrefs.PRIVATE_KEY);
-                        privKeyInput.value = key.privateKey;
+                        self.setFormValue(OpenPGPSecurePrefs.PRIVATE_KEY, key.privateKey);
+                        self.setFormValue(OpenPGPSecurePrefs.PASSPHRASE, key.passphrase);
+                        self.setFormValue(OpenPGPSecurePrefs.PUBLIC_KEY, key.publicKey);
 
-                        var pubKeyInput = document.getElementById(self._id + '_' + OpenPGPSecurePrefs.PUBLIC_KEY);
-                        pubKeyInput.value = key.publicKey;
+                        var zmSettings = appCtxt.getSettings();
 
-                        var passphraseInput = document.getElementById(self._id + '_' + OpenPGPSecurePrefs.PASSPHRASE);
-                        passphraseInput.value = key.passphrase;
+                        var privateKeySetting = zmSettings.getSetting(OpenPGPSecurePrefs.PRIVATE_KEY);
+                        privateKeySetting.setValue(key.privateKey);
+
+                        var passphraseSetting = zmSettings.getSetting(OpenPGPSecurePrefs.PASSPHRASE);
+                        passphraseSetting.setValue(key.passphrase);
+
+                        var publicKeySetting = zmSettings.getSetting(OpenPGPSecurePrefs.PUBLIC_KEY);
+                        publicKeySetting.setValue(key.publicKey);
 
                         return key;
                     });
@@ -339,8 +334,8 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
 
     OpenPGPSecurePrefs.prototype._keySubmit = function() {
         var self = this;
-        var pubKeyInput = document.getElementById(this._id + '_' + OpenPGPSecurePrefs.PUBLIC_KEY);
-        var publicKey = pubKeyInput.value;
+        var publicKey = this.getFormValue(OpenPGPSecurePrefs.PUBLIC_KEY);
+        console.log(publicKey);
         if (publicKey.length > 0) {
             var keyServer = this._handler.getZimletContext().getConfig('openpgp-key-server');
             var hkp = new openpgp.HKP(keyServer);
