@@ -198,7 +198,7 @@ OpenPGPZimbraSecure.prototype._handleMessageResponse = function(callback, csfeRe
         if (hasPGPPart(msg, msg)) {
             pgpMsgs.push(msg);
         }
-        if (hasInlinePGP(msg)) {
+        else if (hasInlinePGP(msg)) {
             inlinePGPMsgs.push(msg);
         }
     });
@@ -225,7 +225,7 @@ OpenPGPZimbraSecure.prototype._handleMessageResponse = function(callback, csfeRe
 OpenPGPZimbraSecure.prototype._loadInlinePGPMessages = function(callback, csfeResult, inlinePGPMsgs){
     var self = this;
     var handled = 0;
-    var allLoadedCheck = new AjxCallback(function(){
+    var allLoadedCallback = new AjxCallback(function(){
         handled += 1;
         if (handled == inlinePGPMsgs.length) {
             callback.run(csfeResult);
@@ -233,7 +233,7 @@ OpenPGPZimbraSecure.prototype._loadInlinePGPMessages = function(callback, csfeRe
     });
 
     inlinePGPMsgs.forEach(function(msg) {
-        var newCallback = new AjxCallback(self, self._decryptInlineMessage, [allLoadedCheck, msg]);
+        var newCallback = new AjxCallback(self, self._decryptInlineMessage, [allLoadedCallback, msg]);
         var partId = msg.part ? '&part=' + msg.part : '';
         //add a timestamp param so that browser will not cache the request
         var timestamp = '&timestamp=' + new Date().getTime();
@@ -293,7 +293,7 @@ OpenPGPZimbraSecure.prototype._decryptInlineMessage = function(callback, msg, re
 OpenPGPZimbraSecure.prototype._loadPGPMessages = function(callback, csfeResult, pgpMsgs){
     var self = this;
     var handled = 0;
-    var allLoadedCheck = new AjxCallback(function(){
+    var allLoadedCallback = new AjxCallback(function(){
         handled += 1;
         if (handled == pgpMsgs.length) {
             callback.run(csfeResult);
@@ -301,7 +301,7 @@ OpenPGPZimbraSecure.prototype._loadPGPMessages = function(callback, csfeResult, 
     });
 
     pgpMsgs.forEach(function(msg) {
-        var newCallback = new AjxCallback(self, self._decryptMessage, [allLoadedCheck, msg]);
+        var newCallback = new AjxCallback(self, self._decryptMessage, [allLoadedCallback, msg]);
         var partId = msg.part ? '&part=' + msg.part : '';
         //add a timestamp param so that browser will not cache the request
         var timestamp = '&timestamp=' + new Date().getTime();

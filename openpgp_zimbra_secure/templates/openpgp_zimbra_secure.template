@@ -68,6 +68,7 @@
                                     <td><div id='${id}_OPENPGP_KEYPAIR_GEN'></div></td>
                                     <td><div id='${id}_OPENPGP_KEY_SUBMIT'></div></td>
                                     <td><div id='${id}_OPENPGP_KEY_SEND'></div></td>
+                                    <td><div id='${id}_OPENPGP_KEY_EXPORT'></div></td>
                                     <td width=100%></td>
                                 </tr>
                             </table>
