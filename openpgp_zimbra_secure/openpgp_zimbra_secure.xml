@@ -44,7 +44,6 @@
     <include>js/widgets/ImportPublicKeyDialog.js</include>
     <include>js/widgets/ImportPublicKeyView.js</include>
 
-    <include>js/json/json2.js</include>
     <include>js/quoted-printable/quoted-printable.js</include>
     <include>js/utf8/utf8.js</include>
     <include>js/email-addresses/email-addresses.min.js</include>
