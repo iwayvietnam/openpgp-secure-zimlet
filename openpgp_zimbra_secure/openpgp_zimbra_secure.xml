@@ -46,7 +46,6 @@
 
     <include>js/quoted-printable/quoted-printable.js</include>
     <include>js/utf8/utf8.js</include>
-    <include>js/email-addresses/email-addresses.min.js</include>
     <include>js/FileSaver/FileSaver.min.js</include>
 
     <include>templates/openpgp_zimbra_secure.template.js</include>

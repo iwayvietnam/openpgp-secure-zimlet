@@ -203,15 +203,15 @@ OpenPGPSecureKeys.prototype.setPublicKey = function(publicKey) {
     });
 };
 
-OpenPGPSecureKeys.prototype.filterPublicKeys = function(receivers) {
+OpenPGPSecureKeys.prototype.filterPublicKeys = function(addrs) {
     var dupes = [];
     var publicKeys = [];
     this.publicKeys.forEach(function(key) {
-        receivers.forEach(function(receiver) {
+        addrs.foreach(function(addr) {
             for (i = 0; i < key.users.length; i++) {
                 var uid = key.users[i].userId.userid;
                 var fingerprint = key.primaryKey.fingerprint;
-                if (uid.indexOf(receiver.address) >= 0 && !dupes[fingerprint + uid]) {
+                if (uid.indexOf(addr.getAddress()) >= 0 && !dupes[fingerprint + uid]) {
                     publicKeys.push(key);
                     dupes[fingerprint + uid] = fingerprint + uid;
                 }
@@ -221,19 +221,21 @@ OpenPGPSecureKeys.prototype.filterPublicKeys = function(receivers) {
     return publicKeys;
 };
 
-OpenPGPSecureKeys.prototype.notHasPublicKey = function(receivers) {
+OpenPGPSecureKeys.prototype.notHasPublicKey = function(addrs) {
     var uidAddresses = [];
     this.publicKeys.forEach(function(key) {
         for (i = 0; i < key.users.length; i++) {
-            var address = emailAddresses.parseOneAddress(key.users[i].userId.userid);
-            uidAddresses[address.address] = address.address;
+            var addr = AjxEmailAddress.parse(key.users[i].userId.userid);
+            if (addr) {
+                uidAddresses[addr.getAddress()] = addr.getAddress();
+            }
         }
     });
 
     var addresses = [];
-    receivers.forEach(function(receiver) {
-        if (!uidAddresses[receiver.address]) {
-            addresses.push(receiver.address);
+    addrs.foreach(function(addr) {
+        if (!uidAddresses[addr.getAddress()]) {
+            addresses.push(addr.getAddress());
         }
     });
     return addresses;

@@ -436,22 +436,13 @@ OpenPGPZimbraSecure.prototype._signMessage = function(orig, msg, params, shouldE
         input.m.e.push({ 'a': addr.toString(), 't': 'f' });
     }
 
-    var addresses = [];
+    var receivers = new AjxVector();
     input.m.e.forEach(function(e) {
-        if (e.t == 't') {
-            addresses.push(e.a);
-        }
-        if (e.t == 'c') {
-            addresses.push(e.a);
-        }
-        if (e.t == 'b') {
-            addresses.push(e.a);
-        }
-        if (e.t == 'f') {
-            addresses.push(e.a);
+        var addr = AjxEmailAddress.parse(e.a);
+        if (addr && (e.t == 't' || e.t == 'c' || e.t == 'b' || e.t == 'f')) {
+            receivers.add(addr);
         }
     });
-    var receivers = emailAddresses.parseAddressList(addresses.join(', '));
     var notHasAddresses = this._pgpKeys.notHasPublicKey(receivers);
 
     if (shouldEncrypt && notHasAddresses.length > 0) {

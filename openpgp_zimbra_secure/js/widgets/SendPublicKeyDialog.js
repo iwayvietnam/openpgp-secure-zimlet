@@ -54,8 +54,8 @@ SendPublicKeyDialog.prototype.setEmail = function(email) {
 SendPublicKeyDialog.prototype.sendPubicKey = function(callback) {
     var publicKey = this._handler.getPGPKeys().getPublicKey();
     var email = this.getEmail();
-    var addresses = emailAddresses.parseAddressList(email);
-    if (publicKey && addresses.length > 0) {
+    var addresses = AjxEmailAddress.getValidAddresses(this.getEmail(), AjxEmailAddress.TO);
+    if (publicKey && addresses.size() > 0) {
         var addr = OpenPGPUtils.getDefaultSenderAddress();
 
         var msg = new ZmMailMsg();
@@ -64,11 +64,7 @@ SendPublicKeyDialog.prototype.sendPubicKey = function(callback) {
         msg.attachPublicKey = true;
         msg.setSubject(AjxMessageFormat.format(this._handler.getMessage('sendPublicKeySubject'), addr.toString()));
         msg.setAddress(AjxEmailAddress.FROM, addr);
-        var addrs = new AjxVector();
-        addresses.forEach(function(address) {
-            addrs.add(new AjxEmailAddress(address.address, AjxEmailAddress.TO, address.name));
-        });
-        msg.setAddresses(AjxEmailAddress.TO, addrs);
+        msg.setAddresses(AjxEmailAddress.TO, addresses);
 
         var top = new ZmMimePart();
         top.setContentType(ZmMimeTable.MULTI_MIXED);
