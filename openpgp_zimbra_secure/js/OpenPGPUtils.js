@@ -402,18 +402,18 @@ OpenPGPUtils.getMessage = function(key) {
     return OpenPGPZimbraSecure.getInstance().getMessage(key);
 };
 
+OpenPGPUtils.saveTextAs = function(text, name) {
+    var blob = new Blob([text], {type: 'text/plain;charset=utf-8'});
+    saveAs(blob, name);
+};
+
 OpenPGPUtils.saveAs = function(data, name, type) {
     data = OpenPGPUtils.base64Decode(data);
-    if (type.indexOf('text/html') >= 0 || type.indexOf('text/plain') >= 0) {
-        saveTextAs(data, name);
+    if (typeof data === 'string') {
+        data = OpenPGPUtils.stringToBin(data);
     }
-    else {
-        if (typeof data === 'string') {
-            data = OpenPGPUtils.stringToBin(data);
-        }
-        var blob = new Blob([data], {type: type});
-        saveAs(blob, name);
-    }
+    var blob = new Blob([data], {type: type});
+    saveAs(blob, name);
 };
 
 /*
