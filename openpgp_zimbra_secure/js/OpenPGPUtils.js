@@ -94,11 +94,16 @@ OpenPGPUtils.isPGPKeysContentType = function(cType) {
     return AjxUtil.indexOf([OpenPGPUtils.OPENPGP_KEYS_CONTENT_TYPE], cType) !== -1;
 };
 
-OpenPGPUtils.hasInlinePGPContent = function(content) {
-    for (var i = 0; i < OpenPGPUtils.OPENPGP_MESSAGE_HEADERS.length; i++) {
-        var header = OpenPGPUtils.OPENPGP_MESSAGE_HEADERS[i];
-        if (content.indexOf(header) > 0) {
-            return true;
+OpenPGPUtils.hasInlinePGPContent = function(content, header) {
+    if (AjxUtil.indexOf(OpenPGPUtils.OPENPGP_MESSAGE_HEADERS, header) !== -1) {
+        return content.indexOf(header) > 0;
+    }
+    else {
+        for (var i = 0; i < OpenPGPUtils.OPENPGP_MESSAGE_HEADERS.length; i++) {
+            var header = OpenPGPUtils.OPENPGP_MESSAGE_HEADERS[i];
+            if (content.indexOf(header) > 0) {
+                return true;
+            }
         }
     }
     return false;

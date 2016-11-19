@@ -161,15 +161,19 @@ OpenPGPZimbraSecure.prototype._handleMessageResponse = function(callback, csfeRe
         return hasPGP;
     }
 
-    function hasInlinePGP(part) {
+    function hasInlinePGP(part, msg) {
         if (part.content && OpenPGPUtils.hasInlinePGPContent(part.content)) {
+            if (OpenPGPUtils.hasInlinePGPContent(part.content, OpenPGPUtils.OPENPGP_PUBLIC_KEY_HEADER)) {
+                msg.hasPGPKey = true;
+                msg.pgpKey = part.content;
+            }
             return true;
         } else if (!part.mp) {
             return false;
         }
         else {
             for (var i = 0; i < part.mp.length; i++) {
-                if (hasInlinePGP(part.mp[i]))
+                if (hasInlinePGP(part.mp[i], msg))
                     return true;
             }
         }
@@ -195,11 +199,13 @@ OpenPGPZimbraSecure.prototype._handleMessageResponse = function(callback, csfeRe
     }
 
     msgs.forEach(function(msg) {
-        if (hasPGPPart(msg, msg)) {
-            pgpMsgs.push(msg);
-        }
-        else if (hasInlinePGP(msg)) {
+        msg.hasPGPKey = false;
+        msg.pgpKey = false;
+        if (hasInlinePGP(msg, msg)) {
             inlinePGPMsgs.push(msg);
+        }
+        else if (hasPGPPart(msg, msg)) {
+            pgpMsgs.push(msg);
         }
     });
 
@@ -269,6 +275,8 @@ OpenPGPZimbraSecure.prototype._decryptInlineMessage = function(callback, msg, re
                     var text = OpenPGPUtils.base64Decode(response.text);
                     var message = mimemessage.parse(text.replace(/\r?\n/g, "\r\n"));
                     message.signatures = result.signatures;
+                    message.hasPGPKey = msg.hasPGPKey;
+                    message.pgpKey = msg.pgpKey;
                     self._pgpMessageCache[msg.id] = message;
                     callback.run();
                 }
@@ -351,7 +359,8 @@ OpenPGPZimbraSecure.prototype._decryptMessage = function(callback, msg, response
  * @param {Object} PGP mime message.
  */
 OpenPGPZimbraSecure.prototype.onDecrypted = function(callback, msg, pgpMessage) {
-    pgpMessage.hasPGPKey = (msg.hasPGPKey === true) ? true : false;
+    pgpMessage.hasPGPKey = msg.hasPGPKey;
+    pgpMessage.pgpKey = msg.pgpKey;
     this._pgpMessageCache[msg.id] = pgpMessage;
 
     if (pgpMessage.encrypted) {
@@ -784,17 +793,20 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
     }
 
     if (pgpMessage.hasPGPKey) {
-        var pgpKey = false;
-        OpenPGPUtils.visitMessage(pgpMessage, function(message) {
-            var ct = message.contentType();
-            if (OpenPGPUtils.isPGPKeysContentType(ct.fulltype)) {
-                pgpKey = message.toString({noHeaders: true});
-            }
-        });
+        var pgpKey = pgpMessage.pgpKey;
+        if (!pgpKey) {
+            OpenPGPUtils.visitMessage(pgpMessage, function(message) {
+                var ct = message.contentType();
+                if (OpenPGPUtils.isPGPKeysContentType(ct.fulltype)) {
+                    pgpKey = message.toString({noHeaders: true});
+                }
+            });
+        }
         if (pgpKey) {
             var pubKey = openpgp.key.readArmored(pgpKey);
             pubKey.keys.forEach(function(key) {
-                if (!self._pgpKeys.publicKeyExisted(key.primaryKey.fingerprint)) {
+                console.log(key);
+                if (key.isPublic() && !self._pgpKeys.publicKeyExisted(key.primaryKey.fingerprint)) {
                     var dialog = self._keyImportDialog = new ImportPublicKeyDialog(
                         self,
                         function(dialog) {
