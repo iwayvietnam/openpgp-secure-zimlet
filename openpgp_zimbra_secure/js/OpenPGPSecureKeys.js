@@ -127,7 +127,7 @@ OpenPGPSecureKeys.prototype.addPublicKey = function(key) {
 OpenPGPSecureKeys.prototype.removePublicKey = function(fingerprint) {
     var self = this;
     var removed = false;
-    this.publicKeys.forEach(function(key) {
+    this.publicKeys.forEach(function(key, index) {
         if (fingerprint == key.primaryKey.fingerprint) {
             self.publicKeys.splice(index, 1);
             delete self._fingerprints[fingerprint];
