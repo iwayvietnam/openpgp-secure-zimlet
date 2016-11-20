@@ -1,24 +1,29 @@
 
-.ImgDontSign {
+.ImgPGPDontSign {
     background-image: url('imgs/dontsign.png');
     width: 16px;
     height: 16px;
 }
 
-.ImgSecureEmail {
+.ImgPGPSecureEmail {
     background-image: url('imgs/secure.png');
     width: 16px;
     height: 16px;
 }
 
-.ImgSign {
+.ImgPGPSign {
     background-image: url('imgs/sign.png');
     width: 16px;
     height: 16px;
 }
 
-.ImgSignEncrypt {
+.ImgPGPSignEncrypt {
     background-image: url('imgs/signencrypt.png');
+    width: 16px;
+    height: 16px;
+}
+.ImgPGPEncrypted {
+    background-image: url('imgs/encrypted.png');
     width: 16px;
     height: 16px;
 }

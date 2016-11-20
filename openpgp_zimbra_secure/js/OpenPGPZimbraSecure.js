@@ -109,6 +109,66 @@ OpenPGPZimbraSecure.prototype.init = function() {
     ], new AjxCallback(function() {
         self._initOpenPGP();
     }));
+
+    if (appCtxt.get(ZmSetting.MAIL_ENABLED)) {
+        AjxPackage.require({
+            name: 'MailCore',
+            callback: new AjxCallback(this, this.addAttachmentHandler)
+        });
+    }
+};
+
+OpenPGPZimbraSecure.prototype.addAttachmentHandler = function() {
+    var self = this;
+
+    OpenPGPUtils.OPENPGP_CONTENT_TYPES.forEach(function(contentType) {
+        ZmMimeTable._table[contentType] = {
+            desc: 'OpenPGP encrypted file',
+            image: "PGPEncrypted",
+            imageLarge: "PGPEncrypted"
+        };
+    });
+
+    var app = appCtxt.getAppController().getApp(ZmId.APP_MAIL);
+    var controller = app.getMsgController(app.getCurrentSessionId(ZmId.VIEW_MSG));
+    var viewType = appCtxt.getViewTypeFromId(ZmMsgController.getDefaultViewType());
+    controller._initializeView(viewType);
+    var view = controller._view[viewType];
+
+    for (var mimeType in ZmMimeTable._table) {
+        if (mimeType === 'application/pgp-encrypted') {
+            view.addAttachmentLinkHandler(mimeType, 'OpenPGPZimbraSecure', function(attachment) {
+                console.log(attachment);
+                var title = self.getMessage('decryptFile');
+                var linkId = view._getAttachmentLinkId(attachment.part, 'decrypt');
+                var linkAttrs = [
+                    'href="javascript:;"',
+                    'onclick="OpenPGPZimbraSecure.decryptAttachment(\'' + attachment.label + '\', \'' + attachment.url + '\')"',
+                    'class="AttLink"',
+                    'style="text-decoration:underline;"',
+                    'id="' + linkId + '"',
+                    'title="' + title + '"'
+                ];
+                return '<a ' + linkAttrs.join(' ') + '>' + title + '</a>';
+            });
+        }
+        else if (mimeType === 'application/pgp-keys') {
+            view.addAttachmentLinkHandler(mimeType, 'OpenPGPZimbraSecure', function(attachment) {
+                console.log(attachment);
+                var title = self.getMessage('importPublicKey');
+                var linkId = view._getAttachmentLinkId(attachment.part, 'import');
+                var linkAttrs = [
+                    'href="javascript:;"',
+                    'onclick="OpenPGPZimbraSecure.importAttachmentKey(\'' + attachment.label + '\', \'' + attachment.url + '\')"',
+                    'class="AttLink"',
+                    'style="text-decoration:underline;"',
+                    'id="' + linkId + '"',
+                    'title="' + title + '"'
+                ];
+                return '<a ' + linkAttrs.join(' ') + '>' + title + '</a>';
+            });
+        }
+    }
 };
 
 OpenPGPZimbraSecure.prototype.getPGPKeys = function() {
@@ -630,6 +690,7 @@ OpenPGPZimbraSecure.prototype.onConvView = function(msg, oldMsg, convView) {
 };
 
 OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
+    var self = this;
     if (!msg || !view._hdrTableId || msg.isDraft)
         return;
     var pgpMessage = this._pgpMessageCache[msg.id];
@@ -637,7 +698,6 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
         return;
     }
 
-    var self = this;
     pgpMessage.signatures.forEach(function(signature) {
         var userid = AjxStringUtil.htmlEncode(signature.userid);
         if (!userid) {
@@ -805,7 +865,6 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
         if (pgpKey) {
             var pubKey = openpgp.key.readArmored(pgpKey);
             pubKey.keys.forEach(function(key) {
-                console.log(key);
                 if (key.isPublic() && !self._pgpKeys.publicKeyExisted(key.primaryKey.fingerprint)) {
                     var dialog = self._keyImportDialog = new ImportPublicKeyDialog(
                         self,
@@ -907,9 +966,9 @@ OpenPGPZimbraSecure.prototype.onSendButtonClicked = function(controller, msg) {
 
 OpenPGPZimbraSecure.prototype._setSecurityImage = function(button, value) {
     var security_types = {};
-    security_types[OpenPGPZimbraSecure.OPENPGP_DONTSIGN] = {label: this.getMessage('dontSignMessage'), className: 'DontSign'};
-    security_types[OpenPGPZimbraSecure.OPENPGP_SIGN] = {label: this.getMessage('signMessage'), className: 'Sign'};
-    security_types[OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT] = {label: this.getMessage('signAndEncryptMessage'), className: 'SignEncrypt'};
+    security_types[OpenPGPZimbraSecure.OPENPGP_DONTSIGN] = {label: this.getMessage('dontSignMessage'), className: 'PGPDontSign'};
+    security_types[OpenPGPZimbraSecure.OPENPGP_SIGN] = {label: this.getMessage('signMessage'), className: 'PGPSign'};
+    security_types[OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT] = {label: this.getMessage('signAndEncryptMessage'), className: 'PGPSignEncrypt'};
 
     if (security_types[value]) {
         button.setImage(security_types[value].className);
@@ -1054,11 +1113,60 @@ OpenPGPZimbraSecure.prototype._initOpenPGP = function() {
     });
 };
 
+OpenPGPZimbraSecure.importAttachmentKey = function(name, url) {
+    var callback = new AjxCallback(function(response) {
+        if (response.success) {
+            var handler = OpenPGPZimbraSecure.getInstance();
+            var data = OpenPGPUtils.base64Decode(response.text);
+            var pubKey = openpgp.key.readArmored(data);
+            pubKey.keys.forEach(function(key) {
+                if (key.isPublic() && !handler._pgpKeys.publicKeyExisted(key.primaryKey.fingerprint)) {
+                    var dialog = handler._keyImportDialog = new ImportPublicKeyDialog(
+                        handler,
+                        function(dialog) {
+                            handler._pgpKeys.addPublicKey(key);
+                            handler.displayStatusMessage(handler.getMessage('publicKeyImported'));
+                        },
+                        false,
+                        OpenPGPSecureKeys.keyInfo(key)
+                    );
+                    dialog.popup();
+                }
+            });
+        }
+    });
+
+    AjxRpc.invoke('', url, {
+        'X-Zimbra-Encoding': 'x-base64'
+    }, callback, true);
+}
+
+OpenPGPZimbraSecure.decryptAttachment = function(name, url) {
+    var callback = new AjxCallback(function(response) {
+        if (response.success) {
+            var handler = OpenPGPZimbraSecure.getInstance();
+            var data = OpenPGPUtils.base64Decode(response.text);
+            var opts = {
+                message: openpgp.message.read(OpenPGPUtils.stringToArray(data)),
+                privateKey: handler.getPGPKeys().getPrivateKey()
+            };
+            openpgp.decrypt(opts).then(function(plainText) {
+                OpenPGPUtils.saveAs(plainText.data, name, 'application/octet-stream');
+            });
+        }
+    });
+
+    AjxRpc.invoke('', url, {
+        'X-Zimbra-Encoding': 'x-base64'
+    }, callback, true);
+}
+
 OpenPGPZimbraSecure.prototype._download = function(element) {
     var id = Dwt.getAttr(element, 'data-id');
     if (id && this._pgpAttachments[id]) {
         var attachment = this._pgpAttachments[id];
-        OpenPGPUtils.saveAs(attachment.content, attachment.name, attachment.type);
+        var content = OpenPGPUtils.base64Decode(attachment.content);
+        OpenPGPUtils.saveAs(content, attachment.name, attachment.type);
     }
 }
 

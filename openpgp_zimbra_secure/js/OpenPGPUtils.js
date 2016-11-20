@@ -225,18 +225,26 @@ OpenPGPUtils.hexToBin = function(hex) {
  * Licensed under the BSD-3-Clause license.
  */
 OpenPGPUtils.stringToBin = function(string){
-      var length = string.length;
+    var length = string.length;
 
-      var resultBuffer = new ArrayBuffer(length);
-      var resultView = new Uint8Array(resultBuffer);
+    var resultBuffer = new ArrayBuffer(length);
+    var resultView = new Uint8Array(resultBuffer);
 
-      for(var i = 0; i < length; i++) {
-          resultView[i] = string.charCodeAt(i);
-      }
+    for(var i = 0; i < length; i++) {
+        resultView[i] = string.charCodeAt(i);
+    }
 
-      return resultBuffer;
-  }
+    return resultBuffer;
+}
 
+OpenPGPUtils.stringToArray = function(string){
+    var length = string.length;
+    var array = new Uint8Array(length);
+    for(var i = 0; i < length; i++) {
+        array[i] = string.charCodeAt(i);
+    }
+    return array;
+}
 
 OpenPGPUtils.fetchPart = function(part, baseUrl) {
     var url, cType, cDisposition, iType;
@@ -413,7 +421,6 @@ OpenPGPUtils.saveTextAs = function(text, name) {
 };
 
 OpenPGPUtils.saveAs = function(data, name, type) {
-    data = OpenPGPUtils.base64Decode(data);
     if (typeof data === 'string') {
         data = OpenPGPUtils.stringToBin(data);
     }
