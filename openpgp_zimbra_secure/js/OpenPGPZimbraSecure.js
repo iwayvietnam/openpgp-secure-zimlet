@@ -138,7 +138,6 @@ OpenPGPZimbraSecure.prototype.addAttachmentHandler = function() {
     for (var mimeType in ZmMimeTable._table) {
         if (mimeType === 'application/pgp-encrypted') {
             view.addAttachmentLinkHandler(mimeType, 'OpenPGPZimbraSecure', function(attachment) {
-                console.log(attachment);
                 var title = self.getMessage('decryptFile');
                 var linkId = view._getAttachmentLinkId(attachment.part, 'decrypt');
                 var linkAttrs = [
@@ -154,7 +153,6 @@ OpenPGPZimbraSecure.prototype.addAttachmentHandler = function() {
         }
         else if (mimeType === 'application/pgp-keys') {
             view.addAttachmentLinkHandler(mimeType, 'OpenPGPZimbraSecure', function(attachment) {
-                console.log(attachment);
                 var title = self.getMessage('importPublicKey');
                 var linkId = view._getAttachmentLinkId(attachment.part, 'import');
                 var linkAttrs = [
