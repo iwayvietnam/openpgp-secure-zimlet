@@ -542,6 +542,7 @@ OpenPGPZimbraSecure.prototype._signMessage = function(orig, msg, params, shouldE
 
 OpenPGPZimbraSecure.prototype._encryptMessage = function(orig, msg, params, shouldEncrypt, receivers) {
     var self = this;
+    var view = appCtxt.getCurrentView();
     var input = (params.jsonObj.SendMsgRequest || params.jsonObj.SaveDraftRequest);
 
     function checkAttachments(list, cid, fmt) {

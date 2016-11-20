@@ -118,6 +118,9 @@ OpenPGPMimeBuilder = function(opts) {
                 contentTransferEncoding: 'base64',
                 body: mp.data.replace(/\r?\n/g, "\r\n").trim()
             });
+            if (mp.ci) {
+                attachmentEntity.header('Content-ID', mp.ci);
+            }
             attachmentEntity.header('Content-Disposition', mp.cd);
             attachmentEntities.push(attachmentEntity);
         });
