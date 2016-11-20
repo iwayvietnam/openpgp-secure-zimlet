@@ -104,8 +104,8 @@ OpenPGPZimbraSecure.prototype.init = function() {
     }));
 
     this._addJsScripts([
-        'js/openpgpjs/openpgp.min.js',
-        'js/mimemessage/mimemessage.js'
+        this.getResource('js/openpgpjs/openpgp.min.js'),
+        this.getResource('js/mimemessage/mimemessage.js')
     ], new AjxCallback(function() {
         self._initOpenPGP();
     }));
@@ -1073,40 +1073,8 @@ OpenPGPZimbraSecure.prototype._shouldEncrypt = function(ctlr, useToolbarOnly) {
     return this._getUserSecuritySetting(ctlr, useToolbarOnly) == OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT;
 };
 
-OpenPGPZimbraSecure.prototype._addJsScripts = function(paths, callback) {
-    var self = this;
-    var head = document.getElementsByTagName('head')[0];
-
-    function loadNextScript(script) {
-        if (AjxEnv.isIE && script && !/loaded|complete/.test(script.readyState))
-            return;
-        window.status = '';
-        if (paths.length > 0) {
-            var path = paths.shift();
-            var script = document.createElement('script');
-            var handler = AjxCallback.simpleClosure(loadNextScript, null, script);
-            if (script.attachEvent) {
-                script.attachEvent('onreadystatechange', handler);
-                script.attachEvent('onerror', handler);
-            }
-            else if (script.addEventListener) {
-                script.addEventListener('load', handler, true);
-                script.addEventListener('error', handler, true);
-            }
-            script.type = 'text/javascript';
-            script.src = self.getResource(path);
-            window.status = 'Loading script: ' + path;
-            head.appendChild(script);
-        }
-        else if (paths.length == 0) {
-            script = null;
-            head = null;
-            if (callback) {
-                callback.run();
-            }
-        }
-    }
-    loadNextScript(null);
+OpenPGPZimbraSecure.prototype._addJsScripts = function(scripts, callback) {
+    return AjxInclude(scripts, null, callback);
 };
 
 OpenPGPZimbraSecure.prototype._initOpenPGP = function() {
