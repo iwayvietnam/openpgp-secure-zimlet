@@ -2,3 +2,6 @@
 *.deb
 *.jar
 *.zip
+*.mo
+*.po
+*.pot
