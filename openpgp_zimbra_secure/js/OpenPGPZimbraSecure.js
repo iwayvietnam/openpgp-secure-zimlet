@@ -1157,10 +1157,18 @@ OpenPGPZimbraSecure.decryptAttachment = function(name, url) {
         if (response.success) {
             var handler = OpenPGPZimbraSecure.getInstance();
             var data = OpenPGPUtils.base64Decode(response.text);
-            var opts = {
-                message: openpgp.message.read(OpenPGPUtils.stringToArray(data)),
-                privateKey: handler.getPGPKeys().getPrivateKey()
-            };
+            if (OpenPGPUtils.hasInlinePGPContent(data, OpenPGPUtils.OPENPGP_MESSAGE_HEADER)) {
+                var opts = {
+                    message: openpgp.message.readArmored(data),
+                    privateKey: handler.getPGPKeys().getPrivateKey()
+                };
+            }
+            else {
+                var opts = {
+                    message: openpgp.message.read(OpenPGPUtils.stringToArray(data)),
+                    privateKey: handler.getPGPKeys().getPrivateKey()
+                };
+            }
             openpgp.decrypt(opts).then(function(plainText) {
                 OpenPGPUtils.saveAs(plainText.data, name, 'application/octet-stream');
             });
