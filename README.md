@@ -1,12 +1,11 @@
-# openpgp-zimlet
- OpenPGP Zimlet - Sign, verify, encrypt, and decrypt email with PGP/MIME by OpenPGP for Zimbra 
+# OpenPGP Zimlet
+ OpenPGP Zimlet - Sign, verify, encrypt, and decrypt email with PGP/MIME by OpenPGP for Zimbra
 
 # Features
-- Sign/encrypt mail when sending, decrypt/verify received mail
+- Automatically sign/encrypt mail when sending, verify/decrypt received mail
 - Support [PGP/MIME](https://www.ietf.org/rfc/rfc3156.txt)
-- Support Inline-PGP signed/encrypted received messages
-- Support decrypting Inline-PGP encrypted attachments
-- Support decrypting PGP/MIME encrypted attachments
+- Support [Inline-PGP](https://www.ietf.org/rfc/rfc4880.txt) signed/encrypted received messages
+- Support decrypting PGP/MIME and Inline-PGP encrypted attachments
 - Support GUI for easy configuration and OpenPGP key management
 
 ### License
