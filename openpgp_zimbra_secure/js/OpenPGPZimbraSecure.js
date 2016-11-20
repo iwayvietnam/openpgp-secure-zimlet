@@ -324,13 +324,24 @@ OpenPGPZimbraSecure.prototype._decryptInlineMessage = function(callback, msg, re
             }
         });
         if (contentPart) {
+            if (contentPart.ct.indexOf('text/html') >= 0) {
+                var content = AjxStringUtil.stripTags(contentPart.content);
+            }
+            else {
+                var content = contentPart.content;
+            }
             OpenPGPDecrypt.decryptContent(
-                contentPart.content,
+                content,
                 self._pgpKeys.getPublicKeys(),
                 self._pgpKeys.getPrivateKey(),
                 function(result) {
                     if (result.content) {
-                        contentPart.content = result.content;
+                        if (contentPart.ct.indexOf('text/html') >= 0) {
+                            contentPart.content = '<pre>' + result.content + '</pre>';
+                        }
+                        else {
+                            contentPart.content = result.content;
+                        }
                     }
                     var text = OpenPGPUtils.base64Decode(response.text);
                     var message = mimemessage.parse(text.replace(/\r?\n/g, "\r\n"));
