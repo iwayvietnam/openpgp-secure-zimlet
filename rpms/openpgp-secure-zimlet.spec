@@ -4,7 +4,7 @@ Release:        1%{?dist}
 Summary:        OpenPGP Secure Zimlet
 
 Group:          Applications/Internet
-License:        GPLv2
+License:        AGPLv3
 URL:            https://github.com/nguyennv/openpgp-zimlet
 Source0:        https://github.com/nguyennv/openpgp-zimlet/archive/%{version}.tar.gz
 
