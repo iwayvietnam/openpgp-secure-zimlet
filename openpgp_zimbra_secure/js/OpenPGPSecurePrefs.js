@@ -329,17 +329,6 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
                         self.setFormValue(OpenPGPSecurePrefs.PASSPHRASE, key.passphrase);
                         self.setFormValue(OpenPGPSecurePrefs.PUBLIC_KEY, publicKey);
 
-                        var zmSettings = appCtxt.getSettings();
-
-                        var privateKeySetting = zmSettings.getSetting(OpenPGPSecurePrefs.PRIVATE_KEY);
-                        privateKeySetting.setValue(privateKey);
-
-                        var passphraseSetting = zmSettings.getSetting(OpenPGPSecurePrefs.PASSPHRASE);
-                        passphraseSetting.setValue(key.passphrase);
-
-                        var publicKeySetting = zmSettings.getSetting(OpenPGPSecurePrefs.PUBLIC_KEY);
-                        publicKeySetting.setValue(publicKey);
-
                         return key;
                     });
                 }
