@@ -63,7 +63,7 @@ OpenPGPSecurePrefs.registerSettings = function(handler) {
     zmSettings.registerSetting(OpenPGPSecurePrefs.PRIVATE_KEY, {
         type: ZmSetting.T_PREF,
         dataType: ZmSetting.D_STRING,
-        defaultValue: privateKey ? privateKey.armor().trim() : ''
+        defaultValue: privateKey ? privateKey.armor().trim().replace(/\r?\n/g, '\n') : ''
     });
     zmSettings.registerSetting(OpenPGPSecurePrefs.PASSPHRASE, {
         type: ZmSetting.T_PREF,
@@ -73,7 +73,7 @@ OpenPGPSecurePrefs.registerSettings = function(handler) {
     zmSettings.registerSetting(OpenPGPSecurePrefs.PUBLIC_KEY, {
         type: ZmSetting.T_PREF,
         dataType: ZmSetting.D_STRING,
-        defaultValue: publicKey ? publicKey.armor().trim() : ''
+        defaultValue: publicKey ? publicKey.armor().trim().replace(/\r?\n/g, '\n') : ''
     });
     zmSettings.registerSetting(OpenPGPSecurePrefs.KEYPAIR_GEN, {
         type: ZmSetting.T_PREF,
@@ -234,8 +234,8 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
         var publicKeySetting = zmSettings.getSetting(OpenPGPSecurePrefs.PUBLIC_KEY);
         var publicKey = publicKeySetting.origValue = publicKeySetting.getValue();
 
-        this._pgpKeys.setPrivateKey(privateKey, passphrase);
-        this._pgpKeys.setPublicKey(publicKey);
+        this._pgpKeys.setPrivateKey(privateKey.replace(/\r?\n/g, '\r\n'), passphrase);
+        this._pgpKeys.setPublicKey(publicKey.replace(/\r?\n/g, '\r\n'));
 
         this._controller.setDirty(this._section.id, false);
 
@@ -322,20 +322,23 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
                 this._handler,
                 function(dialog) {
                     return dialog.generateKey().then(function(key) {
-                        self.setFormValue(OpenPGPSecurePrefs.PRIVATE_KEY, key.privateKey);
+                        var privateKey = key.privateKey.replace(/\r?\n/g, '\n');
+                        var publicKey = key.publicKey.replace(/\r?\n/g, '\n');
+
+                        self.setFormValue(OpenPGPSecurePrefs.PRIVATE_KEY, privateKey);
                         self.setFormValue(OpenPGPSecurePrefs.PASSPHRASE, key.passphrase);
-                        self.setFormValue(OpenPGPSecurePrefs.PUBLIC_KEY, key.publicKey);
+                        self.setFormValue(OpenPGPSecurePrefs.PUBLIC_KEY, publicKey);
 
                         var zmSettings = appCtxt.getSettings();
 
                         var privateKeySetting = zmSettings.getSetting(OpenPGPSecurePrefs.PRIVATE_KEY);
-                        privateKeySetting.setValue(key.privateKey);
+                        privateKeySetting.setValue(privateKey);
 
                         var passphraseSetting = zmSettings.getSetting(OpenPGPSecurePrefs.PASSPHRASE);
                         passphraseSetting.setValue(key.passphrase);
 
                         var publicKeySetting = zmSettings.getSetting(OpenPGPSecurePrefs.PUBLIC_KEY);
-                        publicKeySetting.setValue(key.publicKey);
+                        publicKeySetting.setValue(publicKey);
 
                         return key;
                     });
@@ -351,7 +354,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
         if (publicKey.length > 0) {
             var keyServer = this._handler.getZimletContext().getConfig('openpgp-key-server');
             var hkp = new openpgp.HKP(keyServer);
-            hkp.upload(publicKey).then(function() {
+            hkp.upload(publicKey.replace(/\r?\n/g, '\r\n')).then(function() {
                 self._handler.displayStatusMessage(self._handler.getMessage('publicKeySubmitted'));
             });
         }
@@ -379,7 +382,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
     OpenPGPSecurePrefs.prototype._keyExport = function() {
         var privateKey = this.getFormValue(OpenPGPSecurePrefs.PRIVATE_KEY);
         var publicKey = this.getFormValue(OpenPGPSecurePrefs.PUBLIC_KEY);
-        OpenPGPUtils.saveTextAs(privateKey + '\r\n\r\n' + publicKey, 'keypair.asc');
+        OpenPGPUtils.saveTextAs(privateKey.replace(/\r?\n/g, '\r\n') + '\r\n\r\n' + publicKey.replace(/\r?\n/g, '\r\n'), 'keypair.asc');
     }
 
     OpenPGPSecurePrefs.prototype._togglePassphrase = function() {
