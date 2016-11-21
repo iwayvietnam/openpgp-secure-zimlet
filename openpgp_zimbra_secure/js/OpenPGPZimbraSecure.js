@@ -81,15 +81,7 @@ OpenPGPZimbraSecure.prototype.init = function() {
             });
             self._handleMessageResponse(newCallback, result);
         };
-
-        var inlineImgFunc = ZmMailMsgView.__unfangInternalImage;
-        ZmMailMsgView.__unfangInternalImage = function(msg, elem, aname, external) {
-            var result = inlineImgFunc(msg, elem, aname, external);
-            if (aname == 'src') {
-                self._processInlineImageElement(msg, elem, aname);
-            }
-            return result;
-        };
+        self._processInlineImageElement();
     }));
 
     AjxDispatcher.addPackageLoadFunction('Startup1_2', new AjxCallback(this, function() {
@@ -111,14 +103,7 @@ OpenPGPZimbraSecure.prototype.init = function() {
             self._handleMessageResponse(newCallback, result);
         };
 
-        var inlineImgFunc = ZmMailMsgView.__unfangInternalImage;
-        ZmMailMsgView.__unfangInternalImage = function(msg, elem, aname, external) {
-            var result = inlineImgFunc(msg, elem, aname, external);
-            if (aname == 'src') {
-                self._processInlineImageElement(msg, elem, aname);
-            }
-            return result;
-        };
+        self._processInlineImageElement();
     }));
 
     this._addJsScripts([
@@ -195,30 +180,35 @@ OpenPGPZimbraSecure.prototype.getSecurePassword = function() {
     return this._securePassword;
 };
 
-OpenPGPZimbraSecure.prototype._processInlineImageElement = function(msg, elem, aname) {
-    if (!this._pgpMessageCache[msg.id])
-        return;
+OpenPGPZimbraSecure.prototype._processInlineImageElement = function() {
+    var self = this;
+    var inlineImgFunc = ZmMailMsgView.__unfangInternalImage;
+    ZmMailMsgView.__unfangInternalImage = function(msg, elem, aname, external) {
+        var result = inlineImgFunc(msg, elem, aname, external);
+        if (aname == 'src' && self._pgpMessageCache[msg.id]) {
+            var pgpMessage = self._pgpMessageCache[msg.id];
+            if (pgpMessage.encrypted) {
+                var pnSrc = Dwt.getAttr(elem, 'pn' + aname);
+                var link = pnSrc || Dwt.getAttr(elem, aname);
 
-    var pgpMessage = this._pgpMessageCache[msg.id];
-    if (pgpMessage.encrypted) {
-        var pnSrc = Dwt.getAttr(elem, 'pn' + aname);
-        var link = pnSrc || Dwt.getAttr(elem, aname);
-
-        if (link && link.substring(0, 4) === 'cid:') {
-            OpenPGPUtils.visitMessage(pgpMessage, function(message) {
-                var cd = message.header('Content-Disposition');
-                var cid = message.header('Content-ID');
-                if (cid) {
-                    cid = cid.replace(/[<>]/g, '');
+                if (link && link.substring(0, 4) === 'cid:') {
+                    OpenPGPUtils.visitMessage(pgpMessage, function(message) {
+                        var cd = message.header('Content-Disposition');
+                        var cid = message.header('Content-ID');
+                        if (cid) {
+                            cid = cid.replace(/[<>]/g, '');
+                        }
+                        if (cd === 'attachment' && cid === link.substring(4) && typeof message._body === 'string') {
+                            var ct = message.contentType();
+                            var newLink = 'data:' + ct.fulltype + ';base64,' + message._body.replace(/\r?\n/g, '');
+                            elem.setAttribute('src', newLink);
+                        }
+                    });
                 }
-                if (cd === 'attachment' && cid === link.substring(4) && typeof message._body === 'string') {
-                    var ct = message.contentType();
-                    var newLink = 'data:' + ct.fulltype + ';base64,' + message._body.replace(/\r?\n/g, '');
-                    elem.setAttribute('src', newLink);
-                }
-            });
+            }
         }
-    }
+        return result;
+    };
 }
 
 /**
