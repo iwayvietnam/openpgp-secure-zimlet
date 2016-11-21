@@ -142,8 +142,8 @@ OpenPGPZimbraSecure.prototype.addAttachmentHandler = function() {
     OpenPGPUtils.OPENPGP_CONTENT_TYPES.forEach(function(contentType) {
         ZmMimeTable._table[contentType] = {
             desc: 'OpenPGP encrypted file',
-            image: "PGPEncrypted",
-            imageLarge: "PGPEncrypted"
+            image: 'PGPEncrypted',
+            imageLarge: 'PGPEncrypted'
         };
     });
 
@@ -386,7 +386,7 @@ OpenPGPZimbraSecure.prototype._decryptInlineMessage = function(callback, msg, re
                         }
                     }
                     var text = OpenPGPUtils.base64Decode(response.text);
-                    var message = mimemessage.parse(text.replace(/\r?\n/g, "\r\n"));
+                    var message = mimemessage.parse(text.replace(/\r?\n/g, '\r\n'));
                     message.signatures = result.signatures;
                     message.hasPGPKey = msg.hasPGPKey;
                     message.pgpKey = msg.pgpKey;
@@ -850,12 +850,12 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
                 if (clientVersion.indexOf('8.7.0_GA') >= 0 || clientVersion.indexOf('8.7.1_GA') >= 0) {
                     htmlArr.push(AjxImg.getImageHtml({
                         imageName: mimeInfo ? mimeInfo.image : 'GenericDoc',
-                        styles: "position:relative;",
+                        styles: 'position:relative;',
                         altText: ZmMsg.attachment
                     }));
                 }
                 else {
-                    htmlArr.push(AjxImg.getImageHtml(mimeInfo ? mimeInfo.image : 'GenericDoc', "position:relative;", null, false, false, null, ZmMsg.attachment));
+                    htmlArr.push(AjxImg.getImageHtml(mimeInfo ? mimeInfo.image : 'GenericDoc', 'position:relative;', null, false, false, null, ZmMsg.attachment));
                 }
                 htmlArr.push('</td><td style="white-space:nowrap">');
 
@@ -872,13 +872,13 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
                 htmlArr.push('</span>');
 
                 if (attachment.size < 1024) {
-                    size = numFormatter.format(attachment.size) + " " + ZmMsg.b;
+                    size = numFormatter.format(attachment.size) + ' ' + ZmMsg.b;
                 }
                 else if (attachment.size < (1024 * 1024)) {
-                    size = numFormatter.format(Math.round((attachment.size / 1024) * 10) / 10) + " " + ZmMsg.kb;
+                    size = numFormatter.format(Math.round((attachment.size / 1024) * 10) / 10) + ' ' + ZmMsg.kb;
                 }
                 else {
-                    size = numFormatter.format(Math.round((attachment.size / (1024 * 1024)) * 10) / 10) + " " + ZmMsg.mb;
+                    size = numFormatter.format(Math.round((attachment.size / (1024 * 1024)) * 10) / 10) + ' ' + ZmMsg.mb;
                 }
                 htmlArr.push('&nbsp;(' + size + ')&nbsp;');
 

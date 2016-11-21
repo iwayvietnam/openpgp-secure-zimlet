@@ -81,7 +81,7 @@ SendPublicKeyDialog.prototype.sendPubicKey = function(callback) {
 
         var textPart = new ZmMimePart();
         textPart.setContentType(ZmMimeTable.TEXT_PLAIN);
-        textPart.setContent(textContents.join("\r\n"));
+        textPart.setContent(textContents.join('\r\n'));
         textPart.setIsBody(true);
         top.children.add(textPart);
 

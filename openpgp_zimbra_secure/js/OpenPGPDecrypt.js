@@ -65,7 +65,7 @@ OpenPGPDecrypt.prototype.decrypt = function() {
                 privateKey: self._privateKey
             };
             return openpgp.decrypt(opts).then(function(plainText) {
-                var data = plainText.data.replace(/\r?\n/g, "\r\n");
+                var data = plainText.data.replace(/\r?\n/g, '\r\n');
                 self._message = mimemessage.parse(data);
                 if (!self._message) {
                     throw new Error(OpenPGPUtils.getMessage('parseDecryptedMessageError'));

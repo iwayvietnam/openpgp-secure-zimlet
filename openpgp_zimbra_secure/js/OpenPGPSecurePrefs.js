@@ -379,7 +379,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
     OpenPGPSecurePrefs.prototype._keyExport = function() {
         var privateKey = this.getFormValue(OpenPGPSecurePrefs.PRIVATE_KEY);
         var publicKey = this.getFormValue(OpenPGPSecurePrefs.PUBLIC_KEY);
-        OpenPGPUtils.saveTextAs(privateKey + "\r\n\r\n" + publicKey, 'keypair.asc');
+        OpenPGPUtils.saveTextAs(privateKey + '\r\n\r\n' + publicKey, 'keypair.asc');
     }
 
     OpenPGPSecurePrefs.prototype._togglePassphrase = function() {

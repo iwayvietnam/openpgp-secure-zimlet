@@ -25,7 +25,7 @@ OpenPGPDialog = function(handler, title, onOk, onCancel, standardButtons) {
     ZmDialog.call(this, {
         title: title,
         parent: appCtxt.getShell(),
-        className: "OpenPGP dialog",
+        className: 'OpenPGP dialog',
         standardButtons: standardButtons
     });
     this._handler = handler;

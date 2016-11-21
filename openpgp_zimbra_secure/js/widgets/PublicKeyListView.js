@@ -155,7 +155,7 @@ PublicKeyListView.prototype._deleteListener = function() {
         buttons: [DwtDialog.YES_BUTTON, DwtDialog.NO_BUTTON]
     });
     deleteDialog.setMessage(
-        (ZmMsg.confirmDeleteForever).replace(/{0,.*,1#|\|2#.*\}/g,""),
+        (ZmMsg.confirmDeleteForever).replace(/{0,.*,1#|\|2#.*\}/g, ''),
         DwtMessageDialog.WARNING_STYLE,
         ZmMsg.remove
     );
