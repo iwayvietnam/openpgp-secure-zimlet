@@ -114,97 +114,96 @@ OpenPGPSecurePrefs.registerSettings = function(handler) {
     });
 };
 
+OpenPGPSecurePrefs.registerPrefs = function(handler) {
+    ZmPref.registerPref(OpenPGPSecurePrefs.SECURITY, {
+        displayContainer: ZmPref.TYPE_RADIO_GROUP,
+        orientation:      ZmPref.ORIENT_VERTICAL,
+        displayOptions:   [
+            handler.getMessage('prefSecurityAuto'),
+            handler.getMessage('prefSecurityNone'),
+            handler.getMessage('prefSecuritySign'),
+            handler.getMessage('prefSecurityBoth')
+        ],
+        options: [
+            OpenPGPZimbraSecure.OPENPGP_AUTO,
+            OpenPGPZimbraSecure.OPENPGP_DONTSIGN,
+            OpenPGPZimbraSecure.OPENPGP_SIGN,
+            OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT
+        ]
+    });
+
+    ZmPref.registerPref(OpenPGPSecurePrefs.PRIVATE_KEY, {
+        displayName:      handler.getMessage('prefPrivateKey'),
+        displayContainer: ZmPref.TYPE_TEXTAREA
+    });
+
+    ZmPref.registerPref(OpenPGPSecurePrefs.PASSPHRASE, {
+        displayContainer: ZmPref.TYPE_STATIC
+    });
+
+    ZmPref.registerPref(OpenPGPSecurePrefs.PUBLIC_KEY, {
+        displayName:      handler.getMessage('prefPublicKey'),
+        displayContainer: ZmPref.TYPE_TEXTAREA
+    });
+
+    ZmPref.registerPref(OpenPGPSecurePrefs.KEYPAIR_GEN, {
+        displayContainer: ZmPref.TYPE_STATIC
+    });
+    ZmPref.registerPref(OpenPGPSecurePrefs.KEY_SUBMIT, {
+        displayContainer: ZmPref.TYPE_STATIC
+    });
+    ZmPref.registerPref(OpenPGPSecurePrefs.KEY_SEND, {
+        displayContainer: ZmPref.TYPE_STATIC
+    });
+    ZmPref.registerPref(OpenPGPSecurePrefs.KEY_EXPORT, {
+        displayContainer: ZmPref.TYPE_STATIC
+    });
+    ZmPref.registerPref(OpenPGPSecurePrefs.PASSPHRASE_TOGGLE, {
+        displayContainer: ZmPref.TYPE_STATIC
+    });
+    ZmPref.registerPref(OpenPGPSecurePrefs.KEY_ADD, {
+        displayContainer: ZmPref.TYPE_STATIC
+    });
+    ZmPref.registerPref(OpenPGPSecurePrefs.KEY_LOOKUP, {
+        displayContainer: ZmPref.TYPE_STATIC
+    });
+    ZmPref.registerPref(OpenPGPSecurePrefs.PUBLIC_KEYS, {
+        displayContainer: ZmPref.TYPE_CUSTOM
+    });
+
+    var section = {
+        title: handler.getMessage('prefSection'),
+        icon: 'TrustedAddresses',
+        templateId: 'openpgp_zimbra_secure#Preferences',
+        priority: 49,
+        manageDirty: true,
+        prefs: [
+            ZmSetting[OpenPGPSecurePrefs.SECURITY],
+            ZmSetting[OpenPGPSecurePrefs.PRIVATE_KEY],
+            ZmSetting[OpenPGPSecurePrefs.PASSPHRASE],
+            ZmSetting[OpenPGPSecurePrefs.PUBLIC_KEY],
+            ZmSetting[OpenPGPSecurePrefs.KEYPAIR_GEN],
+            ZmSetting[OpenPGPSecurePrefs.KEY_SUBMIT],
+            ZmSetting[OpenPGPSecurePrefs.KEY_SEND],
+            ZmSetting[OpenPGPSecurePrefs.KEY_EXPORT],
+            ZmSetting[OpenPGPSecurePrefs.PASSPHRASE_TOGGLE],
+            ZmSetting[OpenPGPSecurePrefs.KEY_ADD],
+            ZmSetting[OpenPGPSecurePrefs.KEY_LOOKUP],
+            ZmSetting[OpenPGPSecurePrefs.PUBLIC_KEYS]
+        ],
+        createView: function(parent, sectionObj, controller) {
+            return new OpenPGPSecurePrefs(parent, sectionObj, controller, handler);
+        }
+    };
+    ZmPref.registerPrefSection('SECURITY_PREFERENCES', section);
+};
+
 AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
     OpenPGPSecurePrefs.prototype = new ZmPreferencesPage;
     OpenPGPSecurePrefs.prototype.constructor = OpenPGPSecurePrefs;
 
     OpenPGPSecurePrefs.prototype.toString = function() {
         return 'OpenPGPSecurePrefs';
-    };
-
-    // Setup
-    OpenPGPSecurePrefs.registerPrefs = function(handler) {
-        ZmPref.registerPref(OpenPGPSecurePrefs.SECURITY, {
-            displayContainer: ZmPref.TYPE_RADIO_GROUP,
-            orientation:      ZmPref.ORIENT_VERTICAL,
-            displayOptions:   [
-                handler.getMessage('prefSecurityAuto'),
-                handler.getMessage('prefSecurityNone'),
-                handler.getMessage('prefSecuritySign'),
-                handler.getMessage('prefSecurityBoth')
-            ],
-            options: [
-                OpenPGPZimbraSecure.OPENPGP_AUTO,
-                OpenPGPZimbraSecure.OPENPGP_DONTSIGN,
-                OpenPGPZimbraSecure.OPENPGP_SIGN,
-                OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT
-            ]
-        });
-
-        ZmPref.registerPref(OpenPGPSecurePrefs.PRIVATE_KEY, {
-            displayName:      handler.getMessage('prefPrivateKey'),
-            displayContainer: ZmPref.TYPE_TEXTAREA
-        });
-
-        ZmPref.registerPref(OpenPGPSecurePrefs.PASSPHRASE, {
-            displayContainer: ZmPref.TYPE_STATIC
-        });
-
-        ZmPref.registerPref(OpenPGPSecurePrefs.PUBLIC_KEY, {
-            displayName:      handler.getMessage('prefPublicKey'),
-            displayContainer: ZmPref.TYPE_TEXTAREA
-        });
-    
-        ZmPref.registerPref(OpenPGPSecurePrefs.KEYPAIR_GEN, {
-            displayContainer: ZmPref.TYPE_STATIC
-        });
-        ZmPref.registerPref(OpenPGPSecurePrefs.KEY_SUBMIT, {
-            displayContainer: ZmPref.TYPE_STATIC
-        });
-        ZmPref.registerPref(OpenPGPSecurePrefs.KEY_SEND, {
-            displayContainer: ZmPref.TYPE_STATIC
-        });
-        ZmPref.registerPref(OpenPGPSecurePrefs.KEY_EXPORT, {
-            displayContainer: ZmPref.TYPE_STATIC
-        });
-        ZmPref.registerPref(OpenPGPSecurePrefs.PASSPHRASE_TOGGLE, {
-            displayContainer: ZmPref.TYPE_STATIC
-        });
-        ZmPref.registerPref(OpenPGPSecurePrefs.KEY_ADD, {
-            displayContainer: ZmPref.TYPE_STATIC
-        });
-        ZmPref.registerPref(OpenPGPSecurePrefs.KEY_LOOKUP, {
-            displayContainer: ZmPref.TYPE_STATIC
-        });
-        ZmPref.registerPref(OpenPGPSecurePrefs.PUBLIC_KEYS, {
-            displayContainer: ZmPref.TYPE_CUSTOM
-        });
-
-        var section = {
-            title: handler.getMessage('prefSection'),
-            icon: 'TrustedAddresses',
-            templateId: 'openpgp_zimbra_secure#Preferences',
-            priority: 49,
-            manageDirty: true,
-            prefs: [
-                ZmSetting[OpenPGPSecurePrefs.SECURITY],
-                ZmSetting[OpenPGPSecurePrefs.PRIVATE_KEY],
-                ZmSetting[OpenPGPSecurePrefs.PASSPHRASE],
-                ZmSetting[OpenPGPSecurePrefs.PUBLIC_KEY],
-                ZmSetting[OpenPGPSecurePrefs.KEYPAIR_GEN],
-                ZmSetting[OpenPGPSecurePrefs.KEY_SUBMIT],
-                ZmSetting[OpenPGPSecurePrefs.KEY_SEND],
-                ZmSetting[OpenPGPSecurePrefs.KEY_EXPORT],
-                ZmSetting[OpenPGPSecurePrefs.PASSPHRASE_TOGGLE],
-                ZmSetting[OpenPGPSecurePrefs.KEY_ADD],
-                ZmSetting[OpenPGPSecurePrefs.KEY_LOOKUP],
-                ZmSetting[OpenPGPSecurePrefs.PUBLIC_KEYS]
-            ],
-            createView: function(parent, sectionObj, controller) {
-                return new OpenPGPSecurePrefs(parent, sectionObj, controller, handler);
-            }
-        };
-        ZmPref.registerPrefSection('SECURITY_PREFERENCES', section);
     };
 
     // Saving
