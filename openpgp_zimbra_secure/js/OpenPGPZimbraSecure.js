@@ -206,13 +206,13 @@ OpenPGPZimbraSecure.prototype._processInlineImageElement = function(msg, elem, a
 
         if (link && link.substring(0, 4) === 'cid:') {
             OpenPGPUtils.visitMessage(pgpMessage, function(message) {
-                var ct = message.contentType();
                 var cd = message.header('Content-Disposition');
                 var cid = message.header('Content-ID');
                 if (cid) {
                     cid = cid.replace(/[<>]/g, '');
                 }
                 if (cd === 'attachment' && cid === link.substring(4) && typeof message._body === 'string') {
+                    var ct = message.contentType();
                     var newLink = 'data:' + ct.fulltype + ';base64,' + message._body.replace(/\r?\n/g, '');
                     elem.setAttribute('src', newLink);
                 }
