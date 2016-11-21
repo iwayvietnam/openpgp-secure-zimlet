@@ -201,8 +201,8 @@ OpenPGPZimbraSecure.prototype._processInlineImageElement = function(msg, elem, a
 
     var pgpMessage = this._pgpMessageCache[msg.id];
     if (pgpMessage.encrypted) {
-        var pnSrc = elem.getAttribute('pn' + aname);
-        var link = pnSrc || elem.getAttribute(aname);
+        var pnSrc = Dwt.getAttr(elem, 'pn' + aname);
+        var link = pnSrc || Dwt.getAttr(elem, aname);
 
         if (link && link.substring(0, 4) === 'cid:') {
             OpenPGPUtils.visitMessage(pgpMessage, function(message) {
