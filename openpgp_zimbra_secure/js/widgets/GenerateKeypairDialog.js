@@ -68,9 +68,9 @@ GenerateKeypairDialog.prototype.generateKey = function() {
     var numBits = view.selNumBits.getValue();
 
     var userIds = [];
-    var addresses = email.split(', ');
-    addresses.forEach(function(address) {
-        userIds.push({name: name, email: address});
+    var addrs = AjxEmailAddress.getValidAddresses(email);
+    addrs.foreach(function(addr) {
+        userIds.push({name: name, email: addr.getAddress()});
     });
 
     var opts = {
