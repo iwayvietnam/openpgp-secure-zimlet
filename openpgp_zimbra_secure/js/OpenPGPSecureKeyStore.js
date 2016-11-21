@@ -21,7 +21,7 @@
  * Written by nguyennv1981@gmail.com
  */
 
-OpenPGPSecureKeys = function(handler) {
+OpenPGPSecureKeyStore = function(handler) {
     this._handler = handler;
     this._fingerprints = [];
     this._addCallbacks = [];
@@ -34,13 +34,13 @@ OpenPGPSecureKeys = function(handler) {
     this.publicKeys = [];
 };
 
-OpenPGPSecureKeys.ADD_CALLBACK = 'add';
-OpenPGPSecureKeys.REMOVE_CALLBACK = 'remove';
+OpenPGPSecureKeyStore.ADD_CALLBACK = 'add';
+OpenPGPSecureKeyStore.REMOVE_CALLBACK = 'remove';
 
-OpenPGPSecureKeys.prototype = new Object();
-OpenPGPSecureKeys.prototype.constructor = OpenPGPSecureKeys;
+OpenPGPSecureKeyStore.prototype = new Object();
+OpenPGPSecureKeyStore.prototype.constructor = OpenPGPSecureKeyStore;
 
-OpenPGPSecureKeys.prototype.init = function() {
+OpenPGPSecureKeyStore.prototype.init = function() {
     var self = this;
     var pgpKey = openpgp.key;
 
@@ -105,7 +105,7 @@ OpenPGPSecureKeys.prototype.init = function() {
     });
 };
 
-OpenPGPSecureKeys.prototype.addPublicKey = function(key) {
+OpenPGPSecureKeyStore.prototype.addPublicKey = function(key) {
     var self = this;
     var added = false;
 
@@ -124,7 +124,7 @@ OpenPGPSecureKeys.prototype.addPublicKey = function(key) {
     }
 };
 
-OpenPGPSecureKeys.prototype.removePublicKey = function(fingerprint) {
+OpenPGPSecureKeyStore.prototype.removePublicKey = function(fingerprint) {
     var self = this;
     var removed = false;
     this.publicKeys.forEach(function(key, index) {
@@ -143,8 +143,8 @@ OpenPGPSecureKeys.prototype.removePublicKey = function(fingerprint) {
     }
 };
 
-OpenPGPSecureKeys.prototype.addCallback = function(callback, type) {
-    if (type === OpenPGPSecureKeys.REMOVE_CALLBACK) {
+OpenPGPSecureKeyStore.prototype.addCallback = function(callback, type) {
+    if (type === OpenPGPSecureKeyStore.REMOVE_CALLBACK) {
         this._removeCallbacks.push(callback);
     }
     else {
@@ -152,15 +152,15 @@ OpenPGPSecureKeys.prototype.addCallback = function(callback, type) {
     }
 };
 
-OpenPGPSecureKeys.prototype.getPassphrase = function() {
+OpenPGPSecureKeyStore.prototype.getPassphrase = function() {
     return this.passphrase;
 };
 
-OpenPGPSecureKeys.prototype.getPrivateKey = function() {
+OpenPGPSecureKeyStore.prototype.getPrivateKey = function() {
     return this.privateKey;
 };
 
-OpenPGPSecureKeys.prototype.setPrivateKey = function(privateKey, passphrase) {
+OpenPGPSecureKeyStore.prototype.setPrivateKey = function(privateKey, passphrase) {
     var self = this;
     var privKey = openpgp.key.readArmored(privateKey);
     privKey.keys.forEach(function(key) {
@@ -185,15 +185,15 @@ OpenPGPSecureKeys.prototype.setPrivateKey = function(privateKey, passphrase) {
     });
 };
 
-OpenPGPSecureKeys.prototype.getPublicKeys = function() {
+OpenPGPSecureKeyStore.prototype.getPublicKeys = function() {
     return this.publicKeys;
 };
 
-OpenPGPSecureKeys.prototype.getPublicKey = function() {
+OpenPGPSecureKeyStore.prototype.getPublicKey = function() {
     return this.publicKey;
 };
 
-OpenPGPSecureKeys.prototype.setPublicKey = function(publicKey) {
+OpenPGPSecureKeyStore.prototype.setPublicKey = function(publicKey) {
     var self = this;
     var pubKey = openpgp.key.readArmored(publicKey);
     pubKey.keys.forEach(function(key) {
@@ -203,7 +203,7 @@ OpenPGPSecureKeys.prototype.setPublicKey = function(publicKey) {
     });
 };
 
-OpenPGPSecureKeys.prototype.filterPublicKeys = function(addrs) {
+OpenPGPSecureKeyStore.prototype.havingPublicKeys = function(addrs) {
     var dupes = [];
     var publicKeys = [];
     this.publicKeys.forEach(function(key) {
@@ -221,7 +221,7 @@ OpenPGPSecureKeys.prototype.filterPublicKeys = function(addrs) {
     return publicKeys;
 };
 
-OpenPGPSecureKeys.prototype.notHasPublicKey = function(addrs) {
+OpenPGPSecureKeyStore.prototype.publicKeyMissing = function(addrs) {
     var uidAddresses = [];
     this.publicKeys.forEach(function(key) {
         for (i = 0; i < key.users.length; i++) {
@@ -232,20 +232,20 @@ OpenPGPSecureKeys.prototype.notHasPublicKey = function(addrs) {
         }
     });
 
-    var addresses = [];
+    var missing = [];
     addrs.foreach(function(addr) {
         if (!uidAddresses[addr.getAddress()]) {
-            addresses.push(addr.getAddress());
+            missing.push(addr.getAddress());
         }
     });
-    return addresses;
+    return missing;
 }
 
-OpenPGPSecureKeys.prototype.publicKeyExisted = function(fingerprint) {
+OpenPGPSecureKeyStore.prototype.publicKeyExisted = function(fingerprint) {
     return this._fingerprints[fingerprint] ? true : false;
 }
 
-OpenPGPSecureKeys.keyInfo = function(key) {
+OpenPGPSecureKeyStore.keyInfo = function(key) {
     var uids = [];
     key.users.forEach(function(user) {
         uids.push(AjxStringUtil.htmlEncode(user.userId.userid));
@@ -266,7 +266,7 @@ OpenPGPSecureKeys.keyInfo = function(key) {
     };
 }
 
-OpenPGPSecureKeys.prototype._storePublicKeys = function() {
+OpenPGPSecureKeyStore.prototype._storePublicKeys = function() {
     var publicKeys = [];
     this.publicKeys.forEach(function(key) {
         publicKeys.push(key.armor());

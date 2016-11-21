@@ -26,7 +26,7 @@ function openpgp_zimbra_secure_HandlerObject() {
     this._pgpMessageCache = appCtxt.isChildWindow ? window.opener.openpgp_zimbra_secure_HandlerObject.getInstance()._pgpMessageCache : {};
     this._sendingAttachments = [];
     this._pgpAttachments = {};
-    this._pgpKeys = new OpenPGPSecureKeys(this);
+    this._keyStore = new OpenPGPSecureKeyStore(this);
     this._securePassword = '';
     var pwdKey = 'openpgp_secure_password_' + this.getUserID();
     if (localStorage[pwdKey]) {
@@ -187,8 +187,8 @@ OpenPGPZimbraSecure.prototype.addAttachmentHandler = function() {
     }
 };
 
-OpenPGPZimbraSecure.prototype.getPGPKeys = function() {
-    return this._pgpKeys;
+OpenPGPZimbraSecure.prototype.getKeyStore = function() {
+    return this._keyStore;
 };
 
 OpenPGPZimbraSecure.prototype.getSecurePassword = function() {
@@ -374,8 +374,8 @@ OpenPGPZimbraSecure.prototype._decryptInlineMessage = function(callback, msg, re
             }
             OpenPGPDecrypt.decryptContent(
                 content,
-                self._pgpKeys.getPublicKeys(),
-                self._pgpKeys.getPrivateKey(),
+                self._keyStore.getPublicKeys(),
+                self._keyStore.getPrivateKey(),
                 function(result) {
                     if (result.content) {
                         if (contentPart.ct.indexOf(ZmMimeTable.TEXT_HTML) >= 0) {
@@ -447,8 +447,8 @@ OpenPGPZimbraSecure.prototype._decryptMessage = function(callback, msg, response
     var self = this;
     if (response.success) {
         var decryptor = new OpenPGPDecrypt({
-            privateKey: this._pgpKeys.getPrivateKey(),
-            publicKeys: this._pgpKeys.getPublicKeys(),
+            privateKey: this._keyStore.getPrivateKey(),
+            publicKeys: this._keyStore.getPublicKeys(),
             onDecrypted: function(decryptor, message) {
                 self.onDecrypted(callback, msg, message);
             },
@@ -522,7 +522,7 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
     }
 
     if (shouldSign) {
-        if (!this._pgpKeys.getPrivateKey()) {
+        if (!this._keyStore.getPrivateKey()) {
             var ps = this._popShield = appCtxt.getYesNoMsgDialog();
             ps.setMessage(this.getMessage('notHavePrivateKeyWarning'), DwtMessageDialog.WARNING_STYLE);
             ps.registerCallback(DwtDialog.YES_BUTTON, function() {
@@ -565,11 +565,11 @@ OpenPGPZimbraSecure.prototype._signMessage = function(orig, msg, params, shouldE
             receivers.add(addr);
         }
     });
-    var notHasAddresses = this._pgpKeys.notHasPublicKey(receivers);
+    var missing = this._keyStore.publicKeyMissing(receivers);
 
-    if (shouldEncrypt && notHasAddresses.length > 0) {
+    if (shouldEncrypt && missing.length > 0) {
         var ps = this._popShield = appCtxt.getYesNoMsgDialog();
-        ps.setMessage(AjxMessageFormat.format(this.getMessage('notHavePublicKeyWarning'), notHasAddresses.join(', ')), DwtMessageDialog.WARNING_STYLE);
+        ps.setMessage(AjxMessageFormat.format(this.getMessage('notHavePublicKeyWarning'), missing.join(', ')), DwtMessageDialog.WARNING_STYLE);
         ps.registerCallback(DwtDialog.YES_BUTTON, function() {
             self._popShield.popdown();
             self._encryptMessage(orig, msg, params, shouldEncrypt, receivers);
@@ -651,9 +651,9 @@ OpenPGPZimbraSecure.prototype._encryptMessage = function(orig, msg, params, shou
     }
 
     var encryptor = new OpenPGPEncrypt({
-        privateKey: this._pgpKeys.getPrivateKey(),
-        publicKey: (msg.attachPublicKey === true) ? this._pgpKeys.getPublicKey() : false,
-        publicKeys: this._pgpKeys.filterPublicKeys(receivers),
+        privateKey: this._keyStore.getPrivateKey(),
+        publicKey: (msg.attachPublicKey === true) ? this._keyStore.getPublicKey() : false,
+        publicKeys: this._keyStore.havingPublicKeys(receivers),
         onEncrypted: function(encryptor, builder) {
             builder.importHeaders(input.m);
             self._onEncrypted(params, input, orig, msg, builder.toString());
@@ -919,15 +919,15 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
         if (pgpKey) {
             var pubKey = openpgp.key.readArmored(pgpKey);
             pubKey.keys.forEach(function(key) {
-                if (key.isPublic() && !self._pgpKeys.publicKeyExisted(key.primaryKey.fingerprint)) {
+                if (key.isPublic() && !self._keyStore.publicKeyExisted(key.primaryKey.fingerprint)) {
                     var dialog = self._keyImportDialog = new ImportPublicKeyDialog(
                         self,
                         function(dialog) {
-                            self._pgpKeys.addPublicKey(key);
+                            self._keyStore.addPublicKey(key);
                             self.displayStatusMessage(self.getMessage('publicKeyImported'));
                         },
                         false,
-                        OpenPGPSecureKeys.keyInfo(key)
+                        OpenPGPSecureKeyStore.keyInfo(key)
                     );
                     dialog.popup();
                 }
@@ -1128,7 +1128,7 @@ OpenPGPZimbraSecure.prototype._initOpenPGP = function() {
         openpgp.initWorker({
             path: path
         });
-        return self._pgpKeys.init();
+        return self._keyStore.init();
     })
     .then(function() {
         OpenPGPSecurePrefs.init(self);
@@ -1142,15 +1142,15 @@ OpenPGPZimbraSecure.importAttachmentKey = function(name, url) {
             var data = OpenPGPUtils.base64Decode(response.text);
             var pubKey = openpgp.key.readArmored(data);
             pubKey.keys.forEach(function(key) {
-                if (key.isPublic() && !handler._pgpKeys.publicKeyExisted(key.primaryKey.fingerprint)) {
+                if (key.isPublic() && !handler._keyStore.publicKeyExisted(key.primaryKey.fingerprint)) {
                     var dialog = handler._keyImportDialog = new ImportPublicKeyDialog(
                         handler,
                         function(dialog) {
-                            handler._pgpKeys.addPublicKey(key);
+                            handler._keyStore.addPublicKey(key);
                             handler.displayStatusMessage(handler.getMessage('publicKeyImported'));
                         },
                         false,
-                        OpenPGPSecureKeys.keyInfo(key)
+                        OpenPGPSecureKeyStore.keyInfo(key)
                     );
                     dialog.popup();
                 }
@@ -1171,13 +1171,13 @@ OpenPGPZimbraSecure.decryptAttachment = function(name, url) {
             if (OpenPGPUtils.hasInlinePGPContent(data, OpenPGPUtils.OPENPGP_MESSAGE_HEADER)) {
                 var opts = {
                     message: openpgp.message.readArmored(data),
-                    privateKey: handler.getPGPKeys().getPrivateKey()
+                    privateKey: handler.getKeyStore().getPrivateKey()
                 };
             }
             else {
                 var opts = {
                     message: openpgp.message.read(OpenPGPUtils.stringToArray(data)),
-                    privateKey: handler.getPGPKeys().getPrivateKey()
+                    privateKey: handler.getKeyStore().getPrivateKey()
                 };
             }
             openpgp.decrypt(opts).then(function(plainText) {

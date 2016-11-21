@@ -74,7 +74,7 @@ KeyLookupView.prototype._keyLookup = function() {
             var pubKey = openpgp.key.readArmored(publicKey);
             var html = '';
             pubKey.keys.forEach(function(key) {
-                html = html + AjxTemplate.expand('openpgp_zimbra_secure#KeyLookupResult', OpenPGPSecureKeys.keyInfo(key));
+                html = html + AjxTemplate.expand('openpgp_zimbra_secure#KeyLookupResult', OpenPGPSecureKeyStore.keyInfo(key));
             });
             document.getElementById(id + '_Result').innerHTML = html;
         });

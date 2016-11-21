@@ -24,7 +24,7 @@
 OpenPGPSecurePrefs = function(shell, section, controller, handler) {
     if (!arguments.length) return;
     this._handler = handler;
-    this._pgpKeys = handler.getPGPKeys();
+    this._keyStore = handler.getKeyStore();
     ZmPreferencesPage.call(this, shell, section, controller);
     this._id = this.getHTMLElId();
 };
@@ -50,9 +50,9 @@ OpenPGPSecurePrefs.SECURITY_SETTINGS = [
 OpenPGPSecurePrefs._loadCallbacks = [];
 
 OpenPGPSecurePrefs.registerSettings = function(handler) {
-    var pgpKeys = handler.getPGPKeys();
-    var privateKey = pgpKeys.getPrivateKey();
-    var publicKey = pgpKeys.getPublicKey();
+    var keyStore = handler.getKeyStore();
+    var privateKey = keyStore.getPrivateKey();
+    var publicKey = keyStore.getPublicKey();
 
     var zmSettings = appCtxt.getSettings();
     zmSettings.registerSetting(OpenPGPSecurePrefs.SECURITY, {
@@ -68,7 +68,7 @@ OpenPGPSecurePrefs.registerSettings = function(handler) {
     zmSettings.registerSetting(OpenPGPSecurePrefs.PASSPHRASE, {
         type: ZmSetting.T_PREF,
         dataType: ZmSetting.D_STRING,
-        defaultValue: pgpKeys.getPassphrase()
+        defaultValue: keyStore.getPassphrase()
     });
     zmSettings.registerSetting(OpenPGPSecurePrefs.PUBLIC_KEY, {
         type: ZmSetting.T_PREF,
@@ -234,8 +234,8 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
         var publicKeySetting = zmSettings.getSetting(OpenPGPSecurePrefs.PUBLIC_KEY);
         var publicKey = publicKeySetting.origValue = publicKeySetting.getValue();
 
-        this._pgpKeys.setPrivateKey(privateKey.replace(/\r?\n/g, '\r\n'), passphrase);
-        this._pgpKeys.setPublicKey(publicKey.replace(/\r?\n/g, '\r\n'));
+        this._keyStore.setPrivateKey(privateKey.replace(/\r?\n/g, '\r\n'), passphrase);
+        this._keyStore.setPublicKey(publicKey.replace(/\r?\n/g, '\r\n'));
 
         this._controller.setDirty(this._section.id, false);
 
@@ -301,12 +301,12 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
                 id: id,
                 onDeleteItem: function(item) {
                     if (item) {
-                        self._pgpKeys.removePublicKey(item.id);
+                        self._keyStore.removePublicKey(item.id);
                     }
                 },
-                publicKeys: this._pgpKeys.getPublicKeys()
+                publicKeys: this._keyStore.getPublicKeys()
             });
-            this._pgpKeys.addCallback(new AjxCallback(function(key) {
+            this._keyStore.addCallback(new AjxCallback(function(key) {
                 publicKeyList.addPublicKey(key);
             }));
             return publicKeyList;
@@ -392,7 +392,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
                 function() {
                     var pubKey = openpgp.key.readArmored(dialog.getPublicKey());
                     pubKey.keys.forEach(function(key) {
-                        self._pgpKeys.addPublicKey(key);
+                        self._keyStore.addPublicKey(key);
                     });
                 }
             );
@@ -412,7 +412,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
                 function() {
                     var pubKey = openpgp.key.readArmored(dialog.getPublicKey());
                     pubKey.keys.forEach(function(key) {
-                        self._pgpKeys.addPublicKey(key);
+                        self._keyStore.addPublicKey(key);
                     });
                 }
             );

@@ -52,7 +52,7 @@ SendPublicKeyDialog.prototype.setEmail = function(email) {
 };
 
 SendPublicKeyDialog.prototype.sendPubicKey = function(callback) {
-    var publicKey = this._handler.getPGPKeys().getPublicKey();
+    var publicKey = this._handler.getKeyStore().getPublicKey();
     var email = this.getEmail();
     var addresses = AjxEmailAddress.getValidAddresses(this.getEmail(), AjxEmailAddress.TO);
     if (publicKey && addresses.size() > 0) {
@@ -70,7 +70,7 @@ SendPublicKeyDialog.prototype.sendPubicKey = function(callback) {
         top.setContentType(ZmMimeTable.MULTI_MIXED);
 
         var textContents = [];
-        var keyInfo = OpenPGPSecureKeys.keyInfo(publicKey);
+        var keyInfo = OpenPGPSecureKeyStore.keyInfo(publicKey);
         keyInfo.uids.forEach(function(uid, index) {
             textContents.push('User ID[' + index + ']: ' + AjxStringUtil.htmlDecode(uid));
         });
