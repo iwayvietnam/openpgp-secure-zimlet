@@ -81,6 +81,15 @@ OpenPGPZimbraSecure.prototype.init = function() {
             });
             self._handleMessageResponse(newCallback, result);
         };
+
+        var inlineImgFunc = ZmMailMsgView.__unfangInternalImage;
+        ZmMailMsgView.__unfangInternalImage = function(msg, elem, aname, external) {
+            var result = inlineImgFunc(msg, elem, aname, external);
+            if (aname == 'src') {
+                self._processInlineImageElement(msg, elem, aname);
+            }
+            return result;
+        };
     }));
 
     AjxDispatcher.addPackageLoadFunction('Startup1_2', new AjxCallback(this, function() {
@@ -100,6 +109,15 @@ OpenPGPZimbraSecure.prototype.init = function() {
                 responseExecuteFunc.call(this, callback, newResult || result);
             });
             self._handleMessageResponse(newCallback, result);
+        };
+
+        var inlineImgFunc = ZmMailMsgView.__unfangInternalImage;
+        ZmMailMsgView.__unfangInternalImage = function(msg, elem, aname, external) {
+            var result = inlineImgFunc(msg, elem, aname, external);
+            if (aname == 'src') {
+                self._processInlineImageElement(msg, elem, aname);
+            }
+            return result;
         };
     }));
 
@@ -176,6 +194,32 @@ OpenPGPZimbraSecure.prototype.getPGPKeys = function() {
 OpenPGPZimbraSecure.prototype.getSecurePassword = function() {
     return this._securePassword;
 };
+
+OpenPGPZimbraSecure.prototype._processInlineImageElement = function(msg, elem, aname) {
+    if (!this._pgpMessageCache[msg.id])
+        return;
+
+    var pgpMessage = this._pgpMessageCache[msg.id];
+    if (pgpMessage.encrypted) {
+        var pnSrc = elem.getAttribute('pn' + aname);
+        var link = pnSrc || elem.getAttribute(aname);
+
+        if (link && link.substring(0, 4) === 'cid:') {
+            OpenPGPUtils.visitMessage(pgpMessage, function(message) {
+                var ct = message.contentType();
+                var cd = message.header('Content-Disposition');
+                var cid = message.header('Content-ID');
+                if (cid) {
+                    cid = cid.replace(/[<>]/g, '');
+                }
+                if (cd === 'attachment' && cid === link.substring(4) && typeof message._body === 'string') {
+                    var newLink = 'data:' + ct.fulltype + ';base64,' + message._body.replace(/\r?\n/g, '');
+                    elem.setAttribute('src', newLink);
+                }
+            });
+        }
+    }
+}
 
 /**
  * Additional processing of message from server before handling control back
