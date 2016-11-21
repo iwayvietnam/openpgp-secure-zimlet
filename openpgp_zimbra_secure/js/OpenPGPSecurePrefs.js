@@ -322,12 +322,9 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
                 this._handler,
                 function(dialog) {
                     return dialog.generateKey().then(function(key) {
-                        var privateKey = key.privateKey.replace(/\r?\n/g, '\n');
-                        var publicKey = key.publicKey.replace(/\r?\n/g, '\n');
-
-                        self.setFormValue(OpenPGPSecurePrefs.PRIVATE_KEY, privateKey);
+                        self.setFormValue(OpenPGPSecurePrefs.PRIVATE_KEY, key.privateKey.replace(/\r?\n/g, '\n'));
                         self.setFormValue(OpenPGPSecurePrefs.PASSPHRASE, key.passphrase);
-                        self.setFormValue(OpenPGPSecurePrefs.PUBLIC_KEY, publicKey);
+                        self.setFormValue(OpenPGPSecurePrefs.PUBLIC_KEY, key.publicKey.replace(/\r?\n/g, '\n'));
 
                         return key;
                     });
