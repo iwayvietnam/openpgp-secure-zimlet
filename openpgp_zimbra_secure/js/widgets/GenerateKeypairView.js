@@ -64,7 +64,8 @@ GenerateKeypairView.prototype._initialize = function() {
 
     var selNumBits = this.selNumBits = new DwtSelect({parent: this});
     this._numBits.forEach(function(numBits) {
-        var opt = new DwtSelectOption(numBits, null, numBits);
+        var selected = (numBits === 2048);
+        var opt = new DwtSelectOption(numBits, selected, numBits);
         selNumBits.addOption(opt);
     });
     selNumBits.replaceElement(id + '_selNumBits');
