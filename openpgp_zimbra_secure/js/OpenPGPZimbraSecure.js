@@ -322,7 +322,7 @@ OpenPGPZimbraSecure.prototype._decryptInlineMessage = function(callback, msg, re
             }
         });
         if (contentPart) {
-            if (contentPart.ct.indexOf('text/html') >= 0) {
+            if (contentPart.ct.indexOf(ZmMimeTable.TEXT_HTML) >= 0) {
                 var content = AjxStringUtil.stripTags(contentPart.content);
             }
             else {
@@ -334,7 +334,7 @@ OpenPGPZimbraSecure.prototype._decryptInlineMessage = function(callback, msg, re
                 self._pgpKeys.getPrivateKey(),
                 function(result) {
                     if (result.content) {
-                        if (contentPart.ct.indexOf('text/html') >= 0) {
+                        if (contentPart.ct.indexOf(ZmMimeTable.TEXT_HTML) >= 0) {
                             contentPart.content = '<pre>' + result.content + '</pre>';
                         }
                         else {

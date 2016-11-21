@@ -346,7 +346,7 @@ OpenPGPUtils.mimeMessageToZmMimePart = function(message, withAttachment) {
             else {
                 content = message._body;
             }
-            if (part.ct == 'text/html' || part.ct == 'text/plain') {
+            if (part.ct === ZmMimeTable.TEXT_HTML || part.ct === ZmMimeTable.TEXT_PLAIN) {
                 part.content = content;
             }
             if (encode === 'base64') {
@@ -396,8 +396,8 @@ OpenPGPUtils.mimeMessageToZmMimePart = function(message, withAttachment) {
     }
 
     var mimePart = buildZmMimePart(message);
-    if (!findBody('text/html', mimePart))
-        findBody('text/plain', mimePart);
+    if (!findBody(ZmMimeTable.TEXT_HTML, mimePart))
+        findBody(ZmMimeTable.TEXT_PLAIN, mimePart);
 
     return mimePart;
 };
@@ -416,7 +416,7 @@ OpenPGPUtils.getMessage = function(key) {
 };
 
 OpenPGPUtils.saveTextAs = function(text, name) {
-    var blob = new Blob([text], {type: 'text/plain;charset=utf-8'});
+    var blob = new Blob([text], {type: ZmMimeTable.TEXT_PLAIN + '; charset=utf-8'});
     saveAs(blob, name);
 };
 

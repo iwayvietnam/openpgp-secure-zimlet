@@ -49,7 +49,7 @@ OpenPGPMimeBuilder = function(opts) {
         this._contentParts.forEach(function(cp){
             var contentEntity;
             var contentType = cp.ct;
-            if (contentType === 'text/plain' || contentType === 'text/html') {
+            if (contentType === ZmMimeTable.TEXT_PLAIN || contentType === ZmMimeTable.TEXT_HTML) {
                 contentEntity = mimemessage.factory({
                     contentType: [contentType, 'charset=utf-8'].join('; '),
                     contentTransferEncoding: 'quoted-printable',
@@ -96,7 +96,7 @@ OpenPGPMimeBuilder = function(opts) {
     else if (this._contentParts.length > 0) {
         var cp = this._contentParts[0];
         var contentType = cp.ct;
-        if (contentType == 'text/plain' || contentType == 'text/html') {
+        if (contentType === ZmMimeTable.TEXT_PLAIN || contentType === ZmMimeTable.TEXT_HTML) {
             contentEntity = mimemessage.factory({
                 contentType: [contentType, 'charset=utf-8'].join('; '),
                 contentTransferEncoding: 'quoted-printable',
