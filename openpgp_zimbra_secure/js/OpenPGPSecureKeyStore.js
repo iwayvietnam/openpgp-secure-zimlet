@@ -42,7 +42,6 @@ OpenPGPSecureKeyStore.prototype.constructor = OpenPGPSecureKeyStore;
 
 OpenPGPSecureKeyStore.prototype.init = function() {
     var self = this;
-    var pgpKey = openpgp.key;
 
     var sequence = Promise.resolve();
     return sequence.then(function() {
@@ -71,7 +70,7 @@ OpenPGPSecureKeyStore.prototype.init = function() {
             )
             .then(function(privateKey) {
                 if (privateKey) {
-                    var privKey = pgpKey.readArmored(privateKey);
+                    var privKey = openpgp.key.readArmored(privateKey);
                     privKey.keys.forEach(function(key) {
                         if (key.decrypt(passphrase)) {
                             self.privateKey = key;
@@ -194,7 +193,7 @@ OpenPGPSecureKeyStore.prototype.getPublicKeys = function() {
 OpenPGPSecureKeyStore.prototype.setPublicKeys = function(publicKeys) {
     var self = this;
     publicKeys.forEach(function(armoredKey) {
-        var pubKey = pgpKey.readArmored(armoredKey);
+        var pubKey = openpgp.key.readArmored(armoredKey);
         pubKey.keys.forEach(function(key) {
             var fingerprint = key.primaryKey.fingerprint;
             if (!self._fingerprints[fingerprint]) {
@@ -275,6 +274,7 @@ OpenPGPSecureKeyStore.prototype._readPublicKeys = function() {
     if (localStorage[storeKey]) {
         publicKeys = JSON.parse(localStorage[storeKey]);
     }
+    return publicKeys;
 }
 
 OpenPGPSecureKeyStore.prototype._storePublicKeys = function() {
