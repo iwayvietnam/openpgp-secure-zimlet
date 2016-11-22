@@ -170,6 +170,8 @@ OpenPGPZimbraSecure.prototype._overrideZmMailMsgView = function() {
         }
         return result;
     };
+
+    ZmMailMsgView.displayAdditionalHdrsInMsgView.securityHeader = '<span class="securityHeader">' + this.getMessage('messageSecurityHeader') + '</span>';
 }
 
 OpenPGPZimbraSecure.prototype.addAttachmentHandler = function() {
@@ -259,15 +261,9 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
  * This method is called by the Zimlet framework when a user clicks-on a message in the mail application.
  */
 OpenPGPZimbraSecure.prototype.onMsgView = function(msg, oldMsg, msgView) {
+    console.log(msg);
+    console.log(msgView);
     this._renderMessageInfo(msg, msgView);
-};
-
-OpenPGPZimbraSecure.prototype.onMsgExpansion = function(msg, msgView) {
-    this._renderMessageInfo(msg, msgView);
-};
-
-OpenPGPZimbraSecure.prototype.onConvView = function(msg, oldMsg, convView) {
-    this._renderMessageInfo(msg, convView);
 };
 
 OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
@@ -278,44 +274,6 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
     if (!pgpMessage) {
         return;
     }
-
-    pgpMessage.signatures.forEach(function(signature) {
-        var userid = AjxStringUtil.htmlEncode(signature.userid);
-        if (!userid) {
-            userid = self.getMessage('keyInfoKeyId') + ': ' + signature.keyid.toHex();
-        }
-        var desc = signature.valid ? AjxMessageFormat.format(self.getMessage('goodSignatureFrom'), userid) : AjxMessageFormat.format(self.getMessage('badSignatureFrom'), userid);
-
-        var htmls = [];
-        htmls.push(AjxMessageFormat.format('<span style="color: {0};">', signature.valid ? 'green' : 'red'));
-        htmls.push(AjxMessageFormat.format('<img class="OpenPGPSecureImage" src="{0}" />', self.getResource(signature.valid ? 'imgs/valid.png' : 'imgs/corrupt.png')));
-        htmls.push(desc);
-        htmls.push('</span>');
-
-        var output = htmls.join('');
-        var headerIds = self._msgDivCache[msg.id] = self._msgDivCache[msg.id] || [];
-        if (headerIds && headerIds.length) {
-            for (var i = 0; i < headerIds.length; i++) {
-                var el = Dwt.byId(headerIds[i]);
-                if (el) {
-                    el.innerHTML = output;
-                }
-            }
-        }
-
-        var id = Dwt.getNextId();
-        headerIds.push(id);
-        if (Dwt.byId((view._hdrTableId + '-signature-info'))) return;
-
-        var params = {
-            info: output,
-            id: view._hdrTableId + '-signature-info'
-        };
-        var html = AjxTemplate.expand('openpgp_zimbra_secure#securityHeader', params);
-
-        var hdrTable = Dwt.byId(view._hdrTableId);
-        hdrTable.firstChild.appendChild(Dwt.parseHtmlFragment(html, true));
-    });
 
     if (pgpMessage.encrypted) {
         var el = Dwt.byId(view._attLinksId);

@@ -65,3 +65,10 @@
 .PublicKeyListView .Row:last-child {
     border-bottom: none;
 }
+.ZmMailMsgCapsuleView .securityHeader {
+    display: none;
+}
+.ZmMailMsgCapsuleView .securityValue {
+    margin: 3px 10px;
+    display: block;
+}

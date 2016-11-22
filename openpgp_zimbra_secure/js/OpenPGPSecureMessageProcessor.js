@@ -139,9 +139,11 @@ OpenPGPSecureMessageProcessor.prototype._decryptMessage = function(callback, msg
  * @param {Object} PGP mime message.
  */
 OpenPGPSecureMessageProcessor.prototype.onDecrypted = function(callback, msg, pgpMessage) {
+    var self = this;
     pgpMessage.hasPGPKey = msg.hasPGPKey;
     pgpMessage.pgpKey = msg.pgpKey;
     this._handler._pgpMessageCache[msg.id] = pgpMessage;
+    this._addSecurityHeader(msg, pgpMessage.signatures);
 
     if (pgpMessage.encrypted) {
         var mp = OpenPGPUtils.mimeMessageToZmMimePart(pgpMessage);
@@ -218,6 +220,7 @@ OpenPGPSecureMessageProcessor.prototype._decryptInlineMessage = function(callbac
                     message.hasPGPKey = msg.hasPGPKey;
                     message.pgpKey = msg.pgpKey;
                     self._handler._pgpMessageCache[msg.id] = message;
+                    this._addSecurityHeader(msg, message.signatures);
                     callback.run();
                 }
             );
@@ -236,6 +239,27 @@ OpenPGPSecureMessageProcessor.prototype._onDecryptError = function(error){
     OpenPGPZimbraSecure.popupErrorDialog(error);
 };
 
+OpenPGPSecureMessageProcessor.prototype._addSecurityHeader = function(msg, signatures) {
+    var self = this;
+    if (signatures.length > 0 && !msg._attrs) {
+        msg._attrs = {};
+    }
+    signatures.forEach(function(signature) {
+        var userid = AjxStringUtil.htmlEncode(signature.userid);
+        if (!userid) {
+            userid = self._handler.getMessage('keyInfoKeyId') + ': ' + signature.keyid.toHex();
+        }
+        var desc = signature.valid ? AjxMessageFormat.format(self._handler.getMessage('goodSignatureFrom'), userid) : AjxMessageFormat.format(self._handler.getMessage('badSignatureFrom'), userid);
+
+        var htmlArr = [];
+        htmlArr.push(AjxMessageFormat.format('<span class="securityValue" style="color: {0};">', signature.valid ? 'green' : 'red'));
+        htmlArr.push(AjxMessageFormat.format('<img class="OpenPGPSecureImage" src="{0}" />', self._handler.getResource(signature.valid ? 'imgs/valid.png' : 'imgs/corrupt.png')));
+        htmlArr.push(desc);
+        htmlArr.push('</span>');
+
+        msg._attrs.securityHeader = htmlArr.join('');
+    });
+}
 OpenPGPSecureMessageProcessor.hasPGPPart = function(part, msg) {
     var ct = part.ct;
     var hasPGP = false;
