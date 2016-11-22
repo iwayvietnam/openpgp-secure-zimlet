@@ -36,11 +36,11 @@ OpenPGPSecureSender = function(handler, callback, msg, params) {
     if (this._input) {
         this._shouldSign = handler._shouldSign();
         this._shouldEncrypt = handler._shouldEncrypt();
-        if (msg.shouldSign === true) {
-            this._shouldSign = true;
+        if (typeof msg.shouldSign !== 'undefined') {
+            this._shouldSign = msg.shouldSign ? true : false;
         }
-        if (msg.shouldEncrypt === true) {
-            this._shouldEncrypt = true;
+        if (typeof msg.shouldEncrypt !== 'undefined') {
+            this._shouldEncrypt = msg.shouldEncrypt ? true : false;
         }
     }
 };
@@ -188,7 +188,6 @@ OpenPGPSecureSender.prototype._encryptMessage = function() {
 
     var encryptor = new OpenPGPEncrypt({
         privateKey: handler.getKeyStore().getPrivateKey(),
-        publicKey: (msg.attachPublicKey === true) ? handler.getKeyStore().getPublicKey() : false,
         publicKeys: handler.getKeyStore().havingPublicKeys(this._receivers),
         onEncrypted: function(encryptor, builder) {
             builder.importHeaders(input.m);

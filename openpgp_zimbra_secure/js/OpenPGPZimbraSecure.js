@@ -207,21 +207,6 @@ OpenPGPZimbraSecure.prototype.addAttachmentHandler = function() {
                 return '<a ' + linkAttrs.join(' ') + '>' + title + '</a>';
             });
         }
-        else if (mimeType === 'application/pgp-keys') {
-            view.addAttachmentLinkHandler(mimeType, 'OpenPGPZimbraSecure', function(attachment) {
-                var title = self.getMessage('importPublicKey');
-                var linkId = view._getAttachmentLinkId(attachment.part, 'import');
-                var linkAttrs = [
-                    'href="javascript:;"',
-                    'onclick="OpenPGPZimbraSecure.importAttachmentKey(\'' + attachment.label + '\', \'' + attachment.url + '\')"',
-                    'class="AttLink"',
-                    'style="text-decoration:underline;"',
-                    'id="' + linkId + '"',
-                    'title="' + title + '"'
-                ];
-                return '<a ' + linkAttrs.join(' ') + '>' + title + '</a>';
-            });
-        }
     }
 };
 
@@ -342,7 +327,6 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
                 }
                 htmlArr.push('</td><td style="white-space:nowrap">');
 
-                var content = attachment.content.replace(/\r?\n/g, '');
                 var linkAttrs = [
                     'class="AttLink"',
                     'href="javascript:;//' + attachment.name + '"',
@@ -617,34 +601,6 @@ OpenPGPZimbraSecure.prototype._initOpenPGP = function() {
         OpenPGPSecurePrefs.init(self);
     });
 };
-
-OpenPGPZimbraSecure.importAttachmentKey = function(name, url) {
-    var callback = new AjxCallback(function(response) {
-        if (response.success) {
-            var handler = OpenPGPZimbraSecure.getInstance();
-            var data = OpenPGPUtils.base64Decode(response.text);
-            var pubKey = openpgp.key.readArmored(data);
-            pubKey.keys.forEach(function(key) {
-                if (key.isPublic() && !handler.getKeyStore().publicKeyExisted(key.primaryKey.fingerprint)) {
-                    var dialog = handler._keyImportDialog = new ImportPublicKeyDialog(
-                        handler,
-                        function(dialog) {
-                            handler.getKeyStore().addPublicKey(key);
-                            handler.displayStatusMessage(handler.getMessage('publicKeyImported'));
-                        },
-                        false,
-                        OpenPGPSecureKeyStore.keyInfo(key)
-                    );
-                    dialog.popup();
-                }
-            });
-        }
-    });
-
-    AjxRpc.invoke('', url, {
-        'X-Zimbra-Encoding': 'x-base64'
-    }, callback, true);
-}
 
 OpenPGPZimbraSecure.decryptAttachment = function(name, url) {
     var callback = new AjxCallback(function(response) {

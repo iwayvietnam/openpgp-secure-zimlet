@@ -33,7 +33,7 @@ OpenPGPMimeBuilder = function(opts) {
     this._message = mimemessage.factory({
         body: []
     });
-    var self = this, contentEntity, alternateEntity, attachmentEntities = [];
+    var self = this, contentEntity, alternateEntity, contentEntities = [], attachmentEntities = [];
 
     if (this._headers) {
         this._headers.forEach(function(header){
@@ -41,20 +41,16 @@ OpenPGPMimeBuilder = function(opts) {
         });
     }
 
-    if (this._contentParts.length > 1) {
-        alternateEntity = mimemessage.factory({
-            contentType: ZmMimeTable.MULTI_ALT,
-            body: []
-        });
+    if (this._contentParts) {
         this._contentParts.forEach(function(cp){
-            var contentEntity;
             var contentType = cp.ct;
             if (contentType === ZmMimeTable.TEXT_PLAIN || contentType === ZmMimeTable.TEXT_HTML) {
-                contentEntity = mimemessage.factory({
+                var entity = mimemessage.factory({
                     contentType: [contentType, 'charset=utf-8'].join('; '),
                     contentTransferEncoding: 'quoted-printable',
-                    body: quotedPrintable.encode(utf8.encode(cp.content._content))
+                    body: quotedPrintable.encode(utf8.encode(cp.content._content.replace(/\r?\n/g, '\r\n')))
                 });
+                contentEntities.push(entity);
             }
             else if (OpenPGPUtils.isPGPContentType(contentType)) {
                 var name = 'message.asc';
@@ -71,59 +67,53 @@ OpenPGPMimeBuilder = function(opts) {
                     name = 'key.asc';
                     desc = 'OpenPGP key message';
                 }
-                contentEntity = mimemessage.factory({
+                var entity = mimemessage.factory({
                     contentType: [contentType, 'name="' + name + '"'].join('; '),
                     contentTransferEncoding: '7bit',
-                    body: cp.content._content
+                    body: cp.content._content.replace(/\r?\n/g, '\r\n')
                 });
-                contentEntity.header('Content-Disposition', 'inline; filename="' + name + '"');
-                contentEntity.header('Content-Description', desc);
-                var ctParts = [
-                    ZmMimeTable.MULTI_MIXED,
-                    'boundary=' + OpenPGPUtils.randomString()
-                ];
-                alternateEntity.contentType(ctParts.join('; '));
+                entity.header('Content-Disposition', 'inline; filename="' + name + '"');
+                entity.header('Content-Description', desc);
+                attachmentEntities.push(entity);
             }
             else {
-                contentEntity = mimemessage.factory({
+                var entity = mimemessage.factory({
                     contentType: contentType,
-                    body: cp.content._content
+                    body: cp.content._content.replace(/\r?\n/g, '\r\n')
                 });
+                contentEntities.push(entity);
             }
-            alternateEntity.body.push(contentEntity);
         });
-    }
-    else if (this._contentParts.length > 0) {
-        var cp = this._contentParts[0];
-        var contentType = cp.ct;
-        if (contentType === ZmMimeTable.TEXT_PLAIN || contentType === ZmMimeTable.TEXT_HTML) {
-            contentEntity = mimemessage.factory({
-                contentType: [contentType, 'charset=utf-8'].join('; '),
-                contentTransferEncoding: 'quoted-printable',
-                body: quotedPrintable.encode(utf8.encode(cp.content._content))
-            });
-        }
-        else {
-            contentEntity = mimemessage.factory({
-                contentType: contentType,
-                body: cp.content._content
-            });
-        }
     }
 
     if (this._attachments) {
         this._attachments.forEach(function(mp){
-            var attachmentEntity = mimemessage.factory({
+            var entity = mimemessage.factory({
                 contentType: mp.ct,
                 contentTransferEncoding: 'base64',
-                body: mp.data.trim()
+                body: mp.data.replace(/\r?\n/g, '\r\n')
             });
             if (mp.ci) {
-                attachmentEntity.header('Content-ID', mp.ci);
+                entity.header('Content-ID', mp.ci);
             }
-            attachmentEntity.header('Content-Disposition', mp.cd);
-            attachmentEntities.push(attachmentEntity);
+            entity.header('Content-Disposition', mp.cd);
+            attachmentEntities.push(entity);
         });
+    }
+
+    if (contentEntities.length > 0) {
+        if (contentEntities.length === 1) {
+            contentEntity = contentEntities.pop();
+        }
+        else {
+            alternateEntity = mimemessage.factory({
+                contentType: ZmMimeTable.MULTI_ALT,
+                body: []
+            });
+            while (contentEntities.length > 0) {
+                alternateEntity.body.push(contentEntities.pop());
+            }
+        }
     }
 
     if (attachmentEntities.length > 0) {
@@ -138,9 +128,9 @@ OpenPGPMimeBuilder = function(opts) {
         else if (contentEntity) {
             this._message.body.push(contentEntity);
         }
-        attachmentEntities.forEach(function(attachmentEntity) {
-            self._message.body.push(attachmentEntity);
-        });
+        while (attachmentEntities.length > 0) {
+            this._message.body.push(attachmentEntities.pop());
+        }
     }
     else {
         if (alternateEntity) {
@@ -160,7 +150,7 @@ OpenPGPMimeBuilder.prototype.constructor = OpenPGPMimeBuilder;
  * @param {String} The signature of message.
  * @param {String} The public key of message.
  */
-OpenPGPMimeBuilder.prototype.buildSignedMessage = function(signature, publicKey) {
+OpenPGPMimeBuilder.prototype.buildSignedMessage = function(signature) {
     var message = this._message;
     var ctParts = [
         OpenPGPUtils.SIGNED_MESSAGE_CONTENT_TYPE,
@@ -176,21 +166,11 @@ OpenPGPMimeBuilder.prototype.buildSignedMessage = function(signature, publicKey)
     var pgpMime = mimemessage.factory({
         contentType: OpenPGPUtils.OPENPGP_SIGNATURE_CONTENT_TYPE,
         contentTransferEncoding: '7bit',
-        body: signature
+        body: signature.replace(/\r?\n/g, '\r\n')
     });
     pgpMime.header('Content-Description', 'OpenPGP signed message');
     this._message.body.push(message);
     this._message.body.push(pgpMime);
-
-    if (publicKey) {
-        var keyMime = mimemessage.factory({
-            contentType: OpenPGPUtils.OPENPGP_KEYS_CONTENT_TYPE,
-            contentTransferEncoding: '7bit',
-            body: publicKey
-        });
-        keyMime.header('Content-Description', 'OpenPGP key message');
-        this._message.body.push(keyMime);
-    }
 }
 
 OpenPGPMimeBuilder.prototype.buildEncryptedMessage = function(encryptedText) {
@@ -214,7 +194,7 @@ OpenPGPMimeBuilder.prototype.buildEncryptedMessage = function(encryptedText) {
     var pgpMime = mimemessage.factory({
         contentType: 'application/octet-stream; name="encrypted.asc"',
         contentTransferEncoding: '7bit',
-        body: encryptedText
+        body: encryptedText.replace(/\r?\n/g, '\r\n')
     });
     pgpMime.header('Content-Disposition', 'inline; filename="encrypted.asc"');
     pgpMime.header('Content-Description', 'OpenPGP encrypted message');
