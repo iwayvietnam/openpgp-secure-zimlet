@@ -220,7 +220,7 @@ OpenPGPSecureMessageProcessor.prototype._decryptInlineMessage = function(callbac
                     message.hasPGPKey = msg.hasPGPKey;
                     message.pgpKey = msg.pgpKey;
                     self._handler._pgpMessageCache[msg.id] = message;
-                    this._addSecurityHeader(msg, message.signatures);
+                    self._addSecurityHeader(msg, message.signatures);
                     callback.run();
                 }
             );
