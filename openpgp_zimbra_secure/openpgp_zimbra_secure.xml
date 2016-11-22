@@ -28,6 +28,7 @@
     <include>js/OpenPGPSecurePrefs.js</include>
     <include>js/OpenPGPSecureKeyStore.js</include>
     <include>js/OpenPGPSecureSender.js</include>
+    <include>js/OpenPGPSecureMessageProcessor.js</include>
     <include>js/OpenPGPUtils.js</include>
     <include>js/OpenPGPMimeBuilder.js</include>
     <include>js/OpenPGPEncrypt.js</include>
