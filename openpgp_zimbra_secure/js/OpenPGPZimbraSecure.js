@@ -261,8 +261,6 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
  * This method is called by the Zimlet framework when a user clicks-on a message in the mail application.
  */
 OpenPGPZimbraSecure.prototype.onMsgView = function(msg, oldMsg, msgView) {
-    console.log(msg);
-    console.log(msgView);
     this._renderMessageInfo(msg, msgView);
 };
 
