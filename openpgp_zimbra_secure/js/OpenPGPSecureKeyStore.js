@@ -209,7 +209,7 @@ OpenPGPSecureKeyStore.prototype.havingPublicKeys = function(addresses) {
     var dupes = [];
     var publicKeys = [];
     this.publicKeys.forEach(function(key) {
-        addresses.foreach(function(address) {
+        addresses.forEach(function(address) {
             for (i = 0; i < key.users.length; i++) {
                 var uid = key.users[i].userId.userid;
                 var fingerprint = key.primaryKey.fingerprint;
