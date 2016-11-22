@@ -46,21 +46,7 @@ OpenPGPSecureKeyStore.prototype.init = function() {
 
     var sequence = Promise.resolve();
     return sequence.then(function() {
-        var publicKeys = [];
-        if (localStorage['openpgp_secure_public_keys_' + self._userId]) {
-            publicKeys = JSON.parse(localStorage['openpgp_secure_public_keys_' + self._userId]);
-        }
-
-        publicKeys.forEach(function(armoredKey) {
-            var pubKey = pgpKey.readArmored(armoredKey);
-            pubKey.keys.forEach(function(key) {
-                var fingerprint = key.primaryKey.fingerprint;
-                if (!self._fingerprints[fingerprint]) {
-                    self.publicKeys.push(key);
-                    self._fingerprints[fingerprint] = fingerprint;
-                }
-            });
-        });
+        self.setPublicKeys(self._readPublicKeys());
 
         if (localStorage['openpgp_secure_public_key_' + self._userId]) {
             var publicKey = localStorage['openpgp_secure_public_key_' + self._userId];
@@ -183,10 +169,7 @@ OpenPGPSecureKeyStore.prototype.setPrivateKey = function(privateKey, passphrase)
             throw new Error(this._handler.getMessage('decryptPrivateKeyError'));
         }
     });
-};
-
-OpenPGPSecureKeyStore.prototype.getPublicKeys = function() {
-    return this.publicKeys;
+    return this;
 };
 
 OpenPGPSecureKeyStore.prototype.getPublicKey = function() {
@@ -201,6 +184,26 @@ OpenPGPSecureKeyStore.prototype.setPublicKey = function(publicKey) {
         localStorage['openpgp_secure_public_key_' + self._userId] = self.publicKey.armor();
         self.addPublicKey(self.publicKey);
     });
+    return this;
+};
+
+OpenPGPSecureKeyStore.prototype.getPublicKeys = function() {
+    return this.publicKeys;
+};
+
+OpenPGPSecureKeyStore.prototype.setPublicKeys = function(publicKeys) {
+    var self = this;
+    publicKeys.forEach(function(armoredKey) {
+        var pubKey = pgpKey.readArmored(armoredKey);
+        pubKey.keys.forEach(function(key) {
+            var fingerprint = key.primaryKey.fingerprint;
+            if (!self._fingerprints[fingerprint]) {
+                self.publicKeys.push(key);
+                self._fingerprints[fingerprint] = fingerprint;
+            }
+        });
+    });
+    return this;
 };
 
 OpenPGPSecureKeyStore.prototype.havingPublicKeys = function(addresses) {
@@ -264,6 +267,14 @@ OpenPGPSecureKeyStore.keyInfo = function(key) {
         keyLength: keyLength,
         created: priKey.created
     };
+}
+
+OpenPGPSecureKeyStore.prototype._readPublicKeys = function() {
+    var publicKeys = [];
+    var storeKey = 'openpgp_secure_public_keys_' + this._userId;
+    if (localStorage[storeKey]) {
+        publicKeys = JSON.parse(localStorage[storeKey]);
+    }
 }
 
 OpenPGPSecureKeyStore.prototype._storePublicKeys = function() {
