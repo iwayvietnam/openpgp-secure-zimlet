@@ -252,8 +252,8 @@ OpenPGPSecureMessageProcessor.prototype._addSecurityHeader = function(msg, signa
         var desc = signature.valid ? AjxMessageFormat.format(self._handler.getMessage('goodSignatureFrom'), userid) : AjxMessageFormat.format(self._handler.getMessage('badSignatureFrom'), userid);
 
         var htmlArr = [];
-        htmlArr.push(AjxMessageFormat.format('<span class="securityValue" style="color: {0};">', signature.valid ? 'green' : 'red'));
-        htmlArr.push(AjxMessageFormat.format('<img class="OpenPGPSecureImage" src="{0}" />', self._handler.getResource(signature.valid ? 'imgs/valid.png' : 'imgs/corrupt.png')));
+        htmlArr.push(AjxMessageFormat.format('<span class="securityValue {0}">', signature.valid ? 'valid' : 'invalid'));
+        htmlArr.push(AjxMessageFormat.format('<img class="OpenPGPSecureImage" align="left" src="{0}" />', self._handler.getResource(signature.valid ? 'imgs/valid.png' : 'imgs/corrupt.png')));
         htmlArr.push(desc);
         htmlArr.push('</span>');
 

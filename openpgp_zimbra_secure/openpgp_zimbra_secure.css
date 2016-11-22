@@ -65,6 +65,14 @@
 .PublicKeyListView .Row:last-child {
     border-bottom: none;
 }
+
+span.securityValue.invalid {
+    color: red;
+}
+span.securityValue.valid {
+    color: green;
+}
+
 .ZmMailMsgCapsuleView .securityHeader {
     display: none;
 }
