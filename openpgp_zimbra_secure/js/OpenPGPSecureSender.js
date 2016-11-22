@@ -28,7 +28,7 @@ OpenPGPSecureSender = function(handler, callback, msg, params) {
     this._params = params;
 
     this._sendingAttachments = [];
-    this._receivers = new AjxVector();
+    this._receivers = [];
     this._input = params.jsonObj.SendMsgRequest;
 
     this._shouldSign = false;
@@ -61,7 +61,7 @@ OpenPGPSecureSender.prototype.send = function() {
                 self._sendMessage();
             }, this);
             ps.registerCallback(DwtDialog.NO_BUTTON, function() {
-                self._dismissSendMessageCallback();
+                self._dismissSendMessage();
             }, this);
             ps.popup();
         }
@@ -96,7 +96,7 @@ OpenPGPSecureSender.prototype._sendMessage = function() {
     input.m.e.forEach(function(e) {
         var addr = AjxEmailAddress.parse(e.a);
         if (addr && (e.t == 't' || e.t == 'c' || e.t == 'b' || e.t == 'f')) {
-            self._receivers.add(addr);
+            self._receivers.push(addr.getAddress());
         }
     });
     var missing = handler.getKeyStore().publicKeyMissing(this._receivers);
@@ -109,7 +109,7 @@ OpenPGPSecureSender.prototype._sendMessage = function() {
             self._encryptMessage();
         }, this);
         ps.registerCallback(DwtDialog.NO_BUTTON, function() {
-            self._dismissSendMessageCallback();
+            self._dismissSendMessage();
         }, this);
         ps.popup();
     }
@@ -258,7 +258,7 @@ OpenPGPSecureSender.prototype._onEncryptError = function(error){
     OpenPGPZimbraSecure.popupErrorDialog(error);
 };
 
-OpenPGPSecureSender.prototype._dismissSendMessageCallback = function(){
+OpenPGPSecureSender.prototype._dismissSendMessage = function(){
     var view = appCtxt.getCurrentView();
     var composeCtrl = view && view.getController && view.getController();
     var toolbar = composeCtrl._toolbar;

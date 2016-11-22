@@ -920,11 +920,11 @@ OpenPGPZimbraSecure.importAttachmentKey = function(name, url) {
             var data = OpenPGPUtils.base64Decode(response.text);
             var pubKey = openpgp.key.readArmored(data);
             pubKey.keys.forEach(function(key) {
-                if (key.isPublic() && !handler._keyStore.publicKeyExisted(key.primaryKey.fingerprint)) {
+                if (key.isPublic() && !handler.getKeyStore().publicKeyExisted(key.primaryKey.fingerprint)) {
                     var dialog = handler._keyImportDialog = new ImportPublicKeyDialog(
                         handler,
                         function(dialog) {
-                            handler._keyStore.addPublicKey(key);
+                            handler.getKeyStore().addPublicKey(key);
                             handler.displayStatusMessage(handler.getMessage('publicKeyImported'));
                         },
                         false,
