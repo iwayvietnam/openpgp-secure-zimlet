@@ -53,7 +53,7 @@ OpenPGPMimeBuilder = function(opts) {
                 contentEntity = mimemessage.factory({
                     contentType: [contentType, 'charset=utf-8'].join('; '),
                     contentTransferEncoding: 'quoted-printable',
-                    body: quotedPrintable.encode(utf8.encode(cp.content._content.replace(/\r?\n/g, '\r\n')))
+                    body: quotedPrintable.encode(utf8.encode(cp.content._content))
                 });
             }
             else if (OpenPGPUtils.isPGPContentType(contentType)) {
@@ -74,7 +74,7 @@ OpenPGPMimeBuilder = function(opts) {
                 contentEntity = mimemessage.factory({
                     contentType: [contentType, 'name="' + name + '"'].join('; '),
                     contentTransferEncoding: '7bit',
-                    body: cp.content._content.replace(/\r?\n/g, '\r\n')
+                    body: cp.content._content
                 });
                 contentEntity.header('Content-Disposition', 'inline; filename="' + name + '"');
                 contentEntity.header('Content-Description', desc);
@@ -87,7 +87,7 @@ OpenPGPMimeBuilder = function(opts) {
             else {
                 contentEntity = mimemessage.factory({
                     contentType: contentType,
-                    body: cp.content._content.replace(/\r?\n/g, '\r\n')
+                    body: cp.content._content
                 });
             }
             alternateEntity.body.push(contentEntity);
@@ -100,13 +100,13 @@ OpenPGPMimeBuilder = function(opts) {
             contentEntity = mimemessage.factory({
                 contentType: [contentType, 'charset=utf-8'].join('; '),
                 contentTransferEncoding: 'quoted-printable',
-                body: quotedPrintable.encode(utf8.encode(cp.content._content.replace(/\r?\n/g, '\r\n')))
+                body: quotedPrintable.encode(utf8.encode(cp.content._content))
             });
         }
         else {
             contentEntity = mimemessage.factory({
                 contentType: contentType,
-                body: cp.content._content.replace(/\r?\n/g, '\r\n')
+                body: cp.content._content
             });
         }
     }
@@ -116,7 +116,7 @@ OpenPGPMimeBuilder = function(opts) {
             var attachmentEntity = mimemessage.factory({
                 contentType: mp.ct,
                 contentTransferEncoding: 'base64',
-                body: mp.data.replace(/\r?\n/g, '\r\n').trim()
+                body: mp.data.trim()
             });
             if (mp.ci) {
                 attachmentEntity.header('Content-ID', mp.ci);
