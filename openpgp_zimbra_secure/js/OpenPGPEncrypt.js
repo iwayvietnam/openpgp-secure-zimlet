@@ -21,22 +21,15 @@
  * Written by nguyennv1981@gmail.com
  */
 
-OpenPGPEncrypt = function(opts, mimeBuilder) {
+OpenPGPEncrypt = function(opts) {
     opts = opts || {
         privateKey: false,
         publicKeys: [],
         passphrase: '',
-        beforeSign: false,
-        onSigned: false,
         beforeEncrypt: false,
         onEncrypted: false,
         onError: false
     };
-    var self = this;
-    this._mimeBuilder = mimeBuilder;
-
-    this._beforeSign = opts.beforeSign;
-    this._onSigned = opts.onSigned;
     this._beforeEncrypt = opts.beforeEncrypt;
     this._onEncrypted = opts.onEncrypted;
     this._onError = opts.onError;
@@ -46,68 +39,57 @@ OpenPGPEncrypt = function(opts, mimeBuilder) {
 
     this._shouldSign = true;
     this._shouldEncrypt = false;
-    this._isSigned = false;
-    this._isEncrypted = false;
 };
 
 OpenPGPEncrypt.prototype = new Object();
 OpenPGPEncrypt.prototype.constructor = OpenPGPEncrypt;
 
-OpenPGPEncrypt.prototype.encrypt = function() {
+OpenPGPEncrypt.prototype.encrypt = function(mimeBuilder) {
     var self = this;
-    var sequence = Promise.resolve();
+    var sequence = Promise.resolve(mimeBuilder);
+    return sequence.then(function(mimeBuilder) {
+        self.onCallback(self._beforeEncrypt, mimeBuilder);
 
-    return sequence.then(function() {
-        self.onCallback(self._beforeSign);
-
-        if (self._shouldSign && self._privateKey) {
+        if (self._shouldEncrypt && self._publicKeys.length > 0) {
             var opts = {
-                data: self._mimeBuilder.toString(),
+                data: mimeBuilder.toString(),
+                publicKeys: self._publicKeys
+            };
+            if (self._shouldSign && self._privateKey) {
+                opts.privateKeys = self._privateKey;
+            }
+            return openpgp.encrypt(opts).then(function(cipherText) {
+                mimeBuilder.buildEncryptedMessage(cipherText.data);
+                return mimeBuilder;
+            }, function(err) {
+                self.onError(err);
+            });
+        }
+        else if (self._shouldSign && self._privateKey) {
+            var opts = {
+                data: mimeBuilder.toString(),
                 privateKeys: self._privateKey
             };
             return openpgp.sign(opts).then(function(signedText) {
                 var signatureHeader = '-----BEGIN PGP SIGNATURE-----';
                 var signature = signatureHeader + signedText.data.split(signatureHeader).pop();
-                self._mimeBuilder.buildSignedMessage(signature);
-                self._isSigned = true;
-                self.onCallback(self._onSigned);
-                return self._mimeBuilder;
+                mimeBuilder.buildSignedMessage(signature);
+                return mimeBuilder;
             });
         }
-        else {
-            self.onCallback(self._onSigned);
-            return self._mimeBuilder;
-        }
+        return mimeBuilder;
     })
-    .then(function(builder) {
-        self.onCallback(self._beforeEncrypt);
-
-        if (self._shouldEncrypt && self._publicKeys.length > 0) {
-            var opts = {
-                data: self._mimeBuilder.toString(),
-                publicKeys: self._publicKeys
-            };
-            return openpgp.encrypt(opts).then(function(cipherText) {
-                self._mimeBuilder.buildEncryptedMessage(cipherText.data);
-                self._isEncrypted = true;
-                self.onCallback(self._onEncrypted);
-                return self._mimeBuilder;
-            }, function(err) {
-                self.onError(err);
-            });
-        }
-        else {
-            self.onCallback(self._onEncrypted);
-            return self._mimeBuilder;
-        }
+    .then(function(mimeBuilder) {
+        self.onCallback(self._onEncrypted, mimeBuilder);
+        return mimeBuilder;
     });
 };
 
-OpenPGPEncrypt.prototype.onCallback = function(callback) {
+OpenPGPEncrypt.prototype.onCallback = function(callback, mimeBuilder) {
     if (callback instanceof AjxCallback) {
-        callback.run(this, this._mimeBuilder);
+        callback.run(this, mimeBuilder);
     } else if (AjxUtil.isFunction(callback)) {
-        callback(this, this._mimeBuilder);
+        callback(this, mimeBuilder);
     }
 }
 
@@ -135,12 +117,4 @@ OpenPGPEncrypt.prototype.shouldEncrypt = function(shouldEncrypt) {
     else {
         this._shouldEncrypt = shouldEncrypt ? true : false;
     }
-}
-
-OpenPGPEncrypt.prototype.isSigned = function() {
-    return this._isSigned;
-}
-
-OpenPGPEncrypt.prototype.isEncrypted = function() {
-    return this._isEncrypted;
 }

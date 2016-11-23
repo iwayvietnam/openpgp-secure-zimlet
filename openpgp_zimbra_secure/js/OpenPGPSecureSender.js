@@ -197,13 +197,13 @@ OpenPGPSecureSender.prototype._encryptMessage = function() {
             console.log(error);
             self._onEncryptError('encrypting-error');
         }
-    }, new OpenPGPMimeBuilder({
+    });
+    encryptor.shouldSign(this._shouldSign);
+    encryptor.shouldEncrypt(this._shouldEncrypt);
+    encryptor.encrypt(new OpenPGPMimeBuilder({
         contentParts: contentParts,
         attachments: attachments
     }));
-    encryptor.shouldSign(this._shouldSign);
-    encryptor.shouldEncrypt(this._shouldEncrypt);
-    encryptor.encrypt();
 }
 
 OpenPGPSecureSender.prototype._onEncrypted = function(message) {
