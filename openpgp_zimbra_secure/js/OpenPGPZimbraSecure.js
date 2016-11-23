@@ -267,7 +267,7 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
         var attachments = [];
         OpenPGPUtils.visitMessage(pgpMessage, function(message) {
             var cd = message.header('Content-Disposition');
-            if (cd === 'attachment' && typeof message._body === 'string') {
+            if (cd && cd.indexOf('attachment') >= 0 && typeof message._body === 'string') {
                 var content;
                 var encode = message.header('Content-Transfer-Encoding');
                 if (encode === 'base64') {
