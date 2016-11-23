@@ -106,6 +106,9 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
 
                 var pgpMessage = openpgp.message.readSignedContent(bodyContent.replace(/\r?\n/g, '\r\n'), signature);
                 message.signatures = pgpMessage.verify(self._publicKeys);
+                if (bodyContent.length > 0) {
+                    message.content = bodyContent;
+                }
             }
         }
         message.signatures.forEach(function(signature) {
