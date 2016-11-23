@@ -203,6 +203,26 @@ OpenPGPUtils.hexToBase64 = function(hex) {
     );
 };
 
+/**
+ * Encodes a string into a quoted printable encoding
+ *
+ * @param {String} content String to mime encode
+ * @return {String} Mime encoded string
+ */
+OpenPGPUtils.quotedPrintableEncode = function(content) {
+    return quotedPrintable.encode(utf8.encode(content));
+}
+
+/**
+ * Decodes a string from a quoted printable encoding.
+ *
+ * @param {String} content Mime encoded string to decode
+ * @return {String} Mime decoded string
+ */
+OpenPGPUtils.quotedPrintableDecode = function(content) {
+    return utf8.decode(quotedPrintable.decode(content));
+}
+
 /*
  * hex to bin
  */

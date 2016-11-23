@@ -274,7 +274,7 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
                     content = OpenPGPUtils.base64Decode(message._body);
                 }
                 else if (encode === 'quoted-printable') {
-                    content = utf8.decode(quotedPrintable.decode(message._body));
+                    content = OpenPGPUtils.quotedPrintableDecode(message._body);
                 }
                 else {
                     content = message._body;

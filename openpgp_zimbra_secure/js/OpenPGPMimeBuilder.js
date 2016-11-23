@@ -27,28 +27,25 @@ OpenPGPMimeBuilder = function(opts) {
         contentParts: [],
         attachments: []
     };
-    this._headers = opts.headers;
-    this._contentParts = opts.contentParts;
-    this._attachments = opts.attachments;
     this._message = mimemessage.factory({
         body: []
     });
     var self = this, contentEntity, alternateEntity, contentEntities = [], attachmentEntities = [];
 
-    if (this._headers) {
-        this._headers.forEach(function(header){
+    if (opts.headers) {
+        opts.headers.forEach(function(header){
             self._message.header(header.name, header.value);
         });
     }
 
-    if (this._contentParts) {
-        this._contentParts.forEach(function(cp){
+    if (opts.contentParts) {
+        opts.contentParts.forEach(function(cp){
             var contentType = cp.ct;
             if (contentType === ZmMimeTable.TEXT_PLAIN || contentType === ZmMimeTable.TEXT_HTML) {
                 var entity = mimemessage.factory({
                     contentType: [contentType, 'charset=utf-8'].join('; '),
                     contentTransferEncoding: 'quoted-printable',
-                    body: quotedPrintable.encode(utf8.encode(cp.content._content.replace(/\r?\n/g, '\r\n')))
+                    body: OpenPGPUtils.quotedPrintableEncode(cp.content._content.replace(/\r?\n/g, '\r\n'))
                 });
                 contentEntities.push(entity);
             }
@@ -86,8 +83,8 @@ OpenPGPMimeBuilder = function(opts) {
         });
     }
 
-    if (this._attachments) {
-        this._attachments.forEach(function(mp){
+    if (opts.attachments) {
+        opts.attachments.forEach(function(mp){
             var entity = mimemessage.factory({
                 contentType: mp.ct,
                 contentTransferEncoding: 'base64',

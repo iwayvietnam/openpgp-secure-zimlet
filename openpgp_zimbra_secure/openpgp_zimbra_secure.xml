@@ -51,6 +51,7 @@
     <include>js/FileSaver/FileSaver.min.js</include>
 
     <include>js/emailjs/emailjs-addressparser.js</include>
+    <include>js/emailjs/emailjs-stringencoding.js</include>
     <include>js/emailjs/emailjs-mime-codec.js</include>
     <include>js/emailjs/emailjs-mime-parser.js</include>
 

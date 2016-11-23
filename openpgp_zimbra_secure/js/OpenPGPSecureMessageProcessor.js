@@ -123,8 +123,8 @@ OpenPGPSecureMessageProcessor.prototype._decryptMessage = function(callback, msg
                 console.log(error);
                 self._onDecryptError('decrypting-error');
             }
-        }, OpenPGPUtils.base64Decode(response.text));
-        decryptor.decrypt();
+        });
+        decryptor.decrypt(OpenPGPUtils.base64Decode(response.text));
     } else {
         console.warn('Failed to get message source:');
         console.warn(response);
