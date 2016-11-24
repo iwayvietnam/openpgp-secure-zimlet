@@ -557,6 +557,9 @@ OpenPGPZimbraSecure.prototype._initOpenPGP = function() {
 };
 
 OpenPGPZimbraSecure.decryptAttachment = function(name, url) {
+    if (name.substring(name.length - 4) === '.pgp' || name.substring(name.length - 4) === '.asc') {
+        name = name.substring(0, name.length - 4);
+    }
     var callback = new AjxCallback(function(response) {
         if (response.success) {
             var handler = OpenPGPZimbraSecure.getInstance();
@@ -570,7 +573,8 @@ OpenPGPZimbraSecure.decryptAttachment = function(name, url) {
             else {
                 var opts = {
                     message: openpgp.message.read(OpenPGPUtils.stringToArray(data)),
-                    privateKey: handler.getKeyStore().getPrivateKey()
+                    privateKey: handler.getKeyStore().getPrivateKey(),
+                    format: 'binary'
                 };
             }
             openpgp.decrypt(opts).then(function(plainText) {
