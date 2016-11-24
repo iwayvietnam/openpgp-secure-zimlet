@@ -339,7 +339,7 @@ OpenPGPUtils.visitMimeNode = function(node, callback) {
     callback(node);
     if (Array.isArray(node._childNodes)) {
         node._childNodes.forEach(function(childNode) {
-            OpenPGPUtils.visitMessage(childNode, callback);
+            OpenPGPUtils.visitMimeNode(childNode, callback);
         });
     }
 };
