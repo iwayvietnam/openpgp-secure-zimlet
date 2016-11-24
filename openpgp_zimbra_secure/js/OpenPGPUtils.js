@@ -335,6 +335,15 @@ OpenPGPUtils.visitMessage = function(message, callback) {
     }
 };
 
+OpenPGPUtils.visitMimeNode = function(node, callback) {
+    callback(node);
+    if (Array.isArray(node._childNodes)) {
+        node._childNodes.forEach(function(childNode) {
+            OpenPGPUtils.visitMessage(childNode, callback);
+        });
+    }
+};
+
 OpenPGPUtils.mimeMessageToZmMimePart = function(message, withAttachment) {
     var deep = 0;
     var partIndexes = [];
@@ -361,7 +370,7 @@ OpenPGPUtils.mimeMessageToZmMimePart = function(message, withAttachment) {
             var content = '';
             var encode = message.header('Content-Transfer-Encoding');
             if (encode === 'quoted-printable') {
-                content = utf8.decode(quotedPrintable.decode(message._body));
+                content = OpenPGPUtils.quotedPrintableDecode(message._body);
             }
             else {
                 content = message._body;
@@ -397,29 +406,87 @@ OpenPGPUtils.mimeMessageToZmMimePart = function(message, withAttachment) {
         return part;
     }
 
-    function findBody(cType, part) {
-        var bodyFound = false;
-        if (part.mp) {
-            bodyFound = findBody(cType, part.mp);
-        } else if (part.ct) {
-            if (part.ct == cType) {
-                part.body = bodyFound = true;
-            } else if (part.cd == 'inline') {
-                part.body = true;
-            }
-        } else {
-            for (var i = 0; !bodyFound && i < part.length; i++) {
-                bodyFound = findBody(cType, part[i]);
-            }
-        }
-        return bodyFound;
-    }
-
     var mimePart = buildZmMimePart(message);
-    if (!findBody(ZmMimeTable.TEXT_HTML, mimePart))
-        findBody(ZmMimeTable.TEXT_PLAIN, mimePart);
+    if (!OpenPGPUtils.findBody(ZmMimeTable.TEXT_HTML, mimePart))
+        OpenPGPUtils.findBody(ZmMimeTable.TEXT_PLAIN, mimePart);
 
     return mimePart;
+};
+
+OpenPGPUtils.mimeNodeToZmMimePart = function(node, withAttachment) {
+    var codec = window['emailjs-mime-codec'];
+    var deep = 0;
+    withAttachment = withAttachment | false;
+
+    function buildZmMimePart(node) {
+        deep++;
+        var cd = (node.headers['content-disposition']) ? node.headers['content-disposition'][0] : false;
+        if (!withAttachment && cd && cd.value === 'attachment') {
+            deep--;
+            return false;
+        }
+
+        var part = {};
+        var ct = node.contentType;
+        part.ct = ct.value;
+        if (node.path.length == 0) {
+            part.part = 'TEXT';
+        }
+        else {
+            part.part = node.path.join('.');
+        }
+        if (node.content) {
+            var content = codec.fromTypedArray(node.content);
+            if (part.ct === ZmMimeTable.TEXT_HTML || part.ct === ZmMimeTable.TEXT_PLAIN) {
+                part.content = content;
+            }
+            part.s = content.length;
+        }
+        if (cd.params && cd.params.filename) {
+            part.filename = cd.params.filename;
+        }
+        else if (ct.params && ct.params.name) {
+            part.filename = ct.params.name;
+        }
+        if (cd) {
+            part.cd = cd.value;
+        }
+        if (Array.isArray(node._childNodes)) {
+            part.mp = [];
+            node._childNodes.forEach(function(childNode) {
+                var mp = buildZmMimePart(childNode);
+                if (mp) {
+                    part.mp.push(mp);
+                }
+            });
+        }
+        deep--;
+        return part;
+    }
+
+    var mimePart = buildZmMimePart(node);
+    if (!OpenPGPUtils.findBody(ZmMimeTable.TEXT_HTML, mimePart))
+        OpenPGPUtils.findBody(ZmMimeTable.TEXT_PLAIN, mimePart);
+
+    return mimePart;
+};
+
+OpenPGPUtils.findBody = function(cType, part) {
+    var bodyFound = false;
+    if (part.mp) {
+        bodyFound = OpenPGPUtils.findBody(cType, part.mp);
+    } else if (part.ct) {
+        if (part.ct == cType) {
+            part.body = bodyFound = true;
+        } else if (part.cd == 'inline') {
+            part.body = true;
+        }
+    } else {
+        for (var i = 0; !bodyFound && i < part.length; i++) {
+            bodyFound = OpenPGPUtils.findBody(cType, part[i]);
+        }
+    }
+    return bodyFound;
 };
 
 OpenPGPUtils.getDefaultSenderAddress = function() {

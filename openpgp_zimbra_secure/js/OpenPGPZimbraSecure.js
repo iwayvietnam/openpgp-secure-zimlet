@@ -148,23 +148,19 @@ OpenPGPZimbraSecure.prototype._overrideZmMailMsgView = function() {
         var result = inlineImgFunc(msg, elem, aname, external);
         if (aname == 'src' && self._pgpMessageCache[msg.id]) {
             var pgpMessage = self._pgpMessageCache[msg.id];
-            if (pgpMessage.encrypted) {
+            if (pgpMessage.encrypted && pgpMessage.attachments.length > 0) {
                 var pnSrc = Dwt.getAttr(elem, 'pn' + aname);
                 var link = pnSrc || Dwt.getAttr(elem, aname);
 
                 if (link && link.substring(0, 4) === 'cid:') {
-                    OpenPGPUtils.visitMessage(pgpMessage, function(message) {
-                        var cd = message.header('Content-Disposition');
-                        var cid = message.header('Content-ID');
-                        if (cid) {
-                            cid = cid.replace(/[<>]/g, '');
-                        }
-                        if (cd === 'attachment' && cid === link.substring(4) && typeof message._body === 'string') {
-                            var ct = message.contentType();
-                            var newLink = 'data:' + ct.fulltype + ';base64,' + message._body.replace(/\r?\n/g, '');
-                            elem.setAttribute('src', newLink);
-                        }
+                    var attachment = pgpMessage.attachments.find(function(attachment) {
+                        return (attachment.cid && attachment.cid === link.substring(4));
                     });
+                    if (attachment) {
+                        var content = OpenPGPUtils.base64Encode(attachment.content);
+                        var newLink = 'data:' + attachment.type + ';base64,' + content.replace(/\r?\n/g, '');
+                        elem.setAttribute('src', newLink);
+                    }
                 }
             }
         }
@@ -264,40 +260,7 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
             return;
         }
 
-        var attachments = [];
-        OpenPGPUtils.visitMessage(pgpMessage, function(message) {
-            var cd = message.header('Content-Disposition');
-            if (cd && cd.indexOf('attachment') >= 0 && typeof message._body === 'string') {
-                var content;
-                var encode = message.header('Content-Transfer-Encoding');
-                if (encode === 'base64') {
-                    content = OpenPGPUtils.base64Decode(message._body);
-                }
-                else if (encode === 'quoted-printable') {
-                    content = OpenPGPUtils.quotedPrintableDecode(message._body);
-                }
-                else {
-                    content = message._body;
-                }
-
-                var ct = message.contentType();
-                var attachment = {
-                    id: OpenPGPUtils.randomString(),
-                    type: ct.fulltype,
-                    name: 'attachment',
-                    size: content.length,
-                    content: message._body,
-                    raw: content
-                };
-                if (ct.params.name) {
-                    attachment.name = ct.params.name;
-                }
-                attachments.push(attachment);
-                self._pgpAttachments[attachment.id] = attachment;
-            }
-        });
-
-        if (attachments.length > 0) {
+        if (pgpMessage.attachments.length > 0) {
             var numFormatter = AjxNumberFormat.getInstance();
             var msgBody = Dwt.byId(view._msgBodyDivId);
             var div = document.createElement('div');
@@ -308,7 +271,7 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
             var attLinkIds = [];
             var htmlArr = [];
             htmlArr.push('<table id="' + view._attLinksId + '_table" cellspacing="0" cellpadding="0" border="0">');
-            attachments.forEach(function(attachment, index) {
+            pgpMessage.attachments.forEach(function(attachment, index) {
                 htmlArr.push('<tr><td>');
                 htmlArr.push('<table border=0 cellpadding=0 cellspacing=0 style="margin-right:1em; margin-bottom:1px"><tr>');
                 htmlArr.push('<td style="width:18px">');
@@ -375,14 +338,6 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
 
     if (pgpMessage.hasPGPKey) {
         var pgpKey = pgpMessage.pgpKey;
-        if (!pgpKey) {
-            OpenPGPUtils.visitMessage(pgpMessage, function(message) {
-                var ct = message.contentType();
-                if (OpenPGPUtils.isPGPKeysContentType(ct.fulltype)) {
-                    pgpKey = message.toString({noHeaders: true});
-                }
-            });
-        }
         if (pgpKey) {
             var pubKey = openpgp.key.readArmored(pgpKey);
             pubKey.keys.forEach(function(key) {
@@ -634,8 +589,7 @@ OpenPGPZimbraSecure.prototype._download = function(element) {
     var id = Dwt.getAttr(element, 'data-id');
     if (id && this._pgpAttachments[id]) {
         var attachment = this._pgpAttachments[id];
-        var content = OpenPGPUtils.base64Decode(attachment.content);
-        OpenPGPUtils.saveAs(content, attachment.name, attachment.type);
+        OpenPGPUtils.saveAs(attachment.content, attachment.name, attachment.type);
     }
 }
 

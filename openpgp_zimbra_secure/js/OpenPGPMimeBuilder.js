@@ -69,7 +69,7 @@ OpenPGPMimeBuilder = function(opts) {
                     contentTransferEncoding: '7bit',
                     body: cp.content._content.replace(/\r?\n/g, '\r\n')
                 });
-                entity.header('Content-Disposition', 'inline; filename="' + name + '"');
+                entity.header('Content-Disposition', 'attachment; filename="' + name + '"');
                 entity.header('Content-Description', desc);
                 attachmentEntities.push(entity);
             }

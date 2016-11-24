@@ -119,16 +119,14 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
                 }
             });
         });
-        var mimeMessage = mimemessage.parse(message.content.replace(/\r?\n/g, '\r\n'));
-        mimeMessage.signatures = message.signatures;
-        mimeMessage.encrypted = message.encrypted;
-        return mimeMessage;
+
+        return message;
     }, function(err) {
         self.onError(err);
     })
-    .then(function(mimeMessage) {
-        self.onDecrypted(mimeMessage);
-        return mimeMessage;
+    .then(function(message) {
+        self.onDecrypted(message);
+        return message;
     });
 };
 

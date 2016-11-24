@@ -138,15 +138,58 @@ OpenPGPSecureMessageProcessor.prototype._decryptMessage = function(callback, msg
  * @param {ZmMailMsg} msg
  * @param {Object} PGP mime message.
  */
-OpenPGPSecureMessageProcessor.prototype.onDecrypted = function(callback, msg, pgpMessage) {
+OpenPGPSecureMessageProcessor.prototype.onDecrypted = function(callback, msg, message) {
     var self = this;
-    pgpMessage.hasPGPKey = msg.hasPGPKey;
-    pgpMessage.pgpKey = msg.pgpKey;
+    var pgpMessage = {
+        signatures: message.signatures,
+        encrypted: message.encrypted,
+        attachments: [],
+        hasPGPKey: msg.hasPGPKey,
+        pgpKey: msg.pgpKey
+    };
+
+    var codec = window['emailjs-mime-codec'];
+    var parser = new window['emailjs-mime-parser']();
+    parser.onbody = function(node, chunk){
+        var cd = (node.headers['content-disposition']) ? node.headers['content-disposition'][0] : false;
+        var ct = node.contentType;
+        if (pgpMessage.encrypted && cd && cd.value === 'attachment' && node.content) {
+            var content = codec.fromTypedArray(node.content);
+            var attachment = {
+                id: OpenPGPUtils.randomString(),
+                type: ct.value,
+                name: 'attachment',
+                size: content.length,
+                content: content
+            };
+            if (cd.params && cd.params.filename) {
+                attachment.name = cd.params.filename;
+            }
+            else if (ct.params && ct.params.name) {
+                attachment.name = ct.params.name;
+            }
+
+            var cid = (node.headers['content-id']) ? node.headers['content-id'][0] : false;
+            if (cid) {
+                attachment.cid = cid.value.replace(/[<>]/g, '');
+            }
+
+            pgpMessage.attachments.push(attachment);
+            self._handler._pgpAttachments[attachment.id] = attachment;
+        }
+        if (!pgpMessage.pgpKey && OpenPGPUtils.isPGPKeysContentType(ct.value)) {
+            pgpMessage.pgpKey = codec.fromTypedArray(node.content);
+        }
+    };
+    parser.write(message.content);
+    parser.end();
+
+    pgpMessage.mimeNode = parser.node;
     this._handler._pgpMessageCache[msg.id] = pgpMessage;
     this._addSecurityHeader(msg, pgpMessage.signatures);
 
     if (pgpMessage.encrypted) {
-        var mp = OpenPGPUtils.mimeMessageToZmMimePart(pgpMessage);
+        var mp = OpenPGPUtils.mimeNodeToZmMimePart(pgpMessage.mimeNode);
         msg.mp = [mp];
     }
 
