@@ -323,7 +323,8 @@ OpenPGPUtils.mimeNodeToZmMimePart = function(node, withAttachment) {
     function buildZmMimePart(node) {
         deep++;
         var cd = (node.headers['content-disposition']) ? node.headers['content-disposition'][0] : false;
-        if (!withAttachment && cd && cd.value === 'attachment') {
+        var isAttach = (cd && cd.params && cd.params.filename) && (cd.value === 'attachment' || cd.value === 'inline');
+        if (!withAttachment && isAttach) {
             deep--;
             return false;
         }
