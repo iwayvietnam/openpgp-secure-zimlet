@@ -153,46 +153,49 @@ OpenPGPDecrypt.decryptContent = function(content, publicKeys, privateKey, onDecr
         if (content.indexOf(OpenPGPUtils.OPENPGP_MESSAGE_HEADER) > 0) {
             var opts = {
                 message: openpgp.message.readArmored(content),
+                publicKeys: publicKeys,
                 privateKey: privateKey
             };
             return openpgp.decrypt(opts).then(function(plainText) {
-                return plainText.data;
-            });
-        }
-        else {
-            return content;
-        }
-    })
-    .then(function(plainText) {
-        if (plainText.indexOf(OpenPGPUtils.OPENPGP_SIGNED_MESSAGE_HEADER) > 0) {
-            var opts = {
-                message: openpgp.cleartext.readArmored(plainText),
-                publicKeys: publicKeys
-            };
-            return openpgp.verify(opts).then(function(signature) {
-                var signatures = signature.signatures;
-                signatures.forEach(function(signature) {
-                    publicKeys.forEach(function(key) {
-                        var keyid = key.primaryKey.keyid;
-                        if (keyid.equals(signature.keyid)) {
-                            signature.userid = key.getPrimaryUser().user.userId.userid;
-                        }
-                    });
-                });
                 return {
-                    content: signature.data,
-                    signatures: signatures
+                    content: plainText.data,
+                    signatures: plainText.signatures
                 };
             });
         }
         else {
             return {
-                content: plainText,
+                content: content,
                 signatures: []
             };
         }
     })
     .then(function(result) {
+        if (result.signatures.length == 0 && result.content.indexOf(OpenPGPUtils.OPENPGP_SIGNED_MESSAGE_HEADER) > 0) {
+            var opts = {
+                message: openpgp.cleartext.readArmored(result.content),
+                publicKeys: publicKeys
+            };
+            return openpgp.verify(opts).then(function(signature) {
+                return {
+                    content: signature.data,
+                    signatures: signature.signatures
+                };
+            });
+        }
+        else {
+            return result;
+        }
+    })
+    .then(function(result) {
+        result.signatures.forEach(function(signature) {
+            publicKeys.forEach(function(key) {
+                var keyid = key.primaryKey.keyid;
+                if (keyid.equals(signature.keyid)) {
+                    signature.userid = key.getPrimaryUser().user.userId.userid;
+                }
+            });
+        });
         if (onDecrypted instanceof AjxCallback) {
             onDecrypted.run(result);
         } else if (AjxUtil.isFunction(onDecrypted)) {

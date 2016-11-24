@@ -257,13 +257,29 @@ OpenPGPSecureMessageProcessor.prototype._decryptInlineMessage = function(callbac
                             contentPart.content = result.content;
                         }
                     }
-                    var text = OpenPGPUtils.base64Decode(response.text);
-                    var message = mimemessage.parse(text.replace(/\r?\n/g, '\r\n'));
-                    message.signatures = result.signatures;
-                    message.hasPGPKey = msg.hasPGPKey;
-                    message.pgpKey = msg.pgpKey;
-                    self._handler._pgpMessageCache[msg.id] = message;
-                    self._addSecurityHeader(msg, message.signatures);
+
+                    var pgpMessage = {
+                        signatures: result.signatures,
+                        encrypted: false,
+                        attachments: [],
+                        hasPGPKey: msg.hasPGPKey,
+                        pgpKey: msg.pgpKey
+                    };
+
+                    var codec = window['emailjs-mime-codec'];
+                    var parser = new window['emailjs-mime-parser']();
+                    parser.onbody = function(node, chunk){
+                        var ct = node.contentType;
+                        if (!pgpMessage.pgpKey && OpenPGPUtils.isPGPKeysContentType(ct.value)) {
+                            pgpMessage.pgpKey = codec.fromTypedArray(node.content);
+                        }
+                    };
+                    parser.write(OpenPGPUtils.base64Decode(response.text));
+                    parser.end();
+
+                    pgpMessage.mimeNode = parser.node;
+                    self._handler._pgpMessageCache[msg.id] = pgpMessage;
+                    self._addSecurityHeader(msg, pgpMessage.signatures);
                     callback.run();
                 }
             );

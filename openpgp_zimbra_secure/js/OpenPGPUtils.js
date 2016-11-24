@@ -203,26 +203,6 @@ OpenPGPUtils.hexToBase64 = function(hex) {
     );
 };
 
-/**
- * Encodes a string into a quoted printable encoding
- *
- * @param {String} content String to mime encode
- * @return {String} Mime encoded string
- */
-OpenPGPUtils.quotedPrintableEncode = function(content) {
-    return quotedPrintable.encode(utf8.encode(content));
-}
-
-/**
- * Decodes a string from a quoted printable encoding.
- *
- * @param {String} content Mime encoded string to decode
- * @return {String} Mime decoded string
- */
-OpenPGPUtils.quotedPrintableDecode = function(content) {
-    return utf8.decode(quotedPrintable.decode(content));
-}
-
 /*
  * hex to bin
  */
@@ -326,15 +306,6 @@ OpenPGPUtils.visitMimePart = function(part, callback) {
     }
 };
 
-OpenPGPUtils.visitMessage = function(message, callback) {
-    callback(message);
-    if (Array.isArray(message._body)) {
-        message._body.forEach(function(entity) {
-            OpenPGPUtils.visitMessage(entity, callback);
-        });
-    }
-};
-
 OpenPGPUtils.visitMimeNode = function(node, callback) {
     callback(node);
     if (Array.isArray(node._childNodes)) {
@@ -342,75 +313,6 @@ OpenPGPUtils.visitMimeNode = function(node, callback) {
             OpenPGPUtils.visitMimeNode(childNode, callback);
         });
     }
-};
-
-OpenPGPUtils.mimeMessageToZmMimePart = function(message, withAttachment) {
-    var deep = 0;
-    var partIndexes = [];
-    withAttachment = withAttachment | false;
-
-    function buildZmMimePart(message) {
-        deep++;
-        var cd = message.header('Content-Disposition');
-        if (!withAttachment && cd && (cd.indexOf('attachment') >= 0 || cd.indexOf('inline') >= 0)) {
-            deep--;
-            return false;
-        }
-
-        var part = {};
-        var cType = message.contentType();
-        part.ct = cType.fulltype;
-        if (partIndexes.length == 0) {
-            part.part = 'TEXT';
-        }
-        else {
-            part.part = partIndexes.join('.');
-        }
-        if (typeof message._body === 'string') {
-            var content = '';
-            var encode = message.header('Content-Transfer-Encoding');
-            if (encode === 'quoted-printable') {
-                content = OpenPGPUtils.quotedPrintableDecode(message._body);
-            }
-            else {
-                content = message._body;
-            }
-            if (part.ct === ZmMimeTable.TEXT_HTML || part.ct === ZmMimeTable.TEXT_PLAIN) {
-                part.content = content;
-            }
-            if (encode === 'base64') {
-                part.s = OpenPGPUtils.base64Decode(message._body).length;
-            }
-            else {
-                part.s = content.length;
-            }
-        }
-        if (cType.params.name) {
-            part.filename = cType.params.name;
-        }
-        if (cd) {
-            part.cd = cd;
-        }
-        if (Array.isArray(message._body)) {
-            part.mp = [];
-            message._body.forEach(function(entity, index) {
-                partIndexes[deep - 1] = index + 1;
-                var mp = buildZmMimePart(entity);
-                if (mp) {
-                    part.mp.push(mp);
-                }
-            });
-        }
-        deep--;
-        partIndexes.pop();
-        return part;
-    }
-
-    var mimePart = buildZmMimePart(message);
-    if (!OpenPGPUtils.findBody(ZmMimeTable.TEXT_HTML, mimePart))
-        OpenPGPUtils.findBody(ZmMimeTable.TEXT_PLAIN, mimePart);
-
-    return mimePart;
 };
 
 OpenPGPUtils.mimeNodeToZmMimePart = function(node, withAttachment) {

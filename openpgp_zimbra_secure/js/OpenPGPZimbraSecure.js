@@ -86,8 +86,7 @@ OpenPGPZimbraSecure.prototype.init = function() {
     }));
 
     this._addJsScripts([
-        this.getResource('js/openpgpjs/openpgp.min.js'),
-        this.getResource('js/mimemessage/mimemessage.js')
+        this.getResource('js/openpgpjs/openpgp.min.js')
     ], new AjxCallback(function() {
         self._initOpenPGP();
     }));

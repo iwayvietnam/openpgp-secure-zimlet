@@ -189,21 +189,21 @@ OpenPGPSecureSender.prototype._encryptMessage = function() {
     var encryptor = new OpenPGPEncrypt({
         privateKey: handler.getKeyStore().getPrivateKey(),
         publicKeys: handler.getKeyStore().havingPublicKeys(this._receivers),
-        onEncrypted: function(encryptor, builder) {
-            builder.importHeaders(input.m);
-            self._onEncrypted(builder.toString());
+        onEncrypted: function(mimeNode) {
+            mimeNode.setHeader(self._msgHeaders());
+            self._onEncrypted(mimeNode.build());
         },
-        onError: function(encryptor, error) {
+        onError: function(error) {
             console.log(error);
             self._onEncryptError('encrypting-error');
         }
     });
     encryptor.shouldSign(this._shouldSign);
     encryptor.shouldEncrypt(this._shouldEncrypt);
-    encryptor.encrypt(new OpenPGPMimeBuilder({
-        contentParts: contentParts,
+    encryptor.encrypt({
+        contents: contentParts,
         attachments: attachments
-    }));
+    });
 }
 
 OpenPGPSecureSender.prototype._onEncrypted = function(message) {
@@ -265,4 +265,62 @@ OpenPGPSecureSender.prototype._dismissSendMessage = function(){
         toolbar.enableAll(true);
     }
     this._popShield.popdown();
+};
+
+OpenPGPSecureSender.prototype._msgHeaders = function() {
+    var msg = this._input.m;
+    var headers = {};
+    if (msg.e) {
+        var toAddresses = [];
+        var ccAddresses = [];
+        var bccAddresses = [];
+        var rtAddresses = [];
+        msg.e.forEach(function(e) {
+            if (e.t == 'f') {
+                headers['from'] = e.a;
+            }
+            if (e.t == 's') {
+                headers['sender'] = e.a;
+            }
+            if (e.t == 't') {
+                toAddresses.push(e.a);
+            }
+            if (e.t == 'c') {
+                ccAddresses.push(e.a);
+            }
+            if (e.t == 'b') {
+                bccAddresses.push(e.a);
+            }
+            if (e.t == 'r') {
+                rtAddresses.push(e.a);
+            }
+            if (e.t == 'n') {
+                headers['disposition-notification-to'] = e.a;
+            }
+        });
+        if (toAddresses.length > 0) {
+            headers['to'] = toAddresses.join(', ');
+        }
+        if (ccAddresses.length > 0) {
+            headers['cc'] = ccAddresses.join(', ');
+        }
+        if (bccAddresses.length > 0) {
+            headers['bcc'] = bccAddresses.join(', ');
+        }
+        if (rtAddresses.length > 0) {
+            headers['reply-to'] = rtAddresses.join(', ');
+        }
+    }
+    if (msg.irt) {
+        headers['in-reply-to'] = msg.irt._content;
+    }
+    if (msg.su) {
+        headers['subject'] = msg.su._content;
+    }
+    if (msg.header) {
+        msg.header.forEach(function(header) {
+            headers[header.name] = header._content;
+        });
+    }
+    return headers;
 };
