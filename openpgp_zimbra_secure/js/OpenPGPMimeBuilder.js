@@ -23,6 +23,16 @@
 
 OpenPGPMimeBuilder = function() {};
 
+OpenPGPMimeBuilder.SIGNED_PREAMBLE = 'This is an OpenPGP/MIME signed message (RFC 4880 and 3156)';
+OpenPGPMimeBuilder.ENCRYPTED_PREAMBLE = 'This is an OpenPGP/MIME encrypted message (RFC 4880 and 3156)';
+OpenPGPMimeBuilder.VERSION_CONTENT = 'Version: 1';
+
+OpenPGPMimeBuilder.PGP_DESC = 'OpenPGP message';
+OpenPGPMimeBuilder.SIGNED_DESC = 'OpenPGP digital signature';
+OpenPGPMimeBuilder.ENCRYPTED_DESC = 'OpenPGP encrypted message';
+OpenPGPMimeBuilder.KEY_DESC = 'OpenPGP key message';
+OpenPGPMimeBuilder.VERSION_DESC = 'PGP/MIME Versions Identification';
+
 OpenPGPMimeBuilder.prototype = new Object();
 OpenPGPMimeBuilder.prototype.constructor = OpenPGPMimeBuilder;
 
@@ -46,18 +56,18 @@ OpenPGPMimeBuilder.prototype.buildPlainText = function(message) {
             }
             else if (OpenPGPUtils.isPGPContentType(contentType)) {
                 var filename = 'message.asc';
-                var desc = 'OpenPGP message';
+                var desc = OpenPGPMimeBuilder.PGP_DESC;
                 if (OpenPGPUtils.isSignatureContentType(contentType)) {
                     filename = 'signature.asc';
-                    desc = 'OpenPGP signed message';
+                    desc = OpenPGPMimeBuilder.SIGNED_DESC;
                 }
                 if (OpenPGPUtils.isEncryptedContentType(contentType)) {
                     filename = 'encrypted.asc';
-                    desc = 'OpenPGP encrypted message';
+                    desc = OpenPGPMimeBuilder.ENCRYPTED_DESC;
                 }
                 if (OpenPGPUtils.isPGPKeysContentType(contentType)) {
                     filename = 'key.asc';
-                    desc = 'OpenPGP key message';
+                    desc = OpenPGPMimeBuilder.KEY_DESC;
                 }
                 var node = new MimeNode(contentType, {filename: filename})
                     .setHeader('content-transfer-encoding', '7bit')
@@ -132,11 +142,12 @@ OpenPGPMimeBuilder.prototype.buildSigned = function(mimeNode, signature) {
         'protocol="' + OpenPGPUtils.OPENPGP_SIGNATURE_CONTENT_TYPE + '"',
         'micalg="pgp-sha256"'
     ];
-    var signedNode = new MimeNode(ctParts.join('; '));
+    var signedNode = new MimeNode(ctParts.join('; '))
+        .setContent(OpenPGPMimeBuilder.SIGNED_PREAMBLE);
     signedNode.appendChild(mimeNode);
     signedNode.createChild(OpenPGPUtils.OPENPGP_SIGNATURE_CONTENT_TYPE)
         .setHeader('content-transfer-encoding', '7bit')
-        .setHeader('content-description', 'OpenPGP signed message')
+        .setHeader('content-description', OpenPGPMimeBuilder.SIGNED_DESC)
         .setContent(signature);
     return signedNode;
 };
@@ -147,15 +158,16 @@ OpenPGPMimeBuilder.prototype.buildEncrypted = function(cipherText) {
         OpenPGPUtils.ENCRYPTED_MESSAGE_CONTENT_TYPE,
         'protocol="' + OpenPGPUtils.OPENPGP_ENCRYPTED_CONTENT_TYPE + '"'
     ];
-    var encryptedNode = new MimeNode(ctParts.join('; '));
+    var encryptedNode = new MimeNode(ctParts.join('; '))
+        .setContent(OpenPGPMimeBuilder.ENCRYPTED_PREAMBLE);
     encryptedNode.createChild(OpenPGPUtils.OPENPGP_ENCRYPTED_CONTENT_TYPE)
         .setHeader('content-transfer-encoding', '7bit')
-        .setHeader('content-description', 'PGP/MIME Versions Identification')
-        .setContent('Version: 1');
+        .setHeader('content-description', OpenPGPMimeBuilder.VERSION_DESC)
+        .setContent(OpenPGPMimeBuilder.VERSION_CONTENT);
     encryptedNode.createChild(ZmMimeTable.APP_OCTET_STREAM, {filename: 'encrypted.asc'})
         .setHeader('content-transfer-encoding', '7bit')
         .setHeader('content-disposition', 'inline')
-        .setHeader('content-description', 'OpenPGP encrypted message')
+        .setHeader('content-description', OpenPGPMimeBuilder.ENCRYPTED_DESC)
         .setContent(cipherText);
     return encryptedNode;
 };
