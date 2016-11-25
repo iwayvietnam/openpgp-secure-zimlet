@@ -61,7 +61,7 @@ OpenPGPMimeBuilder.prototype.buildPlainText = function(message) {
                 }
                 var node = new MimeNode(contentType, {filename: filename})
                     .setHeader('content-transfer-encoding', '7bit')
-                    .setHeader('content-disposition', 'attachment')
+                    .setHeader('content-disposition', 'inline')
                     .setHeader('content-description', desc)
                     .setContent(mp.content._content);
                 attachmentNodes.push(node);
@@ -154,6 +154,7 @@ OpenPGPMimeBuilder.prototype.buildEncrypted = function(cipherText) {
         .setContent('Version: 1');
     encryptedNode.createChild(ZmMimeTable.APP_OCTET_STREAM, {filename: 'encrypted.asc'})
         .setHeader('content-transfer-encoding', '7bit')
+        .setHeader('content-disposition', 'inline')
         .setHeader('content-description', 'OpenPGP encrypted message')
         .setContent(cipherText);
     return encryptedNode;
