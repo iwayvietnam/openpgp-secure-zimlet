@@ -1,7 +1,7 @@
 /*
  * ***** BEGIN LICENSE BLOCK *****
  * OpenPGP Zimbra Secure is the open source digital signature and encrypt for Zimbra Collaboration Open Source Edition software
- * Copyright (C) 2016-present OpenPGP Zimbra Secure
+ * Copyright (C) 2016-present Nguyen Van Nguyen <nguyennv1981@gmail.com>
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -18,7 +18,7 @@
  *
  * OpenPGP MIME Secure Email Zimlet
  *
- * Written by nguyennv1981@gmail.com
+ * Written by Nguyen Van Nguyen <nguyennv1981@gmail.com>
  */
 
 PublicKeyListView = function(params) {
