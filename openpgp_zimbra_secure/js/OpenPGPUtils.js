@@ -109,6 +109,10 @@ OpenPGPUtils.hasInlinePGPContent = function(content, header) {
     return false;
 };
 
+OpenPGPUtils.isAttachment = function(cd) {
+    return cd.indexOf('attachment') >=0 || (cd.indexOf('inline') >=0 && cd.indexOf('filename') > 0);
+}
+
 OpenPGPUtils.localStorageSave = function(key, pwd, data) {
     var opts = {
         data: data,
@@ -323,7 +327,7 @@ OpenPGPUtils.mimeNodeToZmMimePart = function(node, withAttachment) {
     function buildZmMimePart(node) {
         deep++;
         var cd = (node.headers['content-disposition']) ? node.headers['content-disposition'][0] : false;
-        var isAttach = (cd && cd.params && cd.params.filename) && (cd.value === 'attachment' || cd.value === 'inline');
+        var isAttach = cd ? OpenPGPUtils.isAttachment(cd.initial) : false;
         if (!withAttachment && isAttach) {
             deep--;
             return false;

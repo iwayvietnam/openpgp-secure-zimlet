@@ -152,7 +152,7 @@ OpenPGPSecureMessageProcessor.prototype.onDecrypted = function(callback, msg, me
     var parser = new window['emailjs-mime-parser']();
     parser.onbody = function(node, chunk){
         var cd = (node.headers['content-disposition']) ? node.headers['content-disposition'][0] : false;
-        var isAttach = (cd && cd.params && cd.params.filename) && (cd.value === 'attachment' || cd.value === 'inline');
+        var isAttach = cd ? OpenPGPUtils.isAttachment(cd.initial) : false;
         var ct = node.contentType;
         if (pgpMessage.encrypted && cd && isAttach && node.content) {
             var content = codec.fromTypedArray(node.content);
