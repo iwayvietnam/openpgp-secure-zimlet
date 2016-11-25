@@ -91,21 +91,23 @@ OpenPGPSecureKeyStore.prototype.init = function() {
 };
 
 OpenPGPSecureKeyStore.prototype.addPublicKey = function(key) {
-    var self = this;
-    var added = false;
+    if (key.isPublic()) {
+        var self = this;
+        var added = false;
 
-    var fingerprint = key.primaryKey.fingerprint;
-    if (!self._fingerprints[fingerprint]) {
-        self._fingerprints[fingerprint] = fingerprint;
-        self.publicKeys.push(key);
-        added = true;
-    }
+        var fingerprint = key.primaryKey.fingerprint;
+        if (!self._fingerprints[fingerprint]) {
+            self._fingerprints[fingerprint] = fingerprint;
+            self.publicKeys.push(key);
+            added = true;
+        }
 
-    if (added) {
-        this._addCallbacks.forEach(function(callback) {
-            callback.run(key);
-        });
-        this._storePublicKeys();
+        if (added) {
+            this._addCallbacks.forEach(function(callback) {
+                callback.run(key);
+            });
+            this._storePublicKeys();
+        }
     }
 };
 
