@@ -53,7 +53,6 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
         var ct = parser.node.contentType.value;
         if(OpenPGPUtils.isEncryptedMessage(ct) && self._privateKey) {
             var cipherText = '';
-            var messageHeader = '-----BEGIN PGP MESSAGE-----';
             var pgpNode = parser.node._childNodes.find(function(node) {
                 return OpenPGPUtils.hasInlinePGPContent(node.raw, OpenPGPUtils.OPENPGP_MESSAGE_HEADER);
             });
