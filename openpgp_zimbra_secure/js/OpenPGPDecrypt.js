@@ -91,7 +91,7 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
 
             var ct = parser.node.contentType.value;
             if (OpenPGPUtils.isSignedMessage(ct) && self._publicKeys.length > 0) {
-                var bodyContent = '';
+                var signedContent = '';
                 var signature = '';
                 parser.node._childNodes.forEach(function(node) {
                     var ct = node.contentType.value;
@@ -99,14 +99,14 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
                         signature = codec.fromTypedArray(node.content);
                     }
                     else if (!OpenPGPUtils.isPGPContentType(ct)) {
-                        bodyContent = node.raw;
+                        signedContent = node.raw.replace(/\r?\n/g, '\r\n');
                     }
                 });
 
-                var pgpMessage = openpgp.message.readSignedContent(bodyContent.replace(/\r?\n/g, '\r\n'), signature);
+                var pgpMessage = openpgp.message.readSignedContent(signedContent, signature);
                 message.signatures = pgpMessage.verify(self._publicKeys);
-                if (bodyContent.length > 0) {
-                    message.content = bodyContent;
+                if (signedContent.length > 0) {
+                    message.content = signedContent;
                 }
             }
         }
