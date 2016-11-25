@@ -187,7 +187,7 @@ OpenPGPZimbraSecure.prototype.addAttachmentHandler = function() {
     var view = controller._view[viewType];
 
     for (var mimeType in ZmMimeTable._table) {
-        if (mimeType === 'application/pgp-encrypted') {
+        if (mimeType === OpenPGPUtils.OPENPGP_ENCRYPTED_CONTENT_TYPE) {
             view.addAttachmentLinkHandler(mimeType, 'OpenPGPZimbraSecure', function(attachment) {
                 var title = self.getMessage('decryptFile');
                 var linkId = view._getAttachmentLinkId(attachment.part, 'decrypt');
@@ -578,7 +578,7 @@ OpenPGPZimbraSecure.decryptAttachment = function(name, url) {
                 };
             }
             openpgp.decrypt(opts).then(function(plainText) {
-                OpenPGPUtils.saveAs(plainText.data, name, 'application/octet-stream');
+                OpenPGPUtils.saveAs(plainText.data, name, ZmMimeTable.APP_OCTET_STREAM);
             });
         }
     });
