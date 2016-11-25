@@ -132,17 +132,17 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
 
 OpenPGPDecrypt.prototype.onDecrypted = function(message) {
     if (this._onDecrypted instanceof AjxCallback) {
-        this._onDecrypted.run(this, message);
+        this._onDecrypted.run(message);
     } else if (AjxUtil.isFunction(this._onDecrypted)) {
-        this._onDecrypted(this, message);
+        this._onDecrypted(message);
     }
 }
 
 OpenPGPDecrypt.prototype.onError = function(err) {
     if (this._onError instanceof AjxCallback) {
-        this._onError.run(this, err);
+        this._onError.run(err);
     } else if (AjxUtil.isFunction(this._onError)) {
-        this._onError(this, err);
+        this._onError(err);
     }
 }
 

@@ -116,10 +116,10 @@ OpenPGPSecureMessageProcessor.prototype._decryptMessage = function(callback, msg
         var decryptor = new OpenPGPDecrypt({
             privateKey: this._handler.getKeyStore().getPrivateKey(),
             publicKeys: this._handler.getKeyStore().getPublicKeys(),
-            onDecrypted: function(decryptor, message) {
+            onDecrypted: function(message) {
                 self.onDecrypted(callback, msg, message);
             },
-            onError: function(decryptor, error) {
+            onError: function(error) {
                 console.log(error);
                 self._onDecryptError('decrypting-error');
             }
