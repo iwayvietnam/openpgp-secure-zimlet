@@ -348,6 +348,9 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
                             self.displayStatusMessage(self.getMessage('publicKeyImported'));
 
                             OpenPGPUtils.visitParent(view.parent, function(parent) {
+                                if (parent.getClassName() == 'ZmConvView2') {
+                                    parent.clearChangeListeners();
+                                }
                                 if (parent.getClassName() == 'ZmConvDoublePaneView') {
                                     var children = parent.getChildren();
                                     children.forEach(function(child) {
