@@ -75,6 +75,7 @@ OpenPGPZimbraSecure.prototype.init = function() {
             self._handleMessageResponse(newCallback, result);
         };
         self._overrideZmMailMsgView();
+        self._addAttachmentHandler();
     }));
 
     AjxDispatcher.addPackageLoadFunction('Startup1_2', new AjxCallback(this, function() {
@@ -90,13 +91,6 @@ OpenPGPZimbraSecure.prototype.init = function() {
     ], new AjxCallback(function() {
         self._initOpenPGP();
     }));
-
-    if (appCtxt.get(ZmSetting.MAIL_ENABLED)) {
-        AjxPackage.require({
-            name: 'MailCore',
-            callback: new AjxCallback(this, this.addAttachmentHandler)
-        });
-    }
 };
 
 OpenPGPZimbraSecure.prototype._handleNewWindow = function() {
@@ -169,7 +163,7 @@ OpenPGPZimbraSecure.prototype._overrideZmMailMsgView = function() {
     ZmMailMsgView.displayAdditionalHdrsInMsgView.securityHeader = '<span class="securityHeader">' + this.getMessage('messageSecurityHeader') + '</span>';
 }
 
-OpenPGPZimbraSecure.prototype.addAttachmentHandler = function() {
+OpenPGPZimbraSecure.prototype._addAttachmentHandler = function() {
     var self = this;
 
     OpenPGPUtils.OPENPGP_CONTENT_TYPES.forEach(function(contentType) {
