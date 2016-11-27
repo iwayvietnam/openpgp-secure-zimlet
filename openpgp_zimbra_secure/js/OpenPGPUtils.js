@@ -301,6 +301,13 @@ OpenPGPUtils.fetchPart = function(part, baseUrl) {
     }
 };
 
+OpenPGPUtils.visitParent = function(parent, callback) {
+    callback(parent);
+    if (parent.parent) {
+        OpenPGPUtils.visitParent(parent.parent, callback);
+    }
+}
+
 OpenPGPUtils.visitMimePart = function(part, callback) {
     callback(part);
     if (part.mp) {

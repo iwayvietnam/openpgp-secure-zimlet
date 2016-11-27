@@ -346,6 +346,23 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
                         function(dialog) {
                             self._keyStore.addPublicKey(key);
                             self.displayStatusMessage(self.getMessage('publicKeyImported'));
+
+                            OpenPGPUtils.visitParent(view.parent, function(parent) {
+                                if (parent.getClassName() == 'ZmConvDoublePaneView') {
+                                    var children = parent.getChildren();
+                                    children.forEach(function(child) {
+                                        if (child.getClassName() == 'DwtListView') {
+                                            var convs = child.getList().getArray();
+                                            convs.forEach(function(conv) {
+                                                console.log(conv);
+                                                if (conv._loaded == true) {
+                                                    conv._loaded = false;
+                                                }
+                                            });
+                                        }
+                                    });
+                                }
+                            });
                         },
                         false,
                         OpenPGPSecureKeyStore.keyInfo(key)
