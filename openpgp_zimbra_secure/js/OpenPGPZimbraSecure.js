@@ -351,7 +351,6 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
                                         if (child.getClassName() == 'DwtListView') {
                                             var convs = child.getList().getArray();
                                             convs.forEach(function(conv) {
-                                                console.log(conv);
                                                 if (conv._loaded == true) {
                                                     conv._loaded = false;
                                                 }
