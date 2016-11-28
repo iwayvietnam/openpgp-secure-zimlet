@@ -310,25 +310,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
                 publicKeyList.addPublicKey(key);
             }));
             this._keyStore.addCallback(new AjxCallback(function(fingerprint) {
-                var controller = AjxDispatcher.run('GetConvListController');
-                var itemView = controller.getItemView();
-                if (itemView && itemView.getClassName() == 'ZmConvView2') {
-                    itemView.clearChangeListeners();
-                }
-                var paneView = controller.getCurrentView();
-                if (paneView && paneView.getClassName() == 'ZmConvDoublePaneView') {
-                    var children = paneView.getChildren();
-                    children.forEach(function(child) {
-                        if (child.getClassName() == 'DwtListView') {
-                            var convs = child.getList().getArray();
-                            convs.forEach(function(conv) {
-                                if (conv._loaded == true) {
-                                    conv._loaded = false;
-                                }
-                            });
-                        }
-                    });
-                }
+                self._handler.handlePublicKeyChange();
             }), OpenPGPSecureKeyStore.REMOVE_CALLBACK);
             return publicKeyList;
         } else {

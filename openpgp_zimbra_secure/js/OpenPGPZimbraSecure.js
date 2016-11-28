@@ -338,30 +338,10 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
                     var dialog = self._keyImportDialog = new ImportPublicKeyDialog(
                         self,
                         function(dialog) {
-                            self._keyStore.addPublicKey(key);
-                            self.displayStatusMessage(self.getMessage('publicKeyImported'));
-
-                            OpenPGPUtils.visitParent(view.parent, function(parent) {
-                                if (parent.getClassName() == 'ZmConvView2') {
-                                    parent.clearChangeListeners();
-                                }
-                                if (parent.getClassName() == 'ZmConvDoublePaneView') {
-                                    var children = parent.getChildren();
-                                    children.forEach(function(child) {
-                                        if (child.getClassName() == 'DwtListView') {
-                                            var convs = child.getList().getArray();
-                                            convs.forEach(function(conv) {
-                                                if (conv._loaded == true) {
-                                                    conv._loaded = false;
-                                                }
-                                            });
-                                        }
-                                    });
-                                }
-                            });
+                            dialog.importPublicKey();
                         },
                         false,
-                        OpenPGPSecureKeyStore.keyInfo(key)
+                        key
                     );
                     dialog.popup();
                 }
@@ -369,6 +349,28 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
         }
     }
 };
+
+OpenPGPZimbraSecure.prototype.handlePublicKeyChange = function() {
+    var controller = AjxDispatcher.run('GetConvListController');
+    var itemView = controller.getItemView();
+    if (itemView && itemView.getClassName() == 'ZmConvView2') {
+        itemView.clearChangeListeners();
+    }
+    var paneView = controller.getCurrentView();
+    if (paneView && paneView.getClassName() == 'ZmConvDoublePaneView') {
+        var children = paneView.getChildren();
+        children.forEach(function(child) {
+            if (child.getClassName() == 'DwtListView') {
+                var convs = child.getList().getArray();
+                convs.forEach(function(conv) {
+                    if (conv._loaded == true) {
+                        conv._loaded = false;
+                    }
+                });
+            }
+        });
+    }
+}
 
 /**
  * This method gets called by the Zimlet framework when a toolbar is created.

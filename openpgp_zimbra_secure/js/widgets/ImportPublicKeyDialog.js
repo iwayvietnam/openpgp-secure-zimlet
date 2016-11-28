@@ -21,7 +21,7 @@
  * Written by Nguyen Van Nguyen <nguyennv1981@gmail.com>
  */
 
-ImportPublicKeyDialog = function(handler, onOk, onCancel, keyInfo) {
+ImportPublicKeyDialog = function(handler, onOk, onCancel, key) {
     OpenPGPDialog.call(
         this,
         handler,
@@ -30,10 +30,11 @@ ImportPublicKeyDialog = function(handler, onOk, onCancel, keyInfo) {
         onCancel,
         [DwtDialog.CANCEL_BUTTON, DwtDialog.OK_BUTTON]
     );
+    this._key = key;
 
     this.setView(new ImportPublicKeyView({
         parent: this
-    }, keyInfo));
+    }, OpenPGPSecureKeyStore.keyInfo(key)));
 };
 
 ImportPublicKeyDialog.prototype = new OpenPGPDialog;
@@ -41,4 +42,10 @@ ImportPublicKeyDialog.prototype.constructor = ImportPublicKeyDialog;
 
 ImportPublicKeyDialog.prototype.toString = function() {
     return 'ImportPublicKeyDialog';
+};
+
+ImportPublicKeyDialog.prototype.importPublicKey = function() {
+    this._handler.getKeyStore().addPublicKey(this._key);
+    this._handler.displayStatusMessage(this._handler.getMessage('publicKeyImported'));
+    self._handler.handlePublicKeyChange();
 };
