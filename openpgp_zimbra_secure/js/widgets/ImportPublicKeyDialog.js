@@ -47,5 +47,5 @@ ImportPublicKeyDialog.prototype.toString = function() {
 ImportPublicKeyDialog.prototype.importPublicKey = function() {
     this._handler.getKeyStore().addPublicKey(this._key);
     this._handler.displayStatusMessage(this._handler.getMessage('publicKeyImported'));
-    self._handler.handlePublicKeyChange();
+    this._handler.handlePublicKeyChange();
 };
