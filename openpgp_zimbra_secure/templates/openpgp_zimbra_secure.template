@@ -225,8 +225,8 @@
 
 <template id='openpgp_zimbra_secure#ImportPublicKeyView'>
     <div class='KeyImportTableWrap'>
-        <table border=0 cellspacing=0 cellpadding=0 width=100% class='KeyLookupTable'>
-            <tr class='KeyLookupRow'>
+        <table border=0 cellspacing=0 cellpadding=0 width=100% class='ImportPublicKeyTable'>
+            <tr class='ImportPublicKeyRow'>
                 <td><div id='${id}_KeyInfo'></div></td>
             </tr>
         </table>
