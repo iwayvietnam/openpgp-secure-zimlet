@@ -38,7 +38,7 @@ PublicKeyListView = function(params) {
     });
 
     this.addActionListener(new AjxListener(this, this._listActionListener));
-}
+};
 
 PublicKeyListView.prototype = new DwtListView;
 PublicKeyListView.prototype.constructor = PublicKeyListView;
@@ -76,7 +76,7 @@ PublicKeyListView.prototype.addPublicKey = function(key) {
             created: priKey.created
         });
     }
-}
+};
 
 PublicKeyListView.prototype._getHeaderList = function () {
     var headers = [];
@@ -123,7 +123,7 @@ PublicKeyListView.prototype._getCellContents = function(htmlArr, idx, item, fiel
         htmlArr[idx++] = item.toString ? item.toString() : item;
     }
     return idx;
-}
+};
 
 PublicKeyListView.prototype._listActionListener = function (ev) {
     var actionMenu = this._initializeActionMenu();

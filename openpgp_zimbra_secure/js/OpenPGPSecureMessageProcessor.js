@@ -72,7 +72,7 @@ OpenPGPSecureMessageProcessor.prototype.process = function() {
             this._loadInlinePGPMessages(inlinePGPMsgs);
         }
     }
-}
+};
 
 /**
  * Load and decrypt the given pgp messages.
@@ -319,7 +319,8 @@ OpenPGPSecureMessageProcessor.prototype._addSecurityHeader = function(msg, signa
 
         msg._attrs.securityHeader = htmlArr.join('');
     });
-}
+};
+
 OpenPGPSecureMessageProcessor.hasPGPPart = function(part, msg) {
     var ct = part.ct;
     var hasPGP = false;
@@ -343,7 +344,7 @@ OpenPGPSecureMessageProcessor.hasPGPPart = function(part, msg) {
     }
 
     return hasPGP;
-}
+};
 
 OpenPGPSecureMessageProcessor.hasInlinePGP = function(part, msg) {
     if (part.content && OpenPGPUtils.hasInlinePGPContent(part.content)) {
@@ -362,4 +363,4 @@ OpenPGPSecureMessageProcessor.hasInlinePGP = function(part, msg) {
         }
     }
     return false
-}
+};

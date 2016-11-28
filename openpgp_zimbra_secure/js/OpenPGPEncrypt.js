@@ -93,7 +93,7 @@ OpenPGPEncrypt.prototype.onCallback = function(callback, obj) {
     } else if (AjxUtil.isFunction(callback)) {
         callback(obj);
     }
-}
+};
 
 OpenPGPEncrypt.prototype.onError = function(err) {
     if (this._onError instanceof AjxCallback) {
@@ -101,7 +101,7 @@ OpenPGPEncrypt.prototype.onError = function(err) {
     } else if (AjxUtil.isFunction(this._onError)) {
         this._onError(err);
     }
-}
+};
 
 OpenPGPEncrypt.prototype.shouldSign = function(shouldSign) {
     if (typeof shouldSign === 'undefined') {
@@ -110,7 +110,7 @@ OpenPGPEncrypt.prototype.shouldSign = function(shouldSign) {
     else {
         this._shouldSign = shouldSign ? true : false;
     }
-}
+};
 
 OpenPGPEncrypt.prototype.shouldEncrypt = function(shouldEncrypt) {
     if (typeof shouldEncrypt === 'undefined') {
@@ -119,4 +119,4 @@ OpenPGPEncrypt.prototype.shouldEncrypt = function(shouldEncrypt) {
     else {
         this._shouldEncrypt = shouldEncrypt ? true : false;
     }
-}
+};

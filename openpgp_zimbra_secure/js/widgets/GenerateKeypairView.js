@@ -85,7 +85,7 @@ GenerateKeypairView.prototype._genPw = function() {
     this.txtPassphrase.setValue(OpenPGPUtils.randomString({
         length: 24
     }));
-}
+};
 
 GenerateKeypairView.prototype._showHide = function() {
     var id = this.getHTMLElId();
@@ -95,4 +95,4 @@ GenerateKeypairView.prototype._showHide = function() {
     } else {
         input.setAttribute('type', 'password');   
     }
-}
+};

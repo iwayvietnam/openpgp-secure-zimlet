@@ -335,7 +335,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
             );
         }
         this._handler._genkeyDialog.popup();
-    }
+    };
 
     OpenPGPSecurePrefs.prototype._keySubmit = function() {
         var self = this;
@@ -347,7 +347,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
                 self._handler.displayStatusMessage(self._handler.getMessage('publicKeySubmitted'));
             });
         }
-    }
+    };
 
     OpenPGPSecurePrefs.prototype._keySend = function() {
         var self = this;
@@ -366,13 +366,13 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
             );
         }
         dialog.popup();
-    }
+    };
 
     OpenPGPSecurePrefs.prototype._keyExport = function() {
         var privateKey = this.getFormValue(OpenPGPSecurePrefs.PRIVATE_KEY);
         var publicKey = this.getFormValue(OpenPGPSecurePrefs.PUBLIC_KEY);
         OpenPGPUtils.saveTextAs(privateKey + '\n\n' + publicKey, 'keypair.asc');
-    }
+    };
 
     OpenPGPSecurePrefs.prototype._togglePassphrase = function() {
         var input = document.getElementById(this._id + '_' + OpenPGPSecurePrefs.PASSPHRASE);
@@ -401,7 +401,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
             );
         }
         dialog.popup();
-    }
+    };
 
     OpenPGPSecurePrefs.prototype._keyLookup = function() {
         var self = this;
@@ -421,7 +421,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
             );
         }
         dialog.popup();
-    }
+    };
 
     OpenPGPSecurePrefs._loadCallbacks.forEach(function(cb) {
         cb.run();

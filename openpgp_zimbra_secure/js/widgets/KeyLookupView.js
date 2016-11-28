@@ -60,7 +60,7 @@ KeyLookupView.prototype._initialize = function() {
 KeyLookupView.prototype.reset = function() {
     this.txtQuery.setValue('');
     document.getElementById(this.getHTMLElId() + '_Result').innerHTML = '';
-}
+};
 
 KeyLookupView.prototype._keyLookup = function() {
     var self = this;
@@ -79,4 +79,4 @@ KeyLookupView.prototype._keyLookup = function() {
             document.getElementById(id + '_Result').innerHTML = html;
         });
     }
-}
+};

@@ -116,7 +116,7 @@ OpenPGPSecureSender.prototype._sendMessage = function() {
     else {
         this._encryptMessage();
     }
-}
+};
 
 OpenPGPSecureSender.prototype._encryptMessage = function() {
     var self = this;
@@ -204,7 +204,7 @@ OpenPGPSecureSender.prototype._encryptMessage = function() {
         contents: contentParts,
         attachments: attachments
     });
-}
+};
 
 OpenPGPSecureSender.prototype._onEncrypted = function(message) {
     var self = this;

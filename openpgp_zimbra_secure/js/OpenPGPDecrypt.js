@@ -135,7 +135,7 @@ OpenPGPDecrypt.prototype.onDecrypted = function(message) {
     } else if (AjxUtil.isFunction(this._onDecrypted)) {
         this._onDecrypted(message);
     }
-}
+};
 
 OpenPGPDecrypt.prototype.onError = function(err) {
     if (this._onError instanceof AjxCallback) {
@@ -143,7 +143,7 @@ OpenPGPDecrypt.prototype.onError = function(err) {
     } else if (AjxUtil.isFunction(this._onError)) {
         this._onError(err);
     }
-}
+};
 
 OpenPGPDecrypt.decryptContent = function(content, publicKeys, privateKey, onDecrypted) {
     var sequence = Promise.resolve();
@@ -202,4 +202,4 @@ OpenPGPDecrypt.decryptContent = function(content, publicKeys, privateKey, onDecr
         }
         return result;
     });
-}
+};

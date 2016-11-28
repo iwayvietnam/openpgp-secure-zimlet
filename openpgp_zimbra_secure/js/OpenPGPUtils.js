@@ -111,7 +111,7 @@ OpenPGPUtils.hasInlinePGPContent = function(content, header) {
 
 OpenPGPUtils.isAttachment = function(cd) {
     return cd.indexOf('attachment') >=0 || (cd.indexOf('inline') >=0 && cd.indexOf('filename') > 0);
-}
+};
 
 OpenPGPUtils.localStorageSave = function(key, pwd, data) {
     var opts = {
@@ -122,7 +122,7 @@ OpenPGPUtils.localStorageSave = function(key, pwd, data) {
         localStorage[key] = encrypted.data;
         return encrypted.data;
     });
-}
+};
 
 OpenPGPUtils.localStorageRead = function(key, pwd) {
     var sequence = Promise.resolve();
@@ -141,7 +141,7 @@ OpenPGPUtils.localStorageRead = function(key, pwd) {
             return false;
         }
     });
-}
+};
 
 /*
  * base64 encode
@@ -306,7 +306,7 @@ OpenPGPUtils.visitParent = function(parent, callback) {
     if (parent.parent) {
         OpenPGPUtils.visitParent(parent.parent, callback);
     }
-}
+};
 
 OpenPGPUtils.visitMimePart = function(part, callback) {
     callback(part);

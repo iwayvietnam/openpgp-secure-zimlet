@@ -243,11 +243,11 @@ OpenPGPSecureKeyStore.prototype.publicKeyMissing = function(addresses) {
         }
     });
     return missing;
-}
+};
 
 OpenPGPSecureKeyStore.prototype.publicKeyExisted = function(fingerprint) {
     return this._fingerprints[fingerprint] ? true : false;
-}
+};
 
 OpenPGPSecureKeyStore.keyInfo = function(key) {
     var uids = [];
@@ -268,7 +268,7 @@ OpenPGPSecureKeyStore.keyInfo = function(key) {
         keyLength: keyLength,
         created: priKey.created
     };
-}
+};
 
 OpenPGPSecureKeyStore.prototype._readPublicKeys = function() {
     var publicKeys = [];
@@ -277,7 +277,7 @@ OpenPGPSecureKeyStore.prototype._readPublicKeys = function() {
         publicKeys = JSON.parse(localStorage[storeKey]);
     }
     return publicKeys;
-}
+};
 
 OpenPGPSecureKeyStore.prototype._storePublicKeys = function() {
     var publicKeys = [];
