@@ -1,4 +1,4 @@
-/*
+/**
  * ***** BEGIN LICENSE BLOCK *****
  * OpenPGP Zimbra Secure is the open source digital signature and encrypt for Zimbra Collaboration Open Source Edition software
  * Copyright (C) 2016-present Nguyen Van Nguyen <nguyennv1981@gmail.com>
