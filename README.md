@@ -11,6 +11,14 @@ Bugs and feedback: https://github.com/nguyennv/openpgp-zimlet/issues
 - Support GUI for easy configuration and OpenPGP key management
 
 ##Install OpenPGP Secure Zimlet
+### Install from git
+    [root@zimbra ~]# cd /tmp/
+    [root@zimbra ~]# git clone https://github.com/nguyennv/openpgp-zimlet
+    [root@zimbra ~]# cd /tmp/openpgp-zimlet
+    [root@zimbra ~]# ./build.sh
+    [root@zimbra ~]# su zimbra
+    [root@zimbra ~]# zmzimletctl deploy /tmp/openpgp-zimlet/openpgp_zimbra_secure.zip
+    [root@zimbra ~]# zmmailboxdctl restart
 
 ### License
 
