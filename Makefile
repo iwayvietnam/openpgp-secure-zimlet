@@ -21,13 +21,13 @@
 BUILDDIR=build
 
 build:
-    @echo "Building $@"
-    @mkdir -p $(BUILDDIR)
-    @cd openpgp_zimbra_secure && zip -r ../$(BUILDDIR)/openpgp_zimbra_secure.zip *
+	@echo "Building $@"
+	@mkdir -p $(BUILDDIR)
+	@cd openpgp_zimbra_secure && zip -r ../$(BUILDDIR)/openpgp_zimbra_secure.zip *
 
 clean:
-    @rm -Rf $(BUILDDIR)
+	@rm -Rf $(BUILDDIR)
 
 install: 
-    mkdir -p $(DESTDIR)/opt/zimbra/zimlets-extra
-    cp -R $(BUILDDIR)/openpgp_zimbra_secure.zip $(DESTDIR)/opt/zimbra/zimlets-extra
+	mkdir -p $(DESTDIR)/opt/zimbra/zimlets-extra
+	cp -R $(BUILDDIR)/openpgp_zimbra_secure.zip $(DESTDIR)/opt/zimbra/zimlets-extra
