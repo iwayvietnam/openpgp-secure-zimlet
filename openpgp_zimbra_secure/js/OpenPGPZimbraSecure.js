@@ -170,9 +170,9 @@ OpenPGPZimbraSecure.prototype._overrideZmMailMsgView = function() {
 
 OpenPGPZimbraSecure.prototype._overrideZmComposeView = function() {
     var self = this;
-    var setBodyFunc = ZmComposeView.prototype._setBody;
-    ZmComposeView.prototype._setBody = function(action, msg, extraBodyText, noEditorUpdate, keepAttachments) {
-        setBodyFunc.call(this, action, msg, extraBodyText, noEditorUpdate, keepAttachments);
+    var setFromSelectFunc = ZmComposeView.prototype._setFromSelect;
+    ZmComposeView.prototype._setFromSelect = function(msg) {
+        setFromSelectFunc.call(this, msg);
         if (msg && self._pgpMessageCache[msg.id]) {
             var pgpMessage = self._pgpMessageCache[msg.id];
             if (pgpMessage.encrypted && pgpMessage.attachments.length > 0) {
