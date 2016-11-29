@@ -64,6 +64,10 @@ OpenPGPZimbraSecure.prototype.init = function() {
         this._handleNewWindow();
     }
 
+    AjxDispatcher.addPackageLoadFunction('Mail', new AjxCallback(this, function() {
+        self._overrideZmComposeView();
+    }));
+
     AjxDispatcher.addPackageLoadFunction('MailCore', new AjxCallback(this, function(){
         self._overrideZmMailMsg();
 
@@ -97,14 +101,15 @@ OpenPGPZimbraSecure.prototype._handleNewWindow = function() {
     this._overrideZmMailMsg();
     this._overrideZmSearch();
     this._overrideZmMailMsgView();
-}
+    this._overrideZmComposeView();
+};
 
 OpenPGPZimbraSecure.prototype._overrideZmMailMsg = function() {
     var self = this;
     var sendMsgFunc = ZmMailMsg.prototype._sendMessage;
     ZmMailMsg.prototype._sendMessage = function(params) {
         self._sendMessage(sendMsgFunc, this, params);
-    }
+    };
 
     var fetchMsgFunc = ZmMailMsg._handleResponseFetchMsg;
     ZmMailMsg._handleResponseFetchMsg = function(callback, result) {
@@ -113,7 +118,7 @@ OpenPGPZimbraSecure.prototype._overrideZmMailMsg = function() {
         });
         self._handleMessageResponse(newCallback, result);
     };
-}
+};
 
 OpenPGPZimbraSecure.prototype._overrideZmSearch = function() {
     var self = this;
@@ -132,7 +137,7 @@ OpenPGPZimbraSecure.prototype._overrideZmSearch = function() {
         });
         self._handleMessageResponse(newCallback, result);
     };
-}
+};
 
 OpenPGPZimbraSecure.prototype._overrideZmMailMsgView = function() {
     var self = this;
@@ -161,7 +166,62 @@ OpenPGPZimbraSecure.prototype._overrideZmMailMsgView = function() {
     };
 
     ZmMailMsgView.displayAdditionalHdrsInMsgView.securityHeader = '<span class="securityHeader">' + this.getMessage('messageSecurityHeader') + '</span>';
-}
+};
+
+OpenPGPZimbraSecure.prototype._overrideZmComposeView = function() {
+    var self = this;
+    var setBodyFunc = ZmComposeView.prototype._setBody;
+    ZmComposeView.prototype._setBody = function(action, msg, extraBodyText, noEditorUpdate, keepAttachments) {
+        setBodyFunc.call(this, action, msg, extraBodyText, noEditorUpdate, keepAttachments);
+        if (msg && self._pgpMessageCache[msg.id]) {
+            var pgpMessage = self._pgpMessageCache[msg.id];
+            if (pgpMessage.encrypted && pgpMessage.attachments.length > 0) {
+                var controller = this.getController();
+                var aids = [];
+                var draftAids = [];
+                var url = appCtxt.get(ZmSetting.CSFE_ATTACHMENT_UPLOAD_URI) + '?fmt=raw';
+                pgpMessage.attachments.forEach(function(attachment) {
+                    var callback = new AjxCallback(function(response) {
+                        if (response.success) {
+                            var values = JSON.parse('[' + response.text.replace(/'/g, '"')  + ']');
+                            if (values && values.length == 3 && values[0] == 200) {
+                                attachment.aid = values[2];
+                                aids.push(attachment.aid);
+                                if (!attachment.cid) {
+                                    draftAids.push(attachment.aid);
+                                }
+                            }
+                            if (aids.length == pgpMessage.attachments.length) {
+                                controller.saveDraft(ZmComposeController.DRAFT_TYPE_AUTO, draftAids.join(','));
+                            }
+                        }
+                    });
+                    var content = (attachment.type.indexOf(ZmMimeTable.TEXT) == -1) ? OpenPGPUtils.stringToArray(attachment.content) : attachment.content;
+                    AjxRpc.invoke(content, url, {
+                        'Content-Type': attachment.type,
+                        'Content-Disposition': 'attachment; filename="' + attachment.name + '"'
+                    }, callback);
+                });
+            }
+        }
+    };
+
+    var topPartFunc = ZmComposeView.prototype._getTopPart;
+    ZmComposeView.prototype._getTopPart = function(msg, isDraft, bodyContent) {
+        if (this._origMsg && self._pgpMessageCache[this._origMsg.id]) {
+            var pgpMessage = self._pgpMessageCache[this._origMsg.id];
+            if (pgpMessage.encrypted && pgpMessage.attachments.length > 0) {
+                pgpMessage.attachments.forEach(function(attachment) {
+                    if (attachment.cid && attachment.aid) {
+                        msg.addInlineAttachmentId(attachment.cid, attachment.aid);
+                        delete attachment.aid;
+                    }
+                });
+            }
+        }
+        return topPartFunc.call(this, msg, isDraft, bodyContent);
+    };
+};
 
 OpenPGPZimbraSecure.prototype._addAttachmentHandler = function() {
     var self = this;
@@ -353,14 +413,14 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
 OpenPGPZimbraSecure.prototype.handlePublicKeyChange = function() {
     var controller = AjxDispatcher.run('GetConvListController');
     var itemView = controller.getItemView();
-    if (itemView && itemView.getClassName() == 'ZmConvView2') {
+    if (itemView && itemView.toString() == 'ZmConvView2') {
         itemView.clearChangeListeners();
     }
     var paneView = controller.getCurrentView();
-    if (paneView && paneView.getClassName() == 'ZmConvDoublePaneView') {
+    if (paneView && paneView.toString() == 'ZmConvDoublePaneView') {
         var children = paneView.getChildren();
         children.forEach(function(child) {
-            if (child.getClassName() == 'DwtListView') {
+            if (child.toString() == 'ZmConvListView') {
                 var convs = child.getList().getArray();
                 convs.forEach(function(conv) {
                     if (conv._loaded == true) {
@@ -370,7 +430,7 @@ OpenPGPZimbraSecure.prototype.handlePublicKeyChange = function() {
             }
         });
     }
-}
+};
 
 /**
  * This method gets called by the Zimlet framework when a toolbar is created.
@@ -450,9 +510,6 @@ OpenPGPZimbraSecure.prototype.initializeToolbar = function(app, toolbar, control
         }
     }
 };
-
-OpenPGPZimbraSecure.prototype.onSendButtonClicked = function(controller, msg) {
-}
 
 OpenPGPZimbraSecure.prototype._setSecurityImage = function(button, value) {
     var security_types = {};
@@ -601,7 +658,7 @@ OpenPGPZimbraSecure.decryptAttachment = function(name, url) {
     AjxRpc.invoke('', url, {
         'X-Zimbra-Encoding': 'x-base64'
     }, callback, true);
-}
+};
 
 OpenPGPZimbraSecure.prototype._download = function(element) {
     var id = Dwt.getAttr(element, 'data-id');
@@ -609,7 +666,7 @@ OpenPGPZimbraSecure.prototype._download = function(element) {
         var attachment = this._pgpAttachments[id];
         OpenPGPUtils.saveAs(attachment.content, attachment.name, attachment.type);
     }
-}
+};
 
 OpenPGPZimbraSecure.popupErrorDialog = function(errorCode){
     if(!errorCode){
