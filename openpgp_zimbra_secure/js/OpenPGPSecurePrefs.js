@@ -231,11 +231,14 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
         var passphraseSetting = zmSettings.getSetting(OpenPGPSecurePrefs.PASSPHRASE);
         var passphrase = passphraseSetting.origValue = passphraseSetting.getValue();
 
-        var publicKeySetting = zmSettings.getSetting(OpenPGPSecurePrefs.PUBLIC_KEY);
-        var publicKey = publicKeySetting.origValue = publicKeySetting.getValue();
-
         this._keyStore.setPrivateKey(privateKey, passphrase);
-        this._keyStore.setPublicKey(publicKey);
+        var publicKey = this._keyStore.getPublicKey();
+        if (publicKey) {
+            var value = publicKey.armor().trim().replace(/\r?\n/g, '\n');
+            var publicKeySetting = zmSettings.getSetting(OpenPGPSecurePrefs.PUBLIC_KEY);
+            publicKeySetting.setValue(value);
+            publicKeySetting.origValue = value;
+        }
 
         this._controller.setDirty(this._section.id, false);
 

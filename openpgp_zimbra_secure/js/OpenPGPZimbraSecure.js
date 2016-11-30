@@ -32,7 +32,7 @@ function openpgp_zimbra_secure_HandlerObject() {
     if (localStorage[pwdKey]) {
         this._securePassword = localStorage[pwdKey];
     }
-    else {
+    if (this._securePassword.length == 0) {
         localStorage[pwdKey] = this._securePassword = OpenPGPUtils.randomString({
             length: 24
         });
