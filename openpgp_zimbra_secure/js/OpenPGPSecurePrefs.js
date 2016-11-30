@@ -343,11 +343,11 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
 
     OpenPGPSecurePrefs.prototype._keySubmit = function() {
         var self = this;
-        var publicKey = this.getFormValue(OpenPGPSecurePrefs.PUBLIC_KEY);
-        if (publicKey.length > 0) {
+        var publicKey = this._keyStore.getPublicKey();
+        if (publicKey) {
             var keyServer = this._handler.getZimletContext().getConfig('openpgp-key-server');
             var hkp = new openpgp.HKP(keyServer);
-            hkp.upload(publicKey).then(function() {
+            hkp.upload(publicKey.armor()).then(function() {
                 self._handler.displayStatusMessage(self._handler.getMessage('publicKeySubmitted'));
             });
         }
