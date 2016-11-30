@@ -30,7 +30,6 @@ OpenPGPSecureKeyStore = function(handler) {
 
     this.passphrase = '';
     this.privateKey = false;
-    this.publicKey = false;
     this.publicKeys = [];
 };
 
