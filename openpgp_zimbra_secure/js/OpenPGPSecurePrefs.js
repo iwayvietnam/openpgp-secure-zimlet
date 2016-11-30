@@ -235,6 +235,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
         var publicKey = this._keyStore.getPublicKey();
         if (publicKey) {
             var value = publicKey.armor().trim().replace(/\r?\n/g, '\n');
+            this.setFormValue(OpenPGPSecurePrefs.PUBLIC_KEY, value);
             var publicKeySetting = zmSettings.getSetting(OpenPGPSecurePrefs.PUBLIC_KEY);
             publicKeySetting.setValue(value);
             publicKeySetting.origValue = value;
@@ -373,8 +374,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
 
     OpenPGPSecurePrefs.prototype._keyExport = function() {
         var privateKey = this.getFormValue(OpenPGPSecurePrefs.PRIVATE_KEY);
-        var publicKey = this.getFormValue(OpenPGPSecurePrefs.PUBLIC_KEY);
-        OpenPGPUtils.saveTextAs(privateKey + '\n\n' + publicKey, 'keypair.asc');
+        OpenPGPUtils.saveTextAs(privateKey, 'key.asc');
     };
 
     OpenPGPSecurePrefs.prototype._togglePassphrase = function() {
