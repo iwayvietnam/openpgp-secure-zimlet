@@ -84,7 +84,7 @@ OpenPGPSecureKeyStore.prototype.init = function() {
     })
     .then(function(privateKey) {
         if (privateKey) {
-            self.setPublicKey(privateKey.toPublic().armor());
+            self.addPublicKey(privateKey.toPublic());
         }
     });
 };
@@ -153,7 +153,7 @@ OpenPGPSecureKeyStore.prototype.setPrivateKey = function(privateKey, passphrase)
         if (key.decrypt(passphrase)) {
             self.privateKey = key;
             self.passphrase = passphrase;
-            self.setPublicKey(key.toPublic().armor());
+            self.addPublicKey(key.toPublic());
 
             OpenPGPUtils.localStorageSave(
                 'openpgp_secure_private_key_' + self._userId,
@@ -174,17 +174,7 @@ OpenPGPSecureKeyStore.prototype.setPrivateKey = function(privateKey, passphrase)
 };
 
 OpenPGPSecureKeyStore.prototype.getPublicKey = function() {
-    return this.publicKey;
-};
-
-OpenPGPSecureKeyStore.prototype.setPublicKey = function(publicKey) {
-    var self = this;
-    var pubKey = openpgp.key.readArmored(publicKey);
-    pubKey.keys.forEach(function(key) {
-        self.publicKey = key;
-        self.addPublicKey(self.publicKey);
-    });
-    return this;
+    return this.privateKey ? this.privateKey.toPublic() : false;
 };
 
 OpenPGPSecureKeyStore.prototype.getPublicKeys = function() {
