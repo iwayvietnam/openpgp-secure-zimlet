@@ -413,14 +413,14 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
 OpenPGPZimbraSecure.prototype.handlePublicKeyChange = function() {
     var controller = AjxDispatcher.run('GetConvListController');
     var itemView = controller.getItemView();
-    if (itemView && itemView.toString() == 'ZmConvView2') {
+    if (itemView instanceof ZmConvView2) {
         itemView.clearChangeListeners();
     }
     var paneView = controller.getCurrentView();
-    if (paneView && paneView.toString() == 'ZmConvDoublePaneView') {
+    if (paneView instanceof ZmConvDoublePaneView) {
         var children = paneView.getChildren();
         children.forEach(function(child) {
-            if (child.toString() == 'ZmConvListView') {
+            if (child instanceof ZmConvListView) {
                 var convs = child.getList().getArray();
                 convs.forEach(function(conv) {
                     if (conv._loaded == true) {
