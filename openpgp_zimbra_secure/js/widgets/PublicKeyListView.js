@@ -49,31 +49,29 @@ PublicKeyListView.prototype.toString = function() {
 
 PublicKeyListView.FIELD_UID = 'uid';
 PublicKeyListView.FIELD_FINGERPRINT = 'fingerprint';
-PublicKeyListView.FIELD_KEY_LENGTH = 'key_length';
+PublicKeyListView.FIELD_KEY_LENGTH = 'keyLength';
 PublicKeyListView.FIELD_CREATED = 'created';
 
 PublicKeyListView.prototype.addPublicKey = function(key) {
-    var priKey = key.primaryKey;
-    var fingerprint = priKey.fingerprint;
+    var keyInfo = OpenPGPSecureKeyStore.keyInfo(key);
+    var fingerprint = keyInfo.fingerprint;
 
     if (!this._itemIds[fingerprint]) {
         this._itemIds[fingerprint] = fingerprint;
 
         var keyUid = '';
-        key.users.forEach(function(user) {
-            keyUid = keyUid + AjxStringUtil.htmlEncode(user.userId.userid) + '<br>';
-        });
-
-        var keyLength = '';
-        if (priKey.mpi.length > 0) {
-            keyLength = (priKey.mpi[0].byteLength() * 8);
+        if (keyInfo.uids) {
+            keyInfo.uids.forEach(function(uid) {
+                keyUid += uid + '<br>';
+            });
         }
+
         this.addItem({
             id: fingerprint,
             uid: keyUid,
             fingerprint: fingerprint,
-            key_length: keyLength,
-            created: priKey.created
+            keyLength: keyInfo.keyLength,
+            created: keyInfo.created
         });
     }
 };
@@ -114,7 +112,7 @@ PublicKeyListView.prototype._getCellContents = function(htmlArr, idx, item, fiel
         htmlArr[idx++] = item.fingerprint;
     }
     else if (field === PublicKeyListView.FIELD_KEY_LENGTH) {
-        htmlArr[idx++] = item.key_length;
+        htmlArr[idx++] = item.keyLength;
     }
     else if (field === PublicKeyListView.FIELD_CREATED) {
         htmlArr[idx++] = item.created;

@@ -247,9 +247,13 @@ OpenPGPSecureKeyStore.prototype.exportPublicKeys = function() {
 
 OpenPGPSecureKeyStore.keyInfo = function(key) {
     var uids = [];
-    key.users.forEach(function(user) {
-        uids.push(AjxStringUtil.htmlEncode(user.userId.userid));
-    });
+    var userIds = key.getUserIds();
+    if (userIds) {
+        userIds.forEach(function(uid) {
+            uids.push(AjxStringUtil.htmlEncode(uid));
+        });
+    }
+
     var priKey = key.primaryKey;
     var keyLength = '';
     if (priKey.mpi.length > 0) {
