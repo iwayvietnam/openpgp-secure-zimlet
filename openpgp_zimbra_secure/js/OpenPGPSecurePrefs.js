@@ -39,6 +39,7 @@ OpenPGPSecurePrefs.KEYPAIR_GEN = 'OPENPGP_KEYPAIR_GEN';
 OpenPGPSecurePrefs.KEY_SUBMIT = 'OPENPGP_KEY_SUBMIT';
 OpenPGPSecurePrefs.KEY_SEND = 'OPENPGP_KEY_SEND';
 OpenPGPSecurePrefs.KEY_EXPORT = 'OPENPGP_KEY_EXPORT';
+OpenPGPSecurePrefs.KEY_EXPORT_ALL = 'OPENPGP_KEY_EXPORT_ALL';
 OpenPGPSecurePrefs.KEY_ADD = 'OPENPGP_KEY_ADD';
 OpenPGPSecurePrefs.KEY_LOOKUP = 'OPENPGP_KEY_LOOKUP';
 OpenPGPSecurePrefs.PASSPHRASE_TOGGLE = 'OPENPGP_PASSPHRASE_TOGGLE';
@@ -88,6 +89,10 @@ OpenPGPSecurePrefs.registerSettings = function(handler) {
         dataType: ZmSetting.D_NONE
     });
     zmSettings.registerSetting(OpenPGPSecurePrefs.KEY_EXPORT, {
+        type: ZmSetting.T_PREF,
+        dataType: ZmSetting.D_NONE
+    });
+    zmSettings.registerSetting(OpenPGPSecurePrefs.KEY_EXPORT_ALL, {
         type: ZmSetting.T_PREF,
         dataType: ZmSetting.D_NONE
     });
@@ -158,6 +163,9 @@ OpenPGPSecurePrefs.registerPrefs = function(handler) {
     ZmPref.registerPref(OpenPGPSecurePrefs.KEY_EXPORT, {
         displayContainer: ZmPref.TYPE_STATIC
     });
+    ZmPref.registerPref(OpenPGPSecurePrefs.KEY_EXPORT_ALL, {
+        displayContainer: ZmPref.TYPE_STATIC
+    });
     ZmPref.registerPref(OpenPGPSecurePrefs.PASSPHRASE_TOGGLE, {
         displayContainer: ZmPref.TYPE_STATIC
     });
@@ -186,6 +194,7 @@ OpenPGPSecurePrefs.registerPrefs = function(handler) {
             ZmSetting[OpenPGPSecurePrefs.KEY_SUBMIT],
             ZmSetting[OpenPGPSecurePrefs.KEY_SEND],
             ZmSetting[OpenPGPSecurePrefs.KEY_EXPORT],
+            ZmSetting[OpenPGPSecurePrefs.KEY_EXPORT_ALL],
             ZmSetting[OpenPGPSecurePrefs.PASSPHRASE_TOGGLE],
             ZmSetting[OpenPGPSecurePrefs.KEY_ADD],
             ZmSetting[OpenPGPSecurePrefs.KEY_LOOKUP],
@@ -270,6 +279,11 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
             var button = new DwtButton({parent: this, id: id});
             button.setText(this._handler.getMessage('btnKeyExport'));
             button.setHandler(DwtEvent.ONCLICK, AjxCallback.simpleClosure(this._keyExport, this));
+            return button;
+        } else if(id == OpenPGPSecurePrefs.KEY_EXPORT_ALL) {
+            var button = new DwtButton({parent: this, id: id});
+            button.setText(this._handler.getMessage('btnKeyExportAll'));
+            button.setHandler(DwtEvent.ONCLICK, AjxCallback.simpleClosure(this._keyExportAll, this));
             return button;
         } else if(id == OpenPGPSecurePrefs.PASSPHRASE_TOGGLE) {
             var button = new DwtButton({parent: this, id: id});
@@ -375,6 +389,11 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
     OpenPGPSecurePrefs.prototype._keyExport = function() {
         var privateKey = this.getFormValue(OpenPGPSecurePrefs.PRIVATE_KEY);
         OpenPGPUtils.saveTextAs(privateKey, 'key.asc');
+    };
+
+    OpenPGPSecurePrefs.prototype._keyExportAll = function() {
+        var publicKeys = this._keyStore.exportPublicKeys();
+        OpenPGPUtils.saveTextAs(publicKeys, 'keys.asc');
     };
 
     OpenPGPSecurePrefs.prototype._togglePassphrase = function() {

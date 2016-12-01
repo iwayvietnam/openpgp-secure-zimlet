@@ -237,6 +237,14 @@ OpenPGPSecureKeyStore.prototype.publicKeyExisted = function(fingerprint) {
     return this._fingerprints[fingerprint] ? true : false;
 };
 
+OpenPGPSecureKeyStore.prototype.exportPublicKeys = function() {
+    var packetlist = new openpgp.packet.List();
+    this.publicKeys.forEach(function(key) {
+        packetlist.read(key.toPacketlist().write());
+    });
+    return openpgp.armor.encode(openpgp.enums.armor.public_key, packetlist.write());
+};
+
 OpenPGPSecureKeyStore.keyInfo = function(key) {
     var uids = [];
     key.users.forEach(function(user) {

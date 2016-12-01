@@ -118,6 +118,7 @@
                                 <tr>
                                     <td><div id='${id}_OPENPGP_KEY_LOOKUP'></div></td>
                                     <td><div id='${id}_OPENPGP_KEY_ADD'></div></td>
+                                    <td><div id='${id}_OPENPGP_KEY_EXPORT_ALL'></div></td>
                                     <td width=100%></td>
                                 </tr>
                             </table>
