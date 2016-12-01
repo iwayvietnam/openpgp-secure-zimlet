@@ -266,7 +266,7 @@ OpenPGPSecureKeyStore.keyInfo = function(key) {
         keyid: priKey.keyid.toHex(),
         algorithm: priKey.algorithm,
         keyLength: keyLength,
-        created: priKey.created.toDateString()
+        created: priKey.created
     };
 };
 

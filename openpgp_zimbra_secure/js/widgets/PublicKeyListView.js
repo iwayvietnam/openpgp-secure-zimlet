@@ -71,7 +71,7 @@ PublicKeyListView.prototype.addPublicKey = function(key) {
             uid: keyUid,
             fingerprint: fingerprint,
             keyLength: keyInfo.keyLength,
-            created: keyInfo.created
+            created: keyInfo.created.toDateString()
         });
     }
 };
