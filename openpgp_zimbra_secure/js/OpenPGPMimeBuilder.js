@@ -41,45 +41,17 @@ OpenPGPMimeBuilder.prototype.buildPlainText = function(message) {
         contents: [],
         attachments: []
     };
-    var codec = window['emailjs-mime-codec'];
     var MimeNode = window['emailjs-mime-builder'];
     var self = this, textNode, contentNode, alternateNode, contentNodes = [], attachmentNodes = [];
 
     if (message.contents) {
         message.contents.forEach(function(mp){
+            var node = new MimeNode(contentType).setContent(mp.content._content);
             var contentType = mp.ct;
             if (contentType === ZmMimeTable.TEXT_PLAIN || contentType === ZmMimeTable.TEXT_HTML) {
-                var node = new MimeNode(contentType)
-                    .setHeader('content-transfer-encoding', 'quoted-printable')
-                    .setContent(mp.content._content);
-                contentNodes.push(node);
+                node.setHeader('content-transfer-encoding', 'quoted-printable');
             }
-            else if (OpenPGPUtils.isPGPContentType(contentType)) {
-                var filename = 'message.asc';
-                var desc = OpenPGPMimeBuilder.PGP_DESC;
-                if (OpenPGPUtils.isSignatureContentType(contentType)) {
-                    filename = 'signature.asc';
-                    desc = OpenPGPMimeBuilder.SIGNED_DESC;
-                }
-                if (OpenPGPUtils.isEncryptedContentType(contentType)) {
-                    filename = 'encrypted.asc';
-                    desc = OpenPGPMimeBuilder.ENCRYPTED_DESC;
-                }
-                if (OpenPGPUtils.isPGPKeysContentType(contentType)) {
-                    filename = 'key.asc';
-                    desc = OpenPGPMimeBuilder.KEY_DESC;
-                }
-                var node = new MimeNode(contentType, {filename: filename})
-                    .setHeader('content-transfer-encoding', '7bit')
-                    .setHeader('content-disposition', 'inline')
-                    .setHeader('content-description', desc)
-                    .setContent(mp.content._content);
-                attachmentNodes.push(node);
-            }
-            else {
-                var node = new MimeNode(contentType).setContent(mp.content._content);
-                contentNodes.push(node);
-            }
+            contentNodes.push(node);
         });
     }
     if (message.attachments) {
@@ -87,7 +59,7 @@ OpenPGPMimeBuilder.prototype.buildPlainText = function(message) {
             var node = new MimeNode(mp.ct)
                 .setHeader('content-transfer-encoding', mp.cte)
                 .setHeader('content-disposition', mp.cd)
-                .setContent(codec.base64.decode(mp.data));
+                .setContent(OpenPGPUtils.base64Decode(mp.data));
             if (mp.ci) {
                 node.setHeader('content-id', mp.ci);
             }

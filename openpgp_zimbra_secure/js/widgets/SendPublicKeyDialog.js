@@ -56,17 +56,16 @@ SendPublicKeyDialog.prototype.sendPubicKey = function(callback) {
     var email = this.getEmail();
     var addresses = AjxEmailAddress.getValidAddresses(this.getEmail(), AjxEmailAddress.TO);
     if (publicKey && addresses.size() > 0) {
-        var addr = OpenPGPUtils.getDefaultSenderAddress();
-
         var msg = new ZmMailMsg();
-        msg.shouldEncrypt = false;
+
         msg.shouldSign = true;
+        msg.shouldEncrypt = false;
+        msg.attachPublicKey = true;
+
+        var addr = OpenPGPUtils.getDefaultSenderAddress();
         msg.setSubject(AjxMessageFormat.format(this._handler.getMessage('sendPublicKeySubject'), addr.toString()));
         msg.setAddress(AjxEmailAddress.FROM, addr);
         msg.setAddresses(AjxEmailAddress.TO, addresses);
-
-        var top = new ZmMimePart();
-        top.setContentType(ZmMimeTable.MULTI_MIXED);
 
         var textContents = [];
         var keyInfo = OpenPGPSecureKeyStore.keyInfo(publicKey);
@@ -82,14 +81,8 @@ SendPublicKeyDialog.prototype.sendPubicKey = function(callback) {
         textPart.setContentType(ZmMimeTable.TEXT_PLAIN);
         textPart.setContent(textContents.join('\r\n'));
         textPart.setIsBody(true);
-        top.children.add(textPart);
 
-        var keyPart = new ZmMimePart();
-        keyPart.setContentType(OpenPGPUtils.OPENPGP_KEYS_CONTENT_TYPE);
-        keyPart.setContent(keyInfo.value);
-        top.children.add(keyPart);
-
-        msg.setTopPart(top);
+        msg.setTopPart(textPart);
         msg.send(false, callback);
     }
 };

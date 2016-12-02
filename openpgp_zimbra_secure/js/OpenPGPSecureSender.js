@@ -33,6 +33,7 @@ OpenPGPSecureSender = function(handler, callback, msg, params) {
 
     this._shouldSign = false;
     this._shouldEncrypt = false;
+    this._attachPublicKey = false;
     if (this._input) {
         this._shouldSign = handler._shouldSign();
         this._shouldEncrypt = handler._shouldEncrypt();
@@ -41,6 +42,9 @@ OpenPGPSecureSender = function(handler, callback, msg, params) {
         }
         if (typeof msg.shouldEncrypt !== 'undefined') {
             this._shouldEncrypt = msg.shouldEncrypt ? true : false;
+        }
+        if (typeof msg.attachPublicKey !== 'undefined') {
+            this._attachPublicKey = msg.attachPublicKey ? true : false;
         }
     }
 };
@@ -184,6 +188,15 @@ OpenPGPSecureSender.prototype._encryptMessage = function() {
     var attachments = [];
     while (this._sendingAttachments.length > 0) {
         attachments.push(this._sendingAttachments.pop());
+    }
+    var pubicKey = handler.getKeyStore().getPublicKey();
+    if (this._attachPublicKey && pubicKey) {
+        attachments.push({
+            data: OpenPGPUtils.base64Encode(pubicKey.armor()),
+            ct: OpenPGPUtils.OPENPGP_KEYS_CONTENT_TYPE + '; name="key.asc"',
+            cd: 'inline; filename="key.asc"',
+            cte: '7bit'
+        });
     }
 
     var encryptor = new OpenPGPEncrypt({
