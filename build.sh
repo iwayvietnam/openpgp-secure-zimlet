@@ -21,6 +21,7 @@
 # Written by Nguyen Van Nguyen <nguyennv1981@gmail.com>
 
 echo "Build OpenPGP Zimbra Secure release zip"
+rm -f openpgp_zimbra_secure.zip
 cd openpgp_zimbra_secure
 zip -r ../openpgp_zimbra_secure.zip *
 exit 0
