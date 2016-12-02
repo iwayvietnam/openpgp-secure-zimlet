@@ -179,7 +179,7 @@ OpenPGPSecureSender.prototype._encryptMessage = function() {
     var contentParts = [];
     input.m.mp.forEach(function(part) {
         OpenPGPUtils.visitMimePart(part, function(mp) {
-            if (!mp.mp) {
+            if (mp.content && (mp.ct === ZmMimeTable.TEXT_PLAIN || mp.ct === ZmMimeTable.TEXT_HTML)) {
                 contentParts.push(mp);
             }
         });
