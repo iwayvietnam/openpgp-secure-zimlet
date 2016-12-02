@@ -272,9 +272,7 @@ OpenPGPUtils.fetchPart = function(part, baseUrl) {
             //add a timestamp param so that browser will not cache the request
             url += '&timestamp=' + new Date().getTime();
         }
-        var response = rpcReq.invoke('', url,
-                                     { 'X-Zimbra-Encoding': 'x-base64' },
-                                     null, true);
+        var response = rpcReq.invoke('', url, { 'X-Zimbra-Encoding': 'x-base64' }, null, true);
         cType = rpcReq.__httpReq.getResponseHeader('Content-Type');
         cDisposition = rpcReq.__httpReq.getResponseHeader('Content-Disposition');
 
