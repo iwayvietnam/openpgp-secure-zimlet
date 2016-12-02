@@ -192,7 +192,7 @@ OpenPGPSecureSender.prototype._encryptMessage = function() {
     var pubicKey = handler.getKeyStore().getPublicKey();
     if (this._attachPublicKey && pubicKey) {
         attachments.push({
-            data: OpenPGPUtils.base64Encode(pubicKey.armor()),
+            data: pubicKey.armor(),
             ct: OpenPGPUtils.OPENPGP_KEYS_CONTENT_TYPE + '; name="key.asc"',
             cd: 'inline; filename="key.asc"',
             cte: '7bit'

@@ -75,7 +75,7 @@ OpenPGPMimeBuilder.prototype.buildPlainText = function(message) {
                 attachNode.setContent(codec.base64.decode(mp.data));
             }
             else {
-                attachNode.setContent(OpenPGPUtils.base64Decode(mp.data));
+                attachNode.setContent(mp.data);
             }
             if (mp.ci) {
                 attachNode.setHeader('content-id', mp.ci);
