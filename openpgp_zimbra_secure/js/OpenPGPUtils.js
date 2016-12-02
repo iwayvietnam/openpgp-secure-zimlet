@@ -23,9 +23,6 @@
 
 OpenPGPUtils = function() {};
 
-OpenPGPUtils.BASE64_TABLE_STRING = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-OpenPGPUtils.BASE64_TABLE = OpenPGPUtils.BASE64_TABLE_STRING.split('');
-
 OpenPGPUtils.SIGNED_MESSAGE_CONTENT_TYPE = 'multipart/signed';
 OpenPGPUtils.ENCRYPTED_MESSAGE_CONTENT_TYPE = 'multipart/encrypted';
 
@@ -144,50 +141,29 @@ OpenPGPUtils.localStorageRead = function(key, pwd) {
 };
 
 /*
- * base64 encode
- * https://github.com/open-eid/hwcrypto.js
+ * Encodes input into base64
  *
- * Copyright (c) 2015 Martin Paljak, Estonian Information System Authority
- * Licensed under the MIT license.
+ * @param {String|Uint8Array} data Data to be encoded into base64
  */
-OpenPGPUtils.base64Encode = function(bin) {
+OpenPGPUtils.base64Encode = function(data) {
     if (!window.btoa) {
-        for (var i = 0, j = 0, len = bin.length / 3, base64 = []; i < len; ++i) {
-          var a = bin.charCodeAt(j++), b = bin.charCodeAt(j++), c = bin.charCodeAt(j++);
-          if ((a | b | c) > 255) throw new Error('String contains an invalid character');
-          base64[base64.length] = OpenPGPUtils.BASE64_TABLE[a >> 2] + OpenPGPUtils.BASE64_TABLE[((a << 4) & 63) | (b >> 4)] +
-                                  (isNaN(b) ? '=' : OpenPGPUtils.BASE64_TABLE[((b << 2) & 63) | (c >> 6)]) +
-                                  (isNaN(b + c) ? '=' : OpenPGPUtils.BASE64_TABLE[c & 63]);
-        }
-        return base64.join('');
+        var codec = window['emailjs-mime-codec'];
+        return codec.base64.encode(data);
     }
     else {
-        return window.btoa(bin);
+        return window.btoa(data);
     }
 };
 
 /*
- * base64 decode
- * https://github.com/open-eid/hwcrypto.js
+ * Decodes base64 encoded string into an unicode string
  *
- * Copyright (c) 2015 Martin Paljak, Estonian Information System Authority
- * Licensed under the MIT license.
+ * @param {String} data Base64 encoded data
  */
 OpenPGPUtils.base64Decode = function(base64) {
     if (!window.atob) {
-        if (/(=[^=]+|={3,})$/.test(base64)) throw new Error('String contains an invalid character');
-        base64 = base64.replace(/=/g, '');
-        var n = base64.length & 3;
-        if (n === 1) throw new Error('String contains an invalid character');
-        for (var i = 0, j = 0, len = base64.length / 4, bin = []; i < len; ++i) {
-            var a = OpenPGPUtils.BASE64_TABLE_STRING.indexOf(base64[j++] || 'A'), b = OpenPGPUtils.BASE64_TABLE_STRING.indexOf(base64[j++] || 'A');
-            var c = OpenPGPUtils.BASE64_TABLE_STRING.indexOf(base64[j++] || 'A'), d = OpenPGPUtils.BASE64_TABLE_STRING.indexOf(base64[j++] || 'A');
-            if ((a | b | c | d) < 0) throw new Error('String contains an invalid character');
-            bin[bin.length] = ((a << 2) | (b >> 4)) & 255;
-            bin[bin.length] = ((b << 4) | (c >> 2)) & 255;
-            bin[bin.length] = ((c << 6) | d) & 255;
-        };
-        return String.fromCharCode.apply(null, bin).substr(0, bin.length + n - 4);
+        var codec = window['emailjs-mime-codec'];
+        return codec.base64.decode(base64, 'string');
     }
     else {
         return window.atob(base64);
