@@ -131,7 +131,7 @@ OpenPGPSecureSender.prototype._encryptMessage = function() {
 
     function checkAttachments(list, cid, fmt) {
         for (var i = 0; list && i < list.length; i++) {
-            var url = appCtxt.get(ZmSetting.CSFE_MSG_FETCHER_URI);
+            var url = appCtxt.get(ZmSetting.CSFE_MSG_FETCHER_URI) + '&disp=a';
             if (fmt) {
                 url += '&fmt=native';
             }
