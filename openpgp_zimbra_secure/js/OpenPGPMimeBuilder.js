@@ -85,7 +85,7 @@ OpenPGPMimeBuilder.prototype.buildPlainText = function(message) {
     if (message.attachments) {
         message.attachments.forEach(function(mp){
             var node = new MimeNode(mp.ct)
-                .setHeader('content-transfer-encoding', 'base64')
+                .setHeader('content-transfer-encoding', mp.cte)
                 .setHeader('content-disposition', mp.cd)
                 .setContent(codec.base64.decode(mp.data));
             if (mp.ci) {

@@ -285,7 +285,7 @@ OpenPGPUtils.fetchPart = function(part, baseUrl) {
         }
 
         if (response.success) {
-            return { data: response.text, ct: cType, cd: cDisposition};
+            return { data: response.text, ct: cType, cd: cDisposition, cte: 'base64'};
         }
     }
 };
