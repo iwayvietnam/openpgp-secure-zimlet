@@ -277,15 +277,6 @@ OpenPGPUtils.fetchPart = function(part, baseUrl) {
         cDisposition = rpcReq.__httpReq.getResponseHeader('Content-Disposition');
 
         iType = rpcReq.__httpReq.getResponseHeader('X-Zimbra-ItemType');
-        if (iType == 'message') {
-            //this is a attached message
-            cDisposition = 'attachment';
-            //now set the file name for this attachment.
-            var m =  appCtxt.cacheGet(part.id); //get the attached message from cache
-            if (m && m.subject) {
-                cDisposition = 'attachment; filename="' + m.subject + '"';
-            }
-        }
         if (iType == 'document' && !cDisposition) {
             var iName = rpcReq.__httpReq.getResponseHeader('X-Zimbra-ItemName');
             if (iName) {
