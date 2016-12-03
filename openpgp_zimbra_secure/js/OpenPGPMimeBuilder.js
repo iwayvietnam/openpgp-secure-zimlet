@@ -69,14 +69,8 @@ OpenPGPMimeBuilder.prototype.buildPlainText = function(message) {
         message.attachments.forEach(function(mp){
             var attachNode = rootNode.createChild(mp.ct)
                 .setHeader('content-transfer-encoding', mp.cte)
-                .setHeader('content-disposition', mp.cd);
-            if (mp.cte == 'base64') {
-                var codec = window['emailjs-mime-codec'];
-                attachNode.setContent(codec.base64.decode(mp.data));
-            }
-            else {
-                attachNode.setContent(mp.data);
-            }
+                .setHeader('content-disposition', mp.cd)
+                .setContent(mp.data);
             if (mp.ci) {
                 attachNode.setHeader('content-id', mp.ci);
             }

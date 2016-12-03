@@ -196,7 +196,7 @@ OpenPGPZimbraSecure.prototype._overrideZmComposeView = function() {
                             }
                         }
                     });
-                    var content = (attachment.type.indexOf(ZmMimeTable.TEXT) == -1) ? OpenPGPUtils.stringToArray(attachment.content) : attachment.content;
+                    var content = (attachment.type.indexOf(ZmMimeTable.TEXT) == -1) ? OpenPGPUtils.stringToBin(attachment.content) : attachment.content;
                     AjxRpc.invoke(content, url, {
                         'Content-Type': attachment.type,
                         'Content-Disposition': 'attachment; filename="' + attachment.name + '"'
@@ -644,7 +644,7 @@ OpenPGPZimbraSecure.decryptAttachment = function(name, url) {
             }
             else {
                 var opts = {
-                    message: openpgp.message.read(OpenPGPUtils.stringToArray(data)),
+                    message: openpgp.message.read(OpenPGPUtils.stringToBin(data)),
                     privateKey: handler.getKeyStore().getPrivateKey(),
                     format: 'binary'
                 };

@@ -148,14 +148,13 @@ OpenPGPSecureMessageProcessor.prototype.onDecrypted = function(callback, msg, me
         pgpKey: msg.pgpKey
     };
 
-    var codec = window['emailjs-mime-codec'];
     var parser = new window['emailjs-mime-parser']();
     parser.onbody = function(node, chunk){
         var cd = (node.headers['content-disposition']) ? node.headers['content-disposition'][0] : false;
         var isAttach = cd ? OpenPGPUtils.isAttachment(cd.initial) : false;
         var ct = node.contentType;
         if (pgpMessage.encrypted && cd && isAttach && node.content) {
-            var content = codec.fromTypedArray(node.content);
+            var content = OpenPGPUtils.binToString(node.content);
             var attachment = {
                 id: OpenPGPUtils.randomString(),
                 type: ct.value,
@@ -179,7 +178,7 @@ OpenPGPSecureMessageProcessor.prototype.onDecrypted = function(callback, msg, me
             self._handler._pgpAttachments[attachment.id] = attachment;
         }
         if (!pgpMessage.pgpKey && OpenPGPUtils.isPGPKeysContentType(ct.value)) {
-            pgpMessage.pgpKey = codec.fromTypedArray(node.content);
+            pgpMessage.pgpKey = OpenPGPUtils.binToString(node.content);
         }
     };
     parser.write(message.content);
@@ -267,12 +266,11 @@ OpenPGPSecureMessageProcessor.prototype._decryptInlineMessage = function(callbac
                         pgpKey: msg.pgpKey
                     };
 
-                    var codec = window['emailjs-mime-codec'];
                     var parser = new window['emailjs-mime-parser']();
                     parser.onbody = function(node, chunk){
                         var ct = node.contentType;
                         if (!pgpMessage.pgpKey && OpenPGPUtils.isPGPKeysContentType(ct.value)) {
-                            pgpMessage.pgpKey = codec.fromTypedArray(node.content);
+                            pgpMessage.pgpKey = OpenPGPUtils.binToString(node.content);
                         }
                     };
                     parser.write(OpenPGPUtils.base64Decode(response.text));

@@ -42,7 +42,6 @@ OpenPGPDecrypt.prototype.constructor = OpenPGPDecrypt;
 
 OpenPGPDecrypt.prototype.decrypt = function(message) {
     var self = this;
-    var codec = window['emailjs-mime-codec'];
     var sequence = Promise.resolve(message);
 
     return sequence.then(function(message) {
@@ -57,7 +56,7 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
                 return OpenPGPUtils.hasInlinePGPContent(node.raw, OpenPGPUtils.OPENPGP_MESSAGE_HEADER);
             });
             if (pgpNode) {
-                cipherText = codec.fromTypedArray(pgpNode.content);
+                cipherText = OpenPGPUtils.binToString(pgpNode.content);
             }
 
             var opts = {
@@ -96,7 +95,7 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
                 parser.node._childNodes.forEach(function(node) {
                     var ct = node.contentType.value;
                     if (OpenPGPUtils.isSignatureContentType(ct)) {
-                        signature = codec.fromTypedArray(node.content);
+                        signature = OpenPGPUtils.binToString(node.content);
                     }
                     else if (!OpenPGPUtils.isPGPContentType(ct)) {
                         signedContent = node.raw.replace(/\r?\n/g, '\r\n');

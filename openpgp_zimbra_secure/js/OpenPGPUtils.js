@@ -170,60 +170,14 @@ OpenPGPUtils.base64Decode = function(base64) {
     }
 };
 
-/*
- * hex to base64
- * https://github.com/open-eid/hwcrypto.js
- *
- * Copyright (c) 2015 Martin Paljak, Estonian Information System Authority
- * Licensed under the MIT license.
- */
-OpenPGPUtils.hexToBase64 = function(hex) {
-    return OpenPGPUtils.base64Encode(String.fromCharCode.apply(null,
-        hex.replace(/\r|\n/g, '').replace(/([\da-fA-F]{2}) ?/g, '0x$1 ').replace(/ +$/, '').split(' '))
-    );
-};
-
-/*
- * hex to bin
- */
-OpenPGPUtils.hexToBin = function(hex) {
-    var chars = [];
-    var hexLength = hex.length;
-
-    for(var i = 0; i < hexLength - 1; i += 2) {
-        var charCode = parseInt(hex.substr(i, 2), 16);
-        chars.push(charCode);
-    }
-    return String.fromCharCode.apply(String, chars);;
-};
-
-/*
- * string to bin
- * http://pkijs.org/
- *
- * Copyright (c) 2014, GMO GlobalSign
- * Licensed under the BSD-3-Clause license.
- */
 OpenPGPUtils.stringToBin = function(string){
-    var length = string.length;
-
-    var resultBuffer = new ArrayBuffer(length);
-    var resultView = new Uint8Array(resultBuffer);
-
-    for(var i = 0; i < length; i++) {
-        resultView[i] = string.charCodeAt(i);
-    }
-
-    return resultBuffer;
+    var codec = window['emailjs-mime-codec'];
+    return codec.toTypedArray(string);
 }
 
-OpenPGPUtils.stringToArray = function(string){
-    var length = string.length;
-    var array = new Uint8Array(length);
-    for(var i = 0; i < length; i++) {
-        array[i] = string.charCodeAt(i);
-    }
-    return array;
+OpenPGPUtils.binToString = function(buf){
+    var codec = window['emailjs-mime-codec'];
+    return codec.fromTypedArray(buf);
 }
 
 OpenPGPUtils.fetchPart = function(part, baseUrl) {
@@ -261,7 +215,13 @@ OpenPGPUtils.fetchPart = function(part, baseUrl) {
         }
 
         if (response.success) {
-            return { data: response.text, ct: cType, cd: cDisposition, cte: 'base64'};
+            var codec = window['emailjs-mime-codec'];
+            return {
+                data: codec.base64.decode(response.text),
+                ct: cType,
+                cd: cDisposition,
+                cte: 'base64'
+            };
         }
     }
 };
