@@ -83,12 +83,12 @@ OpenPGPMimeBuilder.prototype.buildPlainText = function(message) {
     return rootNode;
 };
 
-OpenPGPMimeBuilder.prototype.buildSigned = function(mimeNode, signature) {
+OpenPGPMimeBuilder.prototype.buildSigned = function(mimeNode, signature, hashAlg) {
     var MimeNode = window['emailjs-mime-builder'];
     var ctParts = [
         OpenPGPUtils.SIGNED_MESSAGE_CONTENT_TYPE,
         'protocol="' + OpenPGPUtils.OPENPGP_SIGNATURE_CONTENT_TYPE + '"',
-        'micalg="pgp-sha256"'
+        'micalg="' + hashAlg + '"'
     ];
     var signedNode = new MimeNode(ctParts.join('; '))
         .setContent(OpenPGPMimeBuilder.SIGNED_PREAMBLE);
