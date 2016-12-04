@@ -42,7 +42,7 @@ OpenPGPMimeBuilder.prototype.buildPlainText = function(contents, attachments) {
     if (contents && contents.length > 0) {
         if (contents.length > 1) {
             contentNode = mimeNode.createChild(ZmMimeTable.MULTI_ALT);
-            message.contents.forEach(function(mp){
+            contents.forEach(function(mp){
                 contentNode.createChild(mp.ct)
                     .setContent(mp.content._content)
                     .setHeader('content-transfer-encoding', 'quoted-printable');
