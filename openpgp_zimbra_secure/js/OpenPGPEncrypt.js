@@ -44,12 +44,12 @@ OpenPGPEncrypt = function(opts) {
 OpenPGPEncrypt.prototype = new Object();
 OpenPGPEncrypt.prototype.constructor = OpenPGPEncrypt;
 
-OpenPGPEncrypt.prototype.encrypt = function(message) {
+OpenPGPEncrypt.prototype.encrypt = function(contents, attachments) {
     var self = this;
-    var sequence = Promise.resolve(new OpenPGPMimeBuilder());
+    var builder = new OpenPGPMimeBuilder();
+    var sequence = Promise.resolve(builder.buildPlainText(contents, attachments));
 
-    return sequence.then(function(builder) {
-        var mimeNode = builder.buildPlainText(message);
+    return sequence.then(function(mimeNode) {
         self.onCallback(self._beforeEncrypt, mimeNode);
 
         if (self._shouldEncrypt && self._publicKeys.length > 0) {

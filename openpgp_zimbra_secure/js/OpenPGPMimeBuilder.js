@@ -34,17 +34,13 @@ OpenPGPMimeBuilder.VERSION_DESC = 'PGP/MIME Versions Identification';
 OpenPGPMimeBuilder.prototype = new Object();
 OpenPGPMimeBuilder.prototype.constructor = OpenPGPMimeBuilder;
 
-OpenPGPMimeBuilder.prototype.buildPlainText = function(message) {
-    message = message || {
-        contents: [],
-        attachments: []
-    };
+OpenPGPMimeBuilder.prototype.buildPlainText = function(contents, attachments) {
     var MimeNode = window['emailjs-mime-builder'];
     var rootNode, contentNode;
     var mimeNode = new MimeNode();
 
-    if (message.contents && message.contents.length > 0) {
-        if (message.contents.length > 1) {
+    if (contents && contents.length > 0) {
+        if (contents.length > 1) {
             contentNode = mimeNode.createChild(ZmMimeTable.MULTI_ALT);
             message.contents.forEach(function(mp){
                 contentNode.createChild(mp.ct)
@@ -53,7 +49,7 @@ OpenPGPMimeBuilder.prototype.buildPlainText = function(message) {
             });
         }
         else {
-            var mp = message.contents.pop();
+            var mp = contents[0];
             contentNode = mimeNode.createChild(mp.ct)
                 .setContent(mp.content._content)
                 .setHeader('content-transfer-encoding', 'quoted-printable');
@@ -63,10 +59,10 @@ OpenPGPMimeBuilder.prototype.buildPlainText = function(message) {
         contentNode = new MimeNode(ZmMimeTable.TEXT_PLAIN);
     }
 
-    if (message.attachments) {
+    if (attachments && attachments.length > 0) {
         rootNode = mimeNode.createChild(ZmMimeTable.MULTI_MIXED);
         rootNode.appendChild(contentNode);
-        message.attachments.forEach(function(mp){
+        attachments.forEach(function(mp){
             var attachNode = rootNode.createChild(mp.ct)
                 .setHeader('content-transfer-encoding', mp.cte)
                 .setHeader('content-disposition', mp.cd)

@@ -176,11 +176,11 @@ OpenPGPSecureSender.prototype._encryptMessage = function() {
     }
     checkInlineAttachments(input.m.mp);
 
-    var contentParts = [];
+    var contents = [];
     input.m.mp.forEach(function(part) {
         OpenPGPUtils.visitMimePart(part, function(mp) {
             if (mp.content && (mp.ct === ZmMimeTable.TEXT_PLAIN || mp.ct === ZmMimeTable.TEXT_HTML)) {
-                contentParts.push(mp);
+                contents.push(mp);
             }
         });
     });
@@ -213,10 +213,7 @@ OpenPGPSecureSender.prototype._encryptMessage = function() {
     });
     encryptor.shouldSign(this._shouldSign);
     encryptor.shouldEncrypt(this._shouldEncrypt);
-    encryptor.encrypt({
-        contents: contentParts,
-        attachments: attachments
-    });
+    encryptor.encrypt(contents, attachments);
 };
 
 OpenPGPSecureSender.prototype._onEncrypted = function(message) {
