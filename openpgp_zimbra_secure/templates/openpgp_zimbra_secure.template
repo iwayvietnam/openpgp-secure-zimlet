@@ -197,7 +197,7 @@
 <template id='openpgp_zimbra_secure#KeyLookupResult'>
     <table border=0 cellspacing=0 cellpadding=0 width=100% class='KeyLookupResult'>
         <tr>
-            <td><input name="keyLookupValue" value="${value}" type="radio"></td>
+            <td><input name="keyLookupValue" value="${value}" type="checkbox"></td>
             <td><b>
                 <$ for (var i = 0; i < data.uids.length; i++) { $>
                     <$=openpgp_zimbra_secure.keyInfoUid$>: <$= data.uids[i] $> </br>

@@ -435,9 +435,12 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
             var dialog = this._handler._keyLookupDialog = new KeyLookupDialog(
                 this._handler,
                 function() {
-                    var pubKey = openpgp.key.readArmored(dialog.getPublicKey());
-                    pubKey.keys.forEach(function(key) {
-                        self._keyStore.addPublicKey(key);
+                    var publicKeys = dialog.getPublicKeys();
+                    publicKeys.forEach(function(armoredKey) {
+                        var pubKey = openpgp.key.readArmored(armoredKey);
+                        pubKey.keys.forEach(function(key) {
+                            self._keyStore.addPublicKey(key);
+                        });
                     });
                 }
             );

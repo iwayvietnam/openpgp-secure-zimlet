@@ -45,13 +45,13 @@ KeyLookupDialog.prototype.toString = function() {
     return 'KeyLookupDialog';
 };
 
-KeyLookupDialog.prototype.getPublicKey = function() {
-    var publicKey = '';
+KeyLookupDialog.prototype.getPublicKeys = function() {
+    var publicKeys = [];
     var keyLookup = document.getElementsByName('keyLookupValue');
     for(var i = 0; i < keyLookup.length; i++) {
         if (keyLookup[i].checked == true) {
-            publicKey = keyLookup[i].value;
+            publicKeys.push(keyLookup[i].value);
         }
     }
-    return publicKey;
+    return publicKeys;
 };
