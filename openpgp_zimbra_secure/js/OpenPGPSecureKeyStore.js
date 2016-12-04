@@ -93,7 +93,7 @@ OpenPGPSecureKeyStore.prototype.addPublicKey = function(key) {
         var self = this;
         var added = false;
 
-        var fingerprint = key.primaryKey.fingerprint;
+        var fingerprint = key.primaryKey.getFingerprint();
         if (!self._fingerprints[fingerprint]) {
             self._fingerprints[fingerprint] = fingerprint;
             self.publicKeys.push(key);
@@ -113,7 +113,7 @@ OpenPGPSecureKeyStore.prototype.removePublicKey = function(fingerprint) {
     var self = this;
     var removed = false;
     this.publicKeys.forEach(function(key, index) {
-        if (fingerprint == key.primaryKey.fingerprint) {
+        if (fingerprint == key.primaryKey.getFingerprint()) {
             self.publicKeys.splice(index, 1);
             delete self._fingerprints[fingerprint];
             removed = true;
@@ -185,7 +185,7 @@ OpenPGPSecureKeyStore.prototype.setPublicKeys = function(publicKeys) {
     publicKeys.forEach(function(armoredKey) {
         var pubKey = openpgp.key.readArmored(armoredKey);
         pubKey.keys.forEach(function(key) {
-            var fingerprint = key.primaryKey.fingerprint;
+            var fingerprint = key.primaryKey.getFingerprint();
             if (!self._fingerprints[fingerprint]) {
                 self.publicKeys.push(key);
                 self._fingerprints[fingerprint] = fingerprint;
@@ -202,7 +202,7 @@ OpenPGPSecureKeyStore.prototype.havingPublicKeys = function(addresses) {
         var userIds = key.getUserIds();
         addresses.forEach(function(address) {
             userIds.forEach(function(uid) {
-                var fingerprint = key.primaryKey.fingerprint;
+                var fingerprint = key.primaryKey.getFingerprint();
                 if (uid.indexOf(address) >= 0 && !dupes[fingerprint + uid]) {
                     publicKeys.push(key);
                     dupes[fingerprint + uid] = fingerprint + uid;
