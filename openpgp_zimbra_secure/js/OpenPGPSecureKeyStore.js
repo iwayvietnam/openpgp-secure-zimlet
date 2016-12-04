@@ -199,15 +199,15 @@ OpenPGPSecureKeyStore.prototype.havingPublicKeys = function(addresses) {
     var dupes = [];
     var publicKeys = [];
     this.publicKeys.forEach(function(key) {
+        var userIds = key.getUserIds();
         addresses.forEach(function(address) {
-            for (i = 0; i < key.users.length; i++) {
-                var uid = key.users[i].userId.userid;
+            userIds.forEach(function(uid) {
                 var fingerprint = key.primaryKey.fingerprint;
                 if (uid.indexOf(address) >= 0 && !dupes[fingerprint + uid]) {
                     publicKeys.push(key);
                     dupes[fingerprint + uid] = fingerprint + uid;
                 }
-            }
+            });
         });
     });
     return publicKeys;
@@ -216,12 +216,13 @@ OpenPGPSecureKeyStore.prototype.havingPublicKeys = function(addresses) {
 OpenPGPSecureKeyStore.prototype.publicKeyMissing = function(addresses) {
     var uidAddresses = [];
     this.publicKeys.forEach(function(key) {
-        for (i = 0; i < key.users.length; i++) {
-            var addr = AjxEmailAddress.parse(key.users[i].userId.userid);
+        var userIds = key.getUserIds();
+        userIds.forEach(function(uid) {
+            var addr = AjxEmailAddress.parse(uid);
             if (addr) {
                 uidAddresses[addr.getAddress()] = addr.getAddress();
             }
-        }
+        });
     });
 
     var missing = [];
@@ -262,7 +263,7 @@ OpenPGPSecureKeyStore.keyInfo = function(key) {
     return {
         value: key.armor(),
         uids: uids,
-        fingerprint: priKey.fingerprint,
+        fingerprint: priKey.getFingerprint(),
         keyid: priKey.getKeyId().toHex(),
         algorithm: priKey.algorithm,
         keyLength: keyLength,
