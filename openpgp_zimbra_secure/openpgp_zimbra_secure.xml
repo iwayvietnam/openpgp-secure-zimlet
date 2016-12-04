@@ -41,8 +41,6 @@
     <include>js/widgets/KeyLookupView.js</include>
     <include>js/widgets/KeyAddDialog.js</include>
     <include>js/widgets/KeyAddView.js</include>
-    <include>js/widgets/SendPublicKeyDialog.js</include>
-    <include>js/widgets/SendPublicKeyView.js</include>
     <include>js/widgets/ImportPublicKeyDialog.js</include>
     <include>js/widgets/ImportPublicKeyView.js</include>
 
