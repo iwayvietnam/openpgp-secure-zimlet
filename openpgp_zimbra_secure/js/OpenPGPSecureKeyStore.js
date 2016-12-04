@@ -263,7 +263,7 @@ OpenPGPSecureKeyStore.keyInfo = function(key) {
         value: key.armor(),
         uids: uids,
         fingerprint: priKey.fingerprint,
-        keyid: priKey.keyid.toHex(),
+        keyid: priKey.getKeyId().toHex(),
         algorithm: priKey.algorithm,
         keyLength: keyLength,
         created: priKey.created
