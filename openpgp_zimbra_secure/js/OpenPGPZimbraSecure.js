@@ -22,7 +22,6 @@
  */
 
 function openpgp_zimbra_secure_HandlerObject() {
-    this._msgDivCache = {};
     this._pgpMessageCache = appCtxt.isChildWindow ? window.opener.openpgp_zimbra_secure_HandlerObject.getInstance()._pgpMessageCache : {};
     this._sendingAttachments = [];
     this._pgpAttachments = {};
@@ -423,9 +422,7 @@ OpenPGPZimbraSecure.prototype.handlePublicKeyChange = function() {
             if (child instanceof ZmConvListView) {
                 var convs = child.getList().getArray();
                 convs.forEach(function(conv) {
-                    if (conv._loaded == true) {
-                        conv._loaded = false;
-                    }
+                    conv._loaded = false;
                 });
             }
         });
