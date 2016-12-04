@@ -325,6 +325,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
                 publicKeys: this._keyStore.getPublicKeys()
             });
             this._keyStore.addCallback(new AjxCallback(function(key) {
+                self._handler.handlePublicKeyChange();
                 publicKeyList.addPublicKey(key);
             }));
             this._keyStore.addCallback(new AjxCallback(function(fingerprint) {
