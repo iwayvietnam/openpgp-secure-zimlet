@@ -370,21 +370,44 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
 
     OpenPGPSecurePrefs.prototype._keySend = function() {
         var self = this;
-        if (this._handler._keySendDialog) {
-            var dialog = this._handler._keySendDialog;
-            dialog.setEmail('');
+        var controller = AjxDispatcher.run('GetComposeController');
+        var publicKey = this._keyStore.getPublicKey();
+        if (controller && publicKey) {
+            var textContents = [];
+            var keyInfo = OpenPGPSecureKeyStore.keyInfo(publicKey);
+            keyInfo.uids.forEach(function(uid, index) {
+                textContents.push('User ID[' + index + ']: ' + AjxStringUtil.htmlDecode(uid));
+            });
+            textContents.push('Fingerprint: ' + keyInfo.fingerprint);
+            textContents.push('Key ID: ' + keyInfo.keyid);
+            textContents.push('Created: ' + keyInfo.created);
+            textContents.push('Key Length: ' + keyInfo.keyLength);
+
+            var addr = OpenPGPUtils.getDefaultSenderAddress();
+            var params = {
+                action: ZmOperation.NEW_MESSAGE,
+                composeMode: Dwt.HTML,
+                subjOverride: AjxMessageFormat.format(this._handler.getMessage('sendPublicKeySubject'), addr.toString()),
+                extraBodyText: textContents.join('<br>'),
+                callback: new AjxCallback(function(controller) {
+                    var url = appCtxt.get(ZmSetting.CSFE_ATTACHMENT_UPLOAD_URI) + '?fmt=raw';
+                    var callback = new AjxCallback(function(response) {
+                        if (response.success) {
+                            var values = JSON.parse('[' + response.text.replace(/'/g, '"')  + ']');
+                            if (values && values.length == 3 && values[0] == 200) {
+                                controller.saveDraft(ZmComposeController.DRAFT_TYPE_AUTO, values[2]);
+                            }
+                        }
+                    });
+                    AjxRpc.invoke(publicKey.armor(), url, {
+                        'Content-Type': OpenPGPUtils.OPENPGP_KEYS_CONTENT_TYPE + '; name="key.asc"',
+                        'Content-Disposition': 'inline; filename="key.asc"',
+                        'Content-Transfer-Encoding': '7bit'
+                    }, callback);
+                })
+            };
+            controller.doAction(params);
         }
-        else {
-            var dialog = this._handler._keySendDialog = new SendPublicKeyDialog(
-                this._handler,
-                function(dialog) {
-                    dialog.sendPubicKey(new AjxCallback(function() {
-                        self._handler.displayStatusMessage(self._handler.getMessage('sendPublicKeySubmitted'));
-                    }));
-                }
-            );
-        }
-        dialog.popup();
     };
 
     OpenPGPSecurePrefs.prototype._keyExport = function() {

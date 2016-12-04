@@ -153,8 +153,8 @@ OpenPGPSecureMessageProcessor.prototype.onDecrypted = function(callback, msg, me
         var cd = (node.headers['content-disposition']) ? node.headers['content-disposition'][0] : false;
         var isAttach = cd ? OpenPGPUtils.isAttachment(cd.initial) : false;
         var ct = node.contentType;
-        if (pgpMessage.encrypted && cd && isAttach && node.content) {
-            var content = OpenPGPUtils.binToString(node.content);
+        var content = OpenPGPUtils.binToString(node.content);
+        if (pgpMessage.encrypted && cd && isAttach) {
             var attachment = {
                 id: OpenPGPUtils.randomString(),
                 type: ct.value,
@@ -177,8 +177,10 @@ OpenPGPSecureMessageProcessor.prototype.onDecrypted = function(callback, msg, me
             pgpMessage.attachments.push(attachment);
             self._handler._pgpAttachments[attachment.id] = attachment;
         }
-        if (!pgpMessage.pgpKey && OpenPGPUtils.isPGPKeysContentType(ct.value)) {
-            pgpMessage.pgpKey = OpenPGPUtils.binToString(node.content);
+        var hasPGPKey = OpenPGPUtils.isPGPKeysContentType(ct.value) || OpenPGPUtils.hasInlinePGPContent(content, OpenPGPUtils.OPENPGP_PUBLIC_KEY_HEADER);
+        if (!pgpMessage.pgpKey && hasPGPKey) {
+            pgpMessage.hasPGPKey = hasPGPKey;
+            pgpMessage.pgpKey = content;
         }
     };
     parser.write(message.content);
@@ -269,8 +271,11 @@ OpenPGPSecureMessageProcessor.prototype._decryptInlineMessage = function(callbac
                     var parser = new window['emailjs-mime-parser']();
                     parser.onbody = function(node, chunk){
                         var ct = node.contentType;
-                        if (!pgpMessage.pgpKey && OpenPGPUtils.isPGPKeysContentType(ct.value)) {
-                            pgpMessage.pgpKey = OpenPGPUtils.binToString(node.content);
+                        var content = OpenPGPUtils.binToString(node.content);
+                        var hasPGPKey = OpenPGPUtils.isPGPKeysContentType(ct.value) || OpenPGPUtils.hasInlinePGPContent(content, OpenPGPUtils.OPENPGP_PUBLIC_KEY_HEADER);
+                        if (!pgpMessage.pgpKey && hasPGPKey) {
+                            pgpMessage.hasPGPKey = hasPGPKey;
+                            pgpMessage.pgpKey = content;
                         }
                     };
                     parser.write(OpenPGPUtils.base64Decode(response.text));
