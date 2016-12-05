@@ -5,9 +5,9 @@ Bugs and feedback: https://github.com/nguyennv/openpgp-zimlet/issues
 
 ## Features
 - Automatically sign/encrypt mail when sending, verify/decrypt received mail
-- Support [PGP/MIME](https://www.ietf.org/rfc/rfc3156.txt)
+- Support [OpenPGP/MIME](https://www.ietf.org/rfc/rfc3156.txt) on both message sending and receiving
 - Support [Inline-PGP](https://www.ietf.org/rfc/rfc4880.txt) signed/encrypted received messages
-- Support decrypting PGP/MIME and Inline-PGP encrypted attachments
+- Support decrypting OpenPGP/MIME and Inline-PGP encrypted attachments
 - Support GUI for easy configuration and OpenPGP key management
 
 ##Install OpenPGP Secure Zimlet
