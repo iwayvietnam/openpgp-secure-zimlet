@@ -53,10 +53,10 @@ OpenPGPSecureMessageProcessor.prototype.process = function() {
     msgs.forEach(function(msg) {
         msg.hasPGPKey = false;
         msg.pgpKey = false;
-        if (OpenPGPSecureMessageProcessor.hasInlinePGP(msg, msg)) {
+        if (OpenPGPSecureMessageProcessor.hasInlinePGP(msg)) {
             inlinePGPMsgs.push(msg);
         }
-        else if (OpenPGPSecureMessageProcessor.hasPGPPart(msg, msg)) {
+        else if (OpenPGPSecureMessageProcessor.hasPGPPart(msg)) {
             pgpMsgs.push(msg);
         }
     });
@@ -178,7 +178,7 @@ OpenPGPSecureMessageProcessor.prototype.onDecrypted = function(callback, msg, me
             self._handler._pgpAttachments[attachment.id] = attachment;
         }
         var hasPGPKey = OpenPGPUtils.isPGPKeysContentType(ct.value) || OpenPGPUtils.hasInlinePGPContent(content, OpenPGPUtils.OPENPGP_PUBLIC_KEY_HEADER);
-        if (!pgpMessage.pgpKey && hasPGPKey) {
+        if (hasPGPKey) {
             pgpMessage.hasPGPKey = hasPGPKey;
             pgpMessage.pgpKey = content;
         }
@@ -273,7 +273,7 @@ OpenPGPSecureMessageProcessor.prototype._decryptInlineMessage = function(callbac
                         var ct = node.contentType;
                         var content = OpenPGPUtils.binToString(node.content);
                         var hasPGPKey = OpenPGPUtils.isPGPKeysContentType(ct.value) || OpenPGPUtils.hasInlinePGPContent(content, OpenPGPUtils.OPENPGP_PUBLIC_KEY_HEADER);
-                        if (!pgpMessage.pgpKey && hasPGPKey) {
+                        if (hasPGPKey) {
                             pgpMessage.hasPGPKey = hasPGPKey;
                             pgpMessage.pgpKey = content;
                         }
@@ -324,44 +324,35 @@ OpenPGPSecureMessageProcessor.prototype._addSecurityHeader = function(msg, signa
     });
 };
 
-OpenPGPSecureMessageProcessor.hasPGPPart = function(part, msg) {
+OpenPGPSecureMessageProcessor.hasPGPPart = function(part) {
     var ct = part.ct;
-    var hasPGP = false;
-
-    if (OpenPGPUtils.isPGPKeysContentType(ct) && msg) {
-        msg.hasPGPKey = true;
-    }
     if (OpenPGPUtils.isPGPContentType(ct)) {
-        hasPGP = true;
+        return true;
     }
     else if (!part.mp) {
-        hasPGP = false;
+        return false;
     }
     else {
         if (ct != ZmMimeTable.MSG_RFC822) {
             for (var i = 0; i < part.mp.length; i++) {
-                if (OpenPGPSecureMessageProcessor.hasPGPPart(part.mp[i], msg))
-                    hasPGP = true;
+                if (OpenPGPSecureMessageProcessor.hasPGPPart(part.mp[i]))
+                    return true;
             }
         }
     }
 
-    return hasPGP;
+    return false;
 };
 
-OpenPGPSecureMessageProcessor.hasInlinePGP = function(part, msg) {
+OpenPGPSecureMessageProcessor.hasInlinePGP = function(part) {
     if (part.content && OpenPGPUtils.hasInlinePGPContent(part.content)) {
-        if (OpenPGPUtils.hasInlinePGPContent(part.content, OpenPGPUtils.OPENPGP_PUBLIC_KEY_HEADER)) {
-            msg.hasPGPKey = true;
-            msg.pgpKey = part.content;
-        }
         return true;
     } else if (!part.mp) {
         return false;
     }
     else {
         for (var i = 0; i < part.mp.length; i++) {
-            if (OpenPGPSecureMessageProcessor.hasInlinePGP(part.mp[i], msg))
+            if (OpenPGPSecureMessageProcessor.hasInlinePGP(part.mp[i]))
                 return true;
         }
     }
