@@ -252,6 +252,7 @@ OpenPGPSecureMessageProcessor.prototype._decryptInlineMessage = function(callbac
                 this._handler.getKeyStore().getPrivateKey(),
                 function(result) {
                     if (result.content) {
+                        result.content = DOMPurify.sanitize(result.content);
                         if (contentPart.ct.indexOf(ZmMimeTable.TEXT_HTML) >= 0) {
                             contentPart.content = '<pre>' + result.content + '</pre>';
                         }
