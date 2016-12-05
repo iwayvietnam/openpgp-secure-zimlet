@@ -147,7 +147,8 @@ OpenPGPZimbraSecure.prototype._overrideZmMailMsgView = function() {
             var pgpMessage = self._pgpMessageCache[msg.id];
             if (pgpMessage.encrypted && pgpMessage.attachments.length > 0) {
                 var pnSrc = Dwt.getAttr(elem, 'pn' + aname);
-                var link = pnSrc || Dwt.getAttr(elem, aname);
+                var mceSrc = Dwt.getAttr(elem, 'data-mce-' + aname);
+                var link = pnSrc || mceSrc || Dwt.getAttr(elem, aname);
 
                 if (link && link.substring(0, 4) === 'cid:') {
                     var attachment = pgpMessage.attachments.find(function(attachment) {

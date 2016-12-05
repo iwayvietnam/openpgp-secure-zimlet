@@ -277,7 +277,15 @@ OpenPGPUtils.mimeNodeToZmMimePart = function(node, withAttachment) {
         if (node.content) {
             var content = codec.fromTypedArray(node.content);
             if (part.ct === ZmMimeTable.TEXT_HTML || part.ct === ZmMimeTable.TEXT_PLAIN) {
-                part.content = DOMPurify.sanitize(content);
+                DOMPurify.addHook('uponSanitizeAttribute', function(node, data) {
+                    if (data.attrName == 'src' && data.attrValue.indexOf('cid:') >= 0) {
+                        node.setAttribute('pnsrc', data.attrValue);
+                    }
+                });
+                var config = {
+                    ADD_ATTR: ['pnsrc', 'data-mce-src']
+                };
+                part.content = DOMPurify.sanitize(content, config);
             }
             part.s = content.length;
         }
