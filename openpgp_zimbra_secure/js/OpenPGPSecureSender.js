@@ -73,7 +73,7 @@ OpenPGPSecureSender.prototype._encryptMessage = function() {
                         //get the content type upto ; character
                         var ctIndex = part.ct.indexOf(';');
                         if (ctIndex == -1) ctIndex = part.ct.length;
-                        var newSrc = 'data:' + part.ct.substring(0, ctIndex) + ';base64,' + part.data;
+                        var newSrc = 'data:' + part.ct.substring(0, ctIndex) + ';base64,' + OpenPGPUtils.base64Encode(part.data);
                         view._htmlEditor.replaceImageSrc(oldSrc, newSrc);
                     }
                 }
