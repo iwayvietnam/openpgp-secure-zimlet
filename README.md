@@ -1,5 +1,5 @@
 # OpenPGP Secure Zimlet
- OpenPGP Secure Zimlet - Sign, verify, encrypt, and decrypt email with PGP/MIME by OpenPGP for Zimbra
+ OpenPGP Secure Zimlet - Sign, verify, encrypt, and decrypt email with OpenPGP/MIME for Zimbra
 
 Bugs and feedback: https://github.com/nguyennv/openpgp-zimlet/issues
 
