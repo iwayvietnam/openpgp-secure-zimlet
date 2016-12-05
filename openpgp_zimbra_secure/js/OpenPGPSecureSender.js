@@ -28,24 +28,13 @@ OpenPGPSecureSender = function(handler, callback, msg, params) {
     this._params = params;
 
     this._sendingAttachments = [];
-    this._receivers = [];
     this._input = params.jsonObj.SendMsgRequest;
 
     this._shouldSign = false;
     this._shouldEncrypt = false;
-    this._attachPublicKey = false;
     if (this._input) {
         this._shouldSign = handler._shouldSign();
         this._shouldEncrypt = handler._shouldEncrypt();
-        if (typeof msg.shouldSign !== 'undefined') {
-            this._shouldSign = msg.shouldSign ? true : false;
-        }
-        if (typeof msg.shouldEncrypt !== 'undefined') {
-            this._shouldEncrypt = msg.shouldEncrypt ? true : false;
-        }
-        if (typeof msg.attachPublicKey !== 'undefined') {
-            this._attachPublicKey = msg.attachPublicKey ? true : false;
-        }
     }
 };
 
@@ -53,72 +42,11 @@ OpenPGPSecureSender.prototype = new Object();
 OpenPGPSecureSender.prototype.constructor = OpenPGPSecureSender;
 
 OpenPGPSecureSender.prototype.send = function() {
-    var self = this;
-    var handler = this._handler;
-
-    if (this._shouldSign) {
-        if (!handler.getKeyStore().getPrivateKey()) {
-            var ps = this._popShield = appCtxt.getYesNoMsgDialog();
-            ps.setMessage(handler.getMessage('notHavePrivateKeyWarning'), DwtMessageDialog.WARNING_STYLE);
-            ps.registerCallback(DwtDialog.YES_BUTTON, function() {
-                self._popShield.popdown();
-                self._sendMessage();
-            }, this);
-            ps.registerCallback(DwtDialog.NO_BUTTON, function() {
-                self._dismissSendMessage();
-            }, this);
-            ps.popup();
-        }
-        else {
-            this._sendMessage();
-        }
-    }
-    else if (this._shouldEncrypt) {
-        this._sendMessage();
+    if (this._shouldSign || this._shouldEncrypt) {
+        this._encryptMessage();
     }
     else {
         this._callback.apply(this._msg, [this._params]);
-    }
-};
-
-OpenPGPSecureSender.prototype._sendMessage = function() {
-    var self = this;
-    var handler = this._handler;
-    var input = this._input;
-    var hasFrom = false;
-
-    for (var i = 0; !hasFrom && i < input.m.e.length; i++) {
-        if (input.m.e[i].t == 'f') {
-            hasFrom = true;
-        }
-    }
-    if (!hasFrom) {
-        var addr = OpenPGPUtils.getDefaultSenderAddress();
-        input.m.e.push({ 'a': addr.toString(), 't': 'f' });
-    }
-
-    input.m.e.forEach(function(e) {
-        var addr = AjxEmailAddress.parse(e.a);
-        if (addr && (e.t == 't' || e.t == 'c' || e.t == 'b' || e.t == 'f')) {
-            self._receivers.push(addr.getAddress());
-        }
-    });
-    var missing = handler.getKeyStore().publicKeyMissing(this._receivers);
-
-    if (this._shouldEncrypt && missing.length > 0) {
-        var ps = this._popShield = appCtxt.getYesNoMsgDialog();
-        ps.setMessage(AjxMessageFormat.format(handler.getMessage('notHavePublicKeyWarning'), missing.join(', ')), DwtMessageDialog.WARNING_STYLE);
-        ps.registerCallback(DwtDialog.YES_BUTTON, function() {
-            self._popShield.popdown();
-            self._encryptMessage();
-        }, this);
-        ps.registerCallback(DwtDialog.NO_BUTTON, function() {
-            self._dismissSendMessage();
-        }, this);
-        ps.popup();
-    }
-    else {
-        this._encryptMessage();
     }
 };
 
@@ -189,19 +117,22 @@ OpenPGPSecureSender.prototype._encryptMessage = function() {
     while (this._sendingAttachments.length > 0) {
         attachments.push(this._sendingAttachments.pop());
     }
-    var pubicKey = handler.getKeyStore().getPublicKey();
-    if (this._attachPublicKey && pubicKey) {
-        attachments.push({
-            data: pubicKey.armor(),
-            ct: OpenPGPUtils.OPENPGP_KEYS_CONTENT_TYPE + '; name="key.asc"',
-            cd: 'inline; filename="key.asc"',
-            cte: '7bit'
-        });
+
+    var hasFrom = false;
+    for (var i = 0; !hasFrom && i < input.m.e.length; i++) {
+        if (input.m.e[i].t == 'f') {
+            hasFrom = true;
+        }
+    }
+    if (!hasFrom) {
+        var addr = OpenPGPUtils.getDefaultSenderAddress();
+        input.m.e.push({ 'a': addr.toString(), 't': 'f' });
     }
 
+    var receivers = OpenPGPSecureSender.getReceivers(msg);
     var encryptor = new OpenPGPEncrypt({
         privateKey: handler.getKeyStore().getPrivateKey(),
-        publicKeys: handler.getKeyStore().havingPublicKeys(this._receivers),
+        publicKeys: handler.getKeyStore().havingPublicKeys(receivers),
         onEncrypted: function(mimeNode) {
             mimeNode.setHeader(self._msgHeaders());
             self._onEncrypted(mimeNode.build());
@@ -267,16 +198,6 @@ OpenPGPSecureSender.prototype._onEncryptError = function(error){
     OpenPGPZimbraSecure.popupErrorDialog(error);
 };
 
-OpenPGPSecureSender.prototype._dismissSendMessage = function(){
-    var view = appCtxt.getCurrentView();
-    var composeCtrl = view && view.getController && view.getController();
-    var toolbar = composeCtrl._toolbar;
-    if (toolbar) {
-        toolbar.enableAll(true);
-    }
-    this._popShield.popdown();
-};
-
 OpenPGPSecureSender.prototype._msgHeaders = function() {
     var msg = this._input.m;
     var headers = {};
@@ -333,4 +254,17 @@ OpenPGPSecureSender.prototype._msgHeaders = function() {
         });
     }
     return headers;
+};
+
+OpenPGPSecureSender.getReceivers = function(msg) {
+    var addr = OpenPGPUtils.getDefaultSenderAddress();
+    var receivers = [addr.getAddress()];
+    var types = [AjxEmailAddress.TO, AjxEmailAddress.CC, AjxEmailAddress.BCC];
+    types.forEach(function(type) {
+        var addrs = msg.getAddresses(type).getArray();
+        addrs.forEach(function(addr) {
+            receivers.push(addr.getAddress());
+        });
+    });
+    return receivers;
 };

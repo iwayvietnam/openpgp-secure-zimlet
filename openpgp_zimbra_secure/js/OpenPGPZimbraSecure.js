@@ -291,6 +291,29 @@ OpenPGPZimbraSecure.prototype._sendMessage = function(orig, msg, params) {
 };
 
 /**
+ * This method is called when a message is sent in Zimbra.
+ */
+OpenPGPZimbraSecure.prototype.emailErrorCheck = function(msg, boolAndErrorMsgArray) {
+    var receivers = OpenPGPSecureSender.getReceivers(msg);
+    var missing = this.getKeyStore().publicKeyMissing(receivers);
+
+    if (this._shouldEncrypt() && missing.length > 0) {
+        boolAndErrorMsgArray.push({
+            zimletName: this.toString(),
+            hasError: true,
+            errorMsg: AjxMessageFormat.format(this.getMessage('notHavePublicKeyWarning'), missing.join(', '))
+        });
+    }
+    else if (this._shouldSign() && !this.getKeyStore().getPrivateKey()) {
+        boolAndErrorMsgArray.push({
+            zimletName: this.toString(),
+            hasError: true,
+            errorMsg: this.getMessage('notHavePrivateKeyWarning')
+        });
+    }
+};
+
+/**
  * This method is called when a message is viewed in Zimbra.
  * This method is called by the Zimlet framework when a user clicks-on a message in the mail application.
  */
