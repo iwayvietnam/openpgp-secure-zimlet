@@ -286,6 +286,7 @@ OpenPGPUtils.mimeNodeToZmMimePart = function(node, withAttachment) {
                     ADD_ATTR: ['pnsrc', 'data-mce-src']
                 };
                 part.content = DOMPurify.sanitize(content, config);
+                DOMPurify.removeHook('uponSanitizeAttribute');
             }
             part.s = content.length;
         }
