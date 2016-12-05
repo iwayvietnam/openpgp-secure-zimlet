@@ -376,7 +376,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
             var textContents = [];
             var keyInfo = OpenPGPSecureKeyStore.keyInfo(publicKey);
             keyInfo.uids.forEach(function(uid, index) {
-                textContents.push('User ID[' + index + ']: ' + AjxStringUtil.htmlDecode(uid));
+                textContents.push('User ID[' + index + ']: ' + uid);
             });
             textContents.push('Fingerprint: ' + keyInfo.fingerprint);
             textContents.push('Key ID: ' + keyInfo.keyid);

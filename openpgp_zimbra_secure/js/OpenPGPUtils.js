@@ -277,7 +277,7 @@ OpenPGPUtils.mimeNodeToZmMimePart = function(node, withAttachment) {
         if (node.content) {
             var content = codec.fromTypedArray(node.content);
             if (part.ct === ZmMimeTable.TEXT_HTML || part.ct === ZmMimeTable.TEXT_PLAIN) {
-                part.content = content;
+                part.content = DOMPurify.sanitize(content);
             }
             part.s = content.length;
         }
