@@ -325,12 +325,8 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
                 publicKeys: this._keyStore.getPublicKeys()
             });
             this._keyStore.addCallback(new AjxCallback(function(key) {
-                self._handler.handlePublicKeyChange();
                 publicKeyList.addPublicKey(key);
             }));
-            this._keyStore.addCallback(new AjxCallback(function(fingerprint) {
-                self._handler.handlePublicKeyChange();
-            }), OpenPGPSecureKeyStore.REMOVE_CALLBACK);
             return publicKeyList;
         } else {
             return ZmPreferencesPage.prototype._setupCustom.call(this, id, setup, value);
