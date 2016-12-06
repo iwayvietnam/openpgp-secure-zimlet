@@ -78,7 +78,6 @@ OpenPGPZimbraSecure.prototype.init = function() {
             self._handleMessageResponse(newCallback, result);
         };
         self._overrideZmMailMsgView();
-        self._addAttachmentHandler();
     }));
 
     AjxDispatcher.addPackageLoadFunction('Startup1_2', new AjxCallback(this, function() {
@@ -165,6 +164,38 @@ OpenPGPZimbraSecure.prototype._overrideZmMailMsgView = function() {
         return result;
     };
 
+    OpenPGPUtils.OPENPGP_CONTENT_TYPES.forEach(function(contentType) {
+        ZmMimeTable._table[contentType] = {
+            desc: 'OpenPGP encrypted file',
+            image: 'PGPEncrypted',
+            imageLarge: 'PGPEncrypted'
+        };
+    });
+
+    if (!ZmMailMsgView._attachmentHandlers) {
+        ZmMailMsgView._attachmentHandlers = {};
+    }
+    for (var mimeType in ZmMimeTable._table) {
+        if (mimeType === OpenPGPUtils.OPENPGP_ENCRYPTED_CONTENT_TYPE) {
+            if (!ZmMailMsgView._attachmentHandlers[mimeType]) {
+                ZmMailMsgView._attachmentHandlers[mimeType] = {};
+            }
+            ZmMailMsgView._attachmentHandlers[mimeType]['OpenPGPZimbraSecure'] = function(attachment) {
+                var title = self.getMessage('decryptFile');
+                var linkId = DwtId.makeId(mimeType, attachment.part, ZmId.MV_ATT_LINKS, 'decrypt');
+                var linkAttrs = [
+                    'href="javascript:;"',
+                    'onclick="OpenPGPZimbraSecure.decryptAttachment(\'' + attachment.label + '\', \'' + attachment.url + '\')"',
+                    'class="AttLink"',
+                    'style="text-decoration:underline;"',
+                    'id="' + linkId + '"',
+                    'title="' + title + '"'
+                ];
+                return '<a ' + linkAttrs.join(' ') + '>' + title + '</a>';
+            };
+        }
+    }
+
     ZmMailMsgView.displayAdditionalHdrsInMsgView.securityHeader = '<span class="securityHeader">' + this.getMessage('messageSecurityHeader') + '</span>';
 };
 
@@ -221,42 +252,6 @@ OpenPGPZimbraSecure.prototype._overrideZmComposeView = function() {
         }
         return topPartFunc.call(this, msg, isDraft, bodyContent);
     };
-};
-
-OpenPGPZimbraSecure.prototype._addAttachmentHandler = function() {
-    var self = this;
-
-    OpenPGPUtils.OPENPGP_CONTENT_TYPES.forEach(function(contentType) {
-        ZmMimeTable._table[contentType] = {
-            desc: 'OpenPGP encrypted file',
-            image: 'PGPEncrypted',
-            imageLarge: 'PGPEncrypted'
-        };
-    });
-
-    var app = appCtxt.getAppController().getApp(ZmId.APP_MAIL);
-    var controller = app.getMsgController(app.getCurrentSessionId(ZmId.VIEW_MSG));
-    var viewType = appCtxt.getViewTypeFromId(ZmMsgController.getDefaultViewType());
-    controller._initializeView(viewType);
-    var view = controller._view[viewType];
-
-    for (var mimeType in ZmMimeTable._table) {
-        if (mimeType === OpenPGPUtils.OPENPGP_ENCRYPTED_CONTENT_TYPE) {
-            view.addAttachmentLinkHandler(mimeType, 'OpenPGPZimbraSecure', function(attachment) {
-                var title = self.getMessage('decryptFile');
-                var linkId = view._getAttachmentLinkId(attachment.part, 'decrypt');
-                var linkAttrs = [
-                    'href="javascript:;"',
-                    'onclick="OpenPGPZimbraSecure.decryptAttachment(\'' + attachment.label + '\', \'' + attachment.url + '\')"',
-                    'class="AttLink"',
-                    'style="text-decoration:underline;"',
-                    'id="' + linkId + '"',
-                    'title="' + title + '"'
-                ];
-                return '<a ' + linkAttrs.join(' ') + '>' + title + '</a>';
-            });
-        }
-    }
 };
 
 OpenPGPZimbraSecure.prototype.getKeyStore = function() {
