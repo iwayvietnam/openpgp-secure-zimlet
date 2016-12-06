@@ -21,6 +21,9 @@
  * Written by Nguyen Van Nguyen <nguyennv1981@gmail.com>
  */
 
+/**
+ * Zimlet constructor.
+ */
 function openpgp_zimbra_secure_HandlerObject() {
     this._pgpMessageCache = appCtxt.isChildWindow ? window.opener.openpgp_zimbra_secure_HandlerObject.getInstance()._pgpMessageCache : {};
     this._sendingAttachments = [];
@@ -58,6 +61,9 @@ OpenPGPZimbraSecure.OPENPGP_DONTSIGN = 'openpgp_dontsign';
 OpenPGPZimbraSecure.OPENPGP_SIGN = 'openpgp_sign';
 OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT = 'openpgp_signencrypt';
 
+/**
+ * Zimlet initialize.
+ */
 OpenPGPZimbraSecure.prototype.init = function() {
     var self = this;
 
@@ -97,6 +103,9 @@ OpenPGPZimbraSecure.prototype.init = function() {
     }));
 };
 
+/**
+ * Handle new window.
+ */
 OpenPGPZimbraSecure.prototype._handleNewWindow = function() {
     this._overrideZmMailMsg();
     this._overrideZmSearch();
@@ -104,6 +113,9 @@ OpenPGPZimbraSecure.prototype._handleNewWindow = function() {
     this._overrideZmComposeView();
 };
 
+/**
+ * Override ZmMailMsg class.
+ */
 OpenPGPZimbraSecure.prototype._overrideZmMailMsg = function() {
     var self = this;
     var sendMsgFunc = ZmMailMsg.prototype._sendMessage;
@@ -120,6 +132,9 @@ OpenPGPZimbraSecure.prototype._overrideZmMailMsg = function() {
     };
 };
 
+/**
+ * Override ZmSearch class.
+ */
 OpenPGPZimbraSecure.prototype._overrideZmSearch = function() {
     var self = this;
     var responseGetConvFunc = ZmSearch.prototype._handleResponseGetConv;
@@ -139,6 +154,9 @@ OpenPGPZimbraSecure.prototype._overrideZmSearch = function() {
     };
 };
 
+/**
+ * Override ZmMailMsgView class.
+ */
 OpenPGPZimbraSecure.prototype._overrideZmMailMsgView = function() {
     var self = this;
     var inlineImgFunc = ZmMailMsgView.__unfangInternalImage;
@@ -201,6 +219,9 @@ OpenPGPZimbraSecure.prototype._overrideZmMailMsgView = function() {
     ZmMailMsgView.displayAdditionalHdrsInMsgView.securityHeader = '<span class="securityHeader">' + this.getMessage('messageSecurityHeader') + '</span>';
 };
 
+/**
+ * Override ZmComposeView class.
+ */
 OpenPGPZimbraSecure.prototype._overrideZmComposeView = function() {
     var self = this;
     var setFromSelectFunc = ZmComposeView.prototype._setFromSelect;
@@ -256,10 +277,16 @@ OpenPGPZimbraSecure.prototype._overrideZmComposeView = function() {
     };
 };
 
+/**
+ * Get openpgp key store.
+ */
 OpenPGPZimbraSecure.prototype.getKeyStore = function() {
     return this._keyStore;
 };
 
+/**
+ * Get secure password for encrypt/decrypt sensitive data.
+ */
 OpenPGPZimbraSecure.prototype.getSecurePassword = function() {
     return this._securePassword;
 };
@@ -318,6 +345,9 @@ OpenPGPZimbraSecure.prototype.onMsgView = function(msg, oldMsg, msgView) {
     this._renderMessageInfo(msg, msgView);
 };
 
+/**
+ * Render cached openpgp message.
+ */
 OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
     var self = this;
     if (!msg || !view._hdrTableId || msg.isDraft)
