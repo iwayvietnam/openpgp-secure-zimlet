@@ -81,6 +81,11 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
         }
     }, function(err) {
         self.onError(err);
+        return {
+            content: message,
+            signatures: [],
+            encrypted: false
+        }
     })
     .then(function(message) {
         if (message.encrypted === false || message.signatures.length == 0) {
@@ -121,6 +126,11 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
         return message;
     }, function(err) {
         self.onError(err);
+        return {
+            content: message,
+            signatures: [],
+            encrypted: false
+        }
     })
     .then(function(message) {
         self.onDecrypted(message);
