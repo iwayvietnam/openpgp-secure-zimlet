@@ -428,6 +428,9 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
     }
 };
 
+/**
+ * This method is called when public key is changed.
+ */
 OpenPGPZimbraSecure.prototype.handlePublicKeyChange = function() {
     var controller = AjxDispatcher.run('GetConvListController');
     var itemView = controller.getItemView();
@@ -581,6 +584,9 @@ OpenPGPZimbraSecure.prototype._getSecurityButtonFromToolbar = function(toolbar) 
     }
 };
 
+/**
+ * Get toolbar security setting of user.
+ */
 OpenPGPZimbraSecure.prototype._getUserSecuritySetting = function(ctlr, useToolbarOnly) {
     var app = appCtxt.getApp('Mail');
     AjxDispatcher.require(['MailCore','Mail']);
@@ -603,6 +609,9 @@ OpenPGPZimbraSecure.prototype._getUserSecuritySetting = function(ctlr, useToolba
     }
 };
 
+/**
+ * Get security setting of user.
+ */
 OpenPGPZimbraSecure.prototype._getSecuritySetting = function() {
     if (appCtxt.isChildWindow) {
         return window.opener.appCtxt.getZimletMgr().getZimletByName(OpenPGPZimbraSecure.NAME).handlerObject._getUserSecuritySetting();
@@ -616,19 +625,34 @@ OpenPGPZimbraSecure.prototype._getSecuritySetting = function() {
     }
 };
 
+/**
+ * Get should sign state of user.
+ */
 OpenPGPZimbraSecure.prototype._shouldSign = function(ctlr, useToolbarOnly) {
     var value = this._getUserSecuritySetting(ctlr, useToolbarOnly);
     return (value == OpenPGPZimbraSecure.OPENPGP_SIGN || value == OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT);
 };
 
+/**
+ * Get should encrypt state of user.
+ */
 OpenPGPZimbraSecure.prototype._shouldEncrypt = function(ctlr, useToolbarOnly) {
     return this._getUserSecuritySetting(ctlr, useToolbarOnly) == OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT;
 };
 
+/**
+ * Add js scripts and run a callback.
+ *
+ * @param {array}   scripts    An array of script paths
+ * @param {AjxCallback} callback the callback will be called when all scripts were processed
+ */
 OpenPGPZimbraSecure.prototype._addJsScripts = function(scripts, callback) {
     return AjxInclude(scripts, null, callback);
 };
 
+/**
+ * Initialize openpgp in key store and preference page.
+ */
 OpenPGPZimbraSecure.prototype._initOpenPGP = function() {
     var self = this;
     var sequence = Promise.resolve();
@@ -644,6 +668,12 @@ OpenPGPZimbraSecure.prototype._initOpenPGP = function() {
     });
 };
 
+/**
+ * Decrypted encrypted attachment and download.
+ *
+ * @param {String} name The name of attachment
+ * @param {String} url  The URL of attachment
+ */
 OpenPGPZimbraSecure.decryptAttachment = function(name, url) {
     if (name.substring(name.length - 4) === '.pgp' || name.substring(name.length - 4) === '.asc') {
         name = name.substring(0, name.length - 4);
@@ -676,6 +706,11 @@ OpenPGPZimbraSecure.decryptAttachment = function(name, url) {
     }, callback, true);
 };
 
+/**
+ * Download content of encrypted message attachment.
+ *
+ * @param {Object} element The HMLT DOM element
+ */
 OpenPGPZimbraSecure.prototype._download = function(element) {
     var id = Dwt.getAttr(element, 'data-id');
     if (id && this._pgpAttachments[id]) {
@@ -684,6 +719,11 @@ OpenPGPZimbraSecure.prototype._download = function(element) {
     }
 };
 
+/**
+ * Show error dialog.
+ *
+ * @param {String} errorCode The error code
+ */
 OpenPGPZimbraSecure.popupErrorDialog = function(errorCode){
     if(!errorCode){
         errorCode = 'unknown-error';
@@ -697,10 +737,20 @@ OpenPGPZimbraSecure.popupErrorDialog = function(errorCode){
     dialog.popup();
 };
 
+/**
+ * Gets the zimlet handler.
+ * 
+ * @return {Object} the zimlet handler
+ */
 OpenPGPZimbraSecure.getInstance = function() {
     return appCtxt.getZimletMgr().getZimletByName(OpenPGPZimbraSecure.NAME).handlerObject;
 };
 
+/**
+ * Gets client version.
+ * 
+ * @return  {String}
+ */
 OpenPGPZimbraSecure.getClientVersion = function() {
     return appCtxt.get(ZmSetting.CLIENT_VERSION);
 };
