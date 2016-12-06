@@ -177,6 +177,12 @@ OpenPGPDecrypt.decryptContent = function(content, publicKeys, privateKey, onDecr
                 signatures: []
             };
         }
+    }, function(err) {
+        OpenPGPZimbraSecure.popupErrorDialog(err);
+        return {
+            content: content,
+            signatures: []
+        };
     })
     .then(function(result) {
         if (result.signatures.length == 0 && result.content.indexOf(OpenPGPUtils.OPENPGP_SIGNED_MESSAGE_HEADER) > 0) {
@@ -194,6 +200,12 @@ OpenPGPDecrypt.decryptContent = function(content, publicKeys, privateKey, onDecr
         else {
             return result;
         }
+    }, function(err) {
+        OpenPGPZimbraSecure.popupErrorDialog(err);
+        return {
+            content: content,
+            signatures: []
+        };
     })
     .then(function(result) {
         result.signatures.forEach(function(signature) {
