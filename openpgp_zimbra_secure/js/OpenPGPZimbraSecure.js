@@ -184,7 +184,7 @@ OpenPGPZimbraSecure.prototype._overrideZmMailMsgView = function() {
             }
             ZmMailMsgView._attachmentHandlers[mimeType]['OpenPGPZimbraSecure'] = function(attachment) {
                 var title = self.getMessage('decryptFile');
-                var linkId = DwtId.makeId(mimeType, attachment.part, ZmId.MV_ATT_LINKS, 'decrypt');
+                var linkId = DwtId.makeId(ZmId.VIEW_MSG, attachment.mid, ZmId.MV_ATT_LINKS, attachment.part, 'decrypt');
                 var linkAttrs = [
                     'href="javascript:;"',
                     'onclick="OpenPGPZimbraSecure.decryptAttachment(\'' + attachment.label + '\', \'' + attachment.url + '\')"',
