@@ -260,6 +260,22 @@
     <hr style="width:550px; color: #bbbbbb; background-color: #bbbbbb; height: 1px; border: 0;">
 </template>
 
+
+<template id='openpgp_zimbra_secure#EncryptedAttachments'>
+    <div id="${attLinksId}" class="attachments">
+        <table id="${attLinksId}_table" border=0 cellspacing=0 cellpadding=0 width=100%>
+            <$ for (var i = 0; i < data.attachments.length; i++) { $>
+                <tr><td>
+                    <table border=0 cellpadding=0 cellspacing=0 style="margin-right:1em; margin-bottom:1px"><tr>
+                        <td style="width:18px"><$=data.attachments[i].imageHtml$></td>
+                        <td style="white-space:nowrap"><$=data.attachments[i].links$></td>
+                    </tr></table>
+                </td></tr>
+            <$ } $>
+        </table>
+    </div>
+</template>
+
 <template id='openpgp_zimbra_secure#KeyAddView'>
     <table border=0 cellspacing=0 cellpadding=0 width=100% class='KeyAddTable'>
         <tr class='KeyAddRow'>

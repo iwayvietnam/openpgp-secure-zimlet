@@ -39,7 +39,7 @@ KeyAddView.prototype.toString = function() {
     return 'KeyAddView';
 };
 
-KeyAddView.prototype.TEMPLATE = 'openpgp_zimbra_secure#KeyAddView';
+KeyAddView.prototype.TEMPLATE = OpenPGPZimbraSecure.NAME + '#KeyAddView';
 
 KeyAddView.prototype._initialize = function() {
     var id = this.getHTMLElId();

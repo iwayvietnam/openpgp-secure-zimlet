@@ -363,6 +363,10 @@ OpenPGPUtils.saveAs = function(data, name, type) {
     saveAs(blob, name);
 };
 
+OpenPGPUtils.renderTemplate = function(templateId, data) {
+    return AjxTemplate.expand(OpenPGPZimbraSecure.NAME + '#' + templateId, data);
+};
+
 /*
  * random string
  * https://github.com/valiton/node-random-string

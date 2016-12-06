@@ -39,9 +39,9 @@ ImportPublicKeyView.prototype.toString = function() {
     return 'ImportPublicKeyView';
 };
 
-ImportPublicKeyView.prototype.TEMPLATE = 'openpgp_zimbra_secure#ImportPublicKeyView';
+ImportPublicKeyView.prototype.TEMPLATE = OpenPGPZimbraSecure.NAME + '#ImportPublicKeyView';
 
 ImportPublicKeyView.prototype._initialize = function(keyInfo) {
     var id = this.getHTMLElId();
-    document.getElementById(id + '_KeyInfo').innerHTML = AjxTemplate.expand('openpgp_zimbra_secure#KeyInfo', keyInfo);
+    document.getElementById(id + '_KeyInfo').innerHTML = OpenPGPUtils.renderTemplate('KeyInfo', keyInfo);
 };

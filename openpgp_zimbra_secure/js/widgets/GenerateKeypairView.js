@@ -43,7 +43,7 @@ GenerateKeypairView.prototype.toString = function() {
     return 'GenerateKeypairView';
 };
 
-GenerateKeypairView.prototype.TEMPLATE = 'openpgp_zimbra_secure#GenerateKeypairView';
+GenerateKeypairView.prototype.TEMPLATE = OpenPGPZimbraSecure.NAME + '#GenerateKeypairView';
 
 GenerateKeypairView.prototype._initialize = function() {
     var id = this.getHTMLElId();

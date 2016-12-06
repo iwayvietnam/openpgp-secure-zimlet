@@ -182,7 +182,7 @@ OpenPGPSecurePrefs.registerPrefs = function(handler) {
     var section = {
         title: handler.getMessage('prefSection'),
         icon: 'TrustedAddresses',
-        templateId: 'openpgp_zimbra_secure#Preferences',
+        templateId: OpenPGPZimbraSecure.NAME + '#Preferences',
         priority: 49,
         manageDirty: true,
         prefs: [
