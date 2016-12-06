@@ -431,7 +431,7 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
 /**
  * This method is called when public key is changed.
  */
-OpenPGPZimbraSecure.prototype.handlePublicKeyChange = function() {
+OpenPGPZimbraSecure.prototype.onPublicKeyChange = function() {
     var controller = AjxDispatcher.run('GetConvListController');
     var itemView = controller.getItemView();
     if (itemView instanceof ZmConvView2) {
