@@ -21,6 +21,9 @@
  * Written by Nguyen Van Nguyen <nguyennv1981@gmail.com>
  */
 
+/**
+ * Encrypt constructor.
+ */
 OpenPGPEncrypt = function(opts) {
     opts = opts || {
         privateKey: false,
@@ -44,6 +47,13 @@ OpenPGPEncrypt = function(opts) {
 OpenPGPEncrypt.prototype = new Object();
 OpenPGPEncrypt.prototype.constructor = OpenPGPEncrypt;
 
+/**
+ * Encrypting.
+ *
+ * @param {Array} contents The content parts of message for encrypting
+ * @param {Array} attachments The attachment parts message for encrypting
+ * @return {Promise<Object>} the Promise object
+ */
 OpenPGPEncrypt.prototype.encrypt = function(contents, attachments) {
     var self = this;
     var builder = new OpenPGPMimeBuilder();
@@ -88,6 +98,9 @@ OpenPGPEncrypt.prototype.encrypt = function(contents, attachments) {
     });
 };
 
+/**
+ * Invoke a callback.
+ */
 OpenPGPEncrypt.prototype.onCallback = function(callback, obj) {
     if (callback instanceof AjxCallback) {
         callback.run(obj);
@@ -96,6 +109,9 @@ OpenPGPEncrypt.prototype.onCallback = function(callback, obj) {
     }
 };
 
+/**
+ * Invoke error callback.
+ */
 OpenPGPEncrypt.prototype.onError = function(err) {
     if (this._onError instanceof AjxCallback) {
         this._onError.run(err);
@@ -104,6 +120,9 @@ OpenPGPEncrypt.prototype.onError = function(err) {
     }
 };
 
+/**
+ * Get/set sign state.
+ */
 OpenPGPEncrypt.prototype.shouldSign = function(shouldSign) {
     if (typeof shouldSign === 'undefined') {
         return this._shouldSign;
@@ -113,6 +132,9 @@ OpenPGPEncrypt.prototype.shouldSign = function(shouldSign) {
     }
 };
 
+/**
+ * Get/set encrypt; state.
+ */
 OpenPGPEncrypt.prototype.shouldEncrypt = function(shouldEncrypt) {
     if (typeof shouldEncrypt === 'undefined') {
         return this._shouldEncrypt;
