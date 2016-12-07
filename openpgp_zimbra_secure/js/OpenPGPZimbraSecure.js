@@ -491,7 +491,7 @@ OpenPGPZimbraSecure.prototype.onPublicKeyChange = function() {
  * @param {String} viewId
  */
 OpenPGPZimbraSecure.prototype.initializeToolbar = function(app, toolbar, controller, viewId) {
-    if (viewId.indexOf('COMPOSE') >= 0) {
+    if (viewId.indexOf(ZmId.VIEW_COMPOSE) >= 0) {
         var button;
         var children = toolbar.getChildren();
         for (var i = 0; i < children.length && !button; i++) {
