@@ -31,7 +31,7 @@ OpenPGPSecureKeyStore = function(handler) {
     this._removeCallbacks = [];
 
     var uid = this._handler.getUserID();
-    this._privateKeyItem = 'openpgp-secure-private-key_' + uid;
+    this._privateKeyItem = 'openpgp-secure-private-key-' + uid;
     this._passphraseItem = 'openpgp-secure-passphrase-' + uid;
     this._publicKeysItem = 'openpgp-secure-public-keys-' + uid;
 
