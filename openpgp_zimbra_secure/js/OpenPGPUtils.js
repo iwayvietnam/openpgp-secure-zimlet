@@ -180,6 +180,11 @@ OpenPGPUtils.binToString = function(buf){
     return codec.fromTypedArray(buf);
 }
 
+OpenPGPUtils.utf8Decode = function(buf){
+    var decoder = new TextDecoder('utf-8');
+    return decoder.decode(buf);
+}
+
 OpenPGPUtils.fetchPart = function(part, baseUrl) {
     var url, cType, cDisposition, iType;
     var addTimestamp = true;
@@ -276,6 +281,7 @@ OpenPGPUtils.mimeNodeToZmMimePart = function(node, withAttachment) {
         if (node.content) {
             var content = '';
             if (part.ct === ZmMimeTable.TEXT_HTML || part.ct === ZmMimeTable.TEXT_PLAIN) {
+                content = OpenPGPUtils.utf8Decode(node.content);
                 DOMPurify.addHook('uponSanitizeAttribute', function(node, data) {
                     if (data.attrName == 'src' && data.attrValue.indexOf('cid:') >= 0) {
                         node.setAttribute('pnsrc', data.attrValue);
@@ -284,14 +290,11 @@ OpenPGPUtils.mimeNodeToZmMimePart = function(node, withAttachment) {
                 var config = {
                     ADD_ATTR: ['pnsrc', 'data-mce-src']
                 };
-                var decoder = new TextDecoder('utf-8');
-                content = decoder.decode(node.content);
                 part.content = DOMPurify.sanitize(content, config);
                 DOMPurify.removeHook('uponSanitizeAttribute');
             }
             else {
-                var codec = window['emailjs-mime-codec'];
-                content = codec.fromTypedArray(node.content);
+                content = OpenPGPUtils.binToString(node.content);
             }
             part.s = content.length;
         }

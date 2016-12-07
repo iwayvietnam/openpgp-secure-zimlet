@@ -159,7 +159,15 @@ OpenPGPSecureMessageProcessor.prototype.onDecrypted = function(callback, msg, me
         var cd = (node.headers['content-disposition']) ? node.headers['content-disposition'][0] : false;
         var isAttach = cd ? OpenPGPUtils.isAttachment(cd.initial) : false;
         var ct = node.contentType;
-        var content = OpenPGPUtils.binToString(node.content);
+        var content = '';
+        if (ct.value === ZmMimeTable.TEXT_HTML ||
+            ct.value === ZmMimeTable.TEXT_PLAIN ||
+            ct.value === ZmMimeTable.TEXT_XML) {
+            content = OpenPGPUtils.utf8Decode(node.content);
+        }
+        else {
+            content = OpenPGPUtils.binToString(node.content);
+        }
         if (pgpMessage.encrypted && cd && isAttach) {
             var attachment = {
                 id: OpenPGPUtils.randomString(),
