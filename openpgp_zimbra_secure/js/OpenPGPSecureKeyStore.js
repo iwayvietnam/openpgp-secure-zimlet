@@ -232,6 +232,7 @@ OpenPGPSecureKeyStore.prototype.getPublicKeys = function() {
 OpenPGPSecureKeyStore.prototype.setPublicKeys = function(armoredKeys) {
     if (armoredKeys) {
         var self = this;
+        this.publicKeys.splice(0);
         var pubKeys = openpgp.key.readArmored(armoredKeys);
         pubKeys.keys.forEach(function(key) {
             var fingerprint = key.primaryKey.getFingerprint();
