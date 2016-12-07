@@ -470,10 +470,13 @@ OpenPGPZimbraSecure.prototype.onPublicKeyChange = function() {
         var children = paneView.getChildren();
         children.forEach(function(child) {
             if (child instanceof ZmConvListView) {
-                var convs = child.getList().getArray();
-                convs.forEach(function(conv) {
-                    conv._loaded = false;
-                });
+                var list = child.getList();
+                if (list) {
+                    var convs = list.getArray();
+                    convs.forEach(function(conv) {
+                        conv._loaded = false;
+                    });
+                }
             }
         });
     }
