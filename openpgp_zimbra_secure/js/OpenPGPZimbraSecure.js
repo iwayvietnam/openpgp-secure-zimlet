@@ -713,22 +713,27 @@ OpenPGPZimbraSecure.decryptAttachment = function(name, url) {
         if (response.success) {
             var handler = OpenPGPZimbraSecure.getInstance();
             var data = OpenPGPUtils.base64Decode(response.text);
-            if (OpenPGPUtils.hasInlinePGPContent(data, OpenPGPUtils.OPENPGP_MESSAGE_HEADER)) {
-                var opts = {
-                    message: openpgp.message.readArmored(data),
-                    privateKey: handler.getKeyStore().getPrivateKey()
-                };
+            if (data.indexOf(OpenPGPMimeBuilder.VERSION_CONTENT) > -1) {
+                OpenPGPUtils.saveTextAs(data, name);
             }
             else {
-                var opts = {
-                    message: openpgp.message.read(OpenPGPUtils.stringToBin(data)),
-                    privateKey: handler.getKeyStore().getPrivateKey(),
-                    format: 'binary'
-                };
+                if (OpenPGPUtils.hasInlinePGPContent(data, OpenPGPUtils.OPENPGP_MESSAGE_HEADER)) {
+                    var opts = {
+                        message: openpgp.message.readArmored(data),
+                        privateKey: handler.getKeyStore().getPrivateKey()
+                    };
+                }
+                else {
+                    var opts = {
+                        message: openpgp.message.read(OpenPGPUtils.stringToBin(data)),
+                        privateKey: handler.getKeyStore().getPrivateKey(),
+                        format: 'binary'
+                    };
+                }
+                openpgp.decrypt(opts).then(function(plainText) {
+                    OpenPGPUtils.saveAs(plainText.data, name, ZmMimeTable.APP_OCTET_STREAM);
+                });
             }
-            openpgp.decrypt(opts).then(function(plainText) {
-                OpenPGPUtils.saveAs(plainText.data, name, ZmMimeTable.APP_OCTET_STREAM);
-            });
         }
     });
 
