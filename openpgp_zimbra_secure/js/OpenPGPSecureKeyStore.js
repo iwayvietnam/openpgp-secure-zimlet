@@ -29,7 +29,11 @@ OpenPGPSecureKeyStore = function(handler) {
     this._fingerprints = [];
     this._addCallbacks = [];
     this._removeCallbacks = [];
-    this._userId = this._handler.getUserID();
+
+    var uid = this._handler.getUserID();
+    this._privateKeyItem = 'openpgp-secure-private-key_' + uid;
+    this._passphraseItem = 'openpgp-secure-passphrase-' + uid;
+    this._publicKeysItem = 'openpgp-secure-public-keys-' + uid;
 
     this.passphrase = '';
     this.privateKey = false;
@@ -54,7 +58,7 @@ OpenPGPSecureKeyStore.prototype.init = function() {
     })
     .then(function() {
         return OpenPGPUtils.localStorageRead(
-            'openpgp_secure_passphrase_' + self._userId,
+            self._passphraseItem,
             self._handler.getSecurePassword()
         )
         .then(function(passphrase) {
@@ -64,7 +68,7 @@ OpenPGPSecureKeyStore.prototype.init = function() {
     .then(function(passphrase) {
         if (passphrase) {
             return OpenPGPUtils.localStorageRead(
-                'openpgp_secure_private_key_' + self._userId,
+                self._privateKeyItem,
                 self._handler.getSecurePassword()
             )
             .then(function(privateKey) {
@@ -189,12 +193,12 @@ OpenPGPSecureKeyStore.prototype.setPrivateKey = function(privateKey, passphrase)
             self.addPublicKey(key.toPublic());
 
             OpenPGPUtils.localStorageSave(
-                'openpgp_secure_private_key_' + self._userId,
+                self._privateKeyItem,
                 self._handler.getSecurePassword(),
                 privateKey
             );
             OpenPGPUtils.localStorageSave(
-                'openpgp_secure_passphrase_' + self._userId,
+                self._passphraseItem,
                 self._handler.getSecurePassword(),
                 passphrase
             );
@@ -223,20 +227,20 @@ OpenPGPSecureKeyStore.prototype.getPublicKeys = function() {
 /**
  * Set all public keys to key store.
  *
- * @param {Array} publicKeys An array of armored public keys
+ * @param {String} armoredKeys An armored public keys
  */
-OpenPGPSecureKeyStore.prototype.setPublicKeys = function(publicKeys) {
-    var self = this;
-    publicKeys.forEach(function(armoredKey) {
-        var pubKey = openpgp.key.readArmored(armoredKey);
-        pubKey.keys.forEach(function(key) {
+OpenPGPSecureKeyStore.prototype.setPublicKeys = function(armoredKeys) {
+    if (armoredKeys) {
+        var self = this;
+        var pubKeys = openpgp.key.readArmored(armoredKeys);
+        pubKeys.keys.forEach(function(key) {
             var fingerprint = key.primaryKey.getFingerprint();
-            if (!self._fingerprints[fingerprint]) {
+            if (key.isPublic() && !self._fingerprints[fingerprint]) {
                 self.publicKeys.push(key);
                 self._fingerprints[fingerprint] = fingerprint;
             }
         });
-    });
+    }
     return this;
 };
 
@@ -341,23 +345,13 @@ OpenPGPSecureKeyStore.keyInfo = function(key) {
  * Read all public keys from storage.
  */
 OpenPGPSecureKeyStore.prototype._readPublicKeys = function() {
-    var publicKeys = [];
-    var storeKey = 'openpgp_secure_public_keys_' + this._userId;
-    if (localStorage[storeKey]) {
-        publicKeys = JSON.parse(localStorage[storeKey]);
-    }
-    return publicKeys;
+    return localStorage[this._publicKeysItem];
 };
 
 /**
  * Store all public keys to storage.
  */
 OpenPGPSecureKeyStore.prototype._storePublicKeys = function() {
-    var publicKeys = [];
-    this.publicKeys.forEach(function(key) {
-        publicKeys.push(key.armor());
-    });
-    var storeKey = 'openpgp_secure_public_keys_' + this._userId;
-    localStorage[storeKey] = JSON.stringify(publicKeys);
+    localStorage[this._publicKeysItem] = this.exportPublicKeys();
     appCtxt.notifyZimlet(OpenPGPZimbraSecure.NAME, 'onPublicKeyChange');
 };
