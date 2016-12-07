@@ -348,7 +348,7 @@ OpenPGPZimbraSecure.prototype.onMsgView = function(msg, oldMsg, msgView) {
  */
 OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
     var self = this;
-    if (!msg || !view._hdrTableId || msg.isDraft)
+    if (!msg || msg.isDraft)
         return;
     var pgpMessage = this._pgpMessageCache[msg.id];
     if (!pgpMessage) {
@@ -361,9 +361,9 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
             return;
         }
 
-        if (pgpMessage.attachments.length > 0) {
+        var msgBody = Dwt.byId(view._msgBodyDivId);
+        if (pgpMessage.attachments.length > 0 && msgBody) {
             var numFormatter = AjxNumberFormat.getInstance();
-            var msgBody = Dwt.byId(view._msgBodyDivId);
             var data = {
                 attLinksId: view._attLinksId,
                 attachments: []
