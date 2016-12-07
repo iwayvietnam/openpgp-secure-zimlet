@@ -359,5 +359,5 @@ OpenPGPSecureKeyStore.prototype._storePublicKeys = function() {
     });
     var storeKey = 'openpgp_secure_public_keys_' + this._userId;
     localStorage[storeKey] = JSON.stringify(publicKeys);
-    appCtxt.notifyZimlets('onPublicKeyChange');
+    appCtxt.notifyZimlet(OpenPGPZimbraSecure.NAME, 'onPublicKeyChange');
 };
