@@ -22,7 +22,7 @@
  */
 
 /**
- * Zimlet constructor.
+ * Zimlet handler constructor.
  */
 function openpgp_zimbra_secure_HandlerObject() {
     this._pgpMessageCache = appCtxt.isChildWindow ? window.opener.openpgp_zimbra_secure_HandlerObject.getInstance()._pgpMessageCache : {};

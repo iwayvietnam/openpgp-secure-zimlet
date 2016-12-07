@@ -21,6 +21,9 @@
  * Written by Nguyen Van Nguyen <nguyennv1981@gmail.com>
  */
 
+/**
+ * Sender constructor.
+ */
 OpenPGPSecureSender = function(handler, callback, msg, params) {
     this._handler = handler;
     this._callback = callback;
@@ -41,6 +44,9 @@ OpenPGPSecureSender = function(handler, callback, msg, params) {
 OpenPGPSecureSender.prototype = new Object();
 OpenPGPSecureSender.prototype.constructor = OpenPGPSecureSender;
 
+/**
+ * Send message.
+ */
 OpenPGPSecureSender.prototype.send = function() {
     if (this._shouldSign || this._shouldEncrypt) {
         this._encryptMessage();
@@ -50,6 +56,11 @@ OpenPGPSecureSender.prototype.send = function() {
     }
 };
 
+/**
+ * Encrypt message before sending.
+ *
+ * @private
+ */
 OpenPGPSecureSender.prototype._encryptMessage = function() {
     var self = this;
     var handler = this._handler;
@@ -147,6 +158,11 @@ OpenPGPSecureSender.prototype._encryptMessage = function() {
     encryptor.encrypt(contents, attachments);
 };
 
+/**
+ * The callback is invoked after encrypting.
+ *
+ * @private
+ */
 OpenPGPSecureSender.prototype._onEncrypted = function(message) {
     var self = this;
     var msg = this._msg;
@@ -198,6 +214,11 @@ OpenPGPSecureSender.prototype._onEncryptError = function(error){
     OpenPGPZimbraSecure.popupErrorDialog(error);
 };
 
+/**
+ * Get headers of sending message.
+ *
+ * @private
+ */
 OpenPGPSecureSender.prototype._msgHeaders = function() {
     var msg = this._input.m;
     var headers = {};
@@ -256,6 +277,11 @@ OpenPGPSecureSender.prototype._msgHeaders = function() {
     return headers;
 };
 
+/**
+ * Get receivers of sending message.
+ *
+ * @param {ZmMailMsg} msg
+ */
 OpenPGPSecureSender.getReceivers = function(msg) {
     var addr = OpenPGPUtils.getDefaultSenderAddress();
     var receivers = [addr.getAddress()];
