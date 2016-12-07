@@ -50,6 +50,11 @@ OpenPGPSecurePrefs.SECURITY_SETTINGS = [
 
 OpenPGPSecurePrefs._loadCallbacks = [];
 
+/**
+ * Register settings.
+ *
+ * @param {Object} handler Zimlet handler object
+ */
 OpenPGPSecurePrefs.registerSettings = function(handler) {
     var keyStore = handler.getKeyStore();
     var privateKey = keyStore.getPrivateKey();
@@ -119,6 +124,11 @@ OpenPGPSecurePrefs.registerSettings = function(handler) {
     });
 };
 
+/**
+ * Register preferences.
+ *
+ * @param {Object} handler Zimlet handler object
+ */
 OpenPGPSecurePrefs.registerPrefs = function(handler) {
     ZmPref.registerPref(OpenPGPSecurePrefs.SECURITY, {
         displayContainer: ZmPref.TYPE_RADIO_GROUP,
@@ -215,7 +225,9 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
         return 'OpenPGPSecurePrefs';
     };
 
-    // Saving
+    /**
+     * Add saving command.
+     */
     OpenPGPSecurePrefs.prototype.addCommand = function(batchCommand) {
         batchCommand.add(new AjxCallback(this, this._savePrefs));
         batchCommand.size = function() {
@@ -223,6 +235,11 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
         };
     };
 
+    /**
+     * Saving preference values.
+     *
+     * @private
+     */
     OpenPGPSecurePrefs.prototype._savePrefs = function(batchCommand) {
         var self = this;
         var zmSettings = appCtxt.getSettings();
@@ -259,6 +276,11 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
         this._handler.saveUserProperties();
     };
 
+    /**
+     * Setup static settings.
+     *
+     * @private
+     */
     OpenPGPSecurePrefs.prototype._setupStatic = function(id, setup, value) {
         if (id == OpenPGPSecurePrefs.KEYPAIR_GEN) {
             var button = new DwtButton({parent: this, id: id});
@@ -311,6 +333,11 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
         }
     };
 
+    /**
+     * Setup custom settings.
+     *
+     * @private
+     */
     OpenPGPSecurePrefs.prototype._setupCustom = function(id, setup, value) {
         var self = this;
         if (id == OpenPGPSecurePrefs.PUBLIC_KEYS) {
@@ -333,6 +360,11 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
         }
     };
 
+    /**
+     * Genarate key pair
+     *
+     * @private
+     */
     OpenPGPSecurePrefs.prototype._keyGen = function() {
         var self = this;
         if (!this._handler._genkeyDialog) {
@@ -352,6 +384,11 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
         this._handler._genkeyDialog.popup();
     };
 
+    /**
+     * Submit public key to key server
+     *
+     * @private
+     */
     OpenPGPSecurePrefs.prototype._keySubmit = function() {
         var self = this;
         var publicKey = this._keyStore.getPublicKey();
@@ -364,6 +401,11 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
         }
     };
 
+    /**
+     * Send public key to someone
+     *
+     * @private
+     */
     OpenPGPSecurePrefs.prototype._keySend = function() {
         var self = this;
         var controller = AjxDispatcher.run('GetComposeController');
@@ -406,16 +448,31 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
         }
     };
 
+    /**
+     * Export private key for downloading
+     *
+     * @private
+     */
     OpenPGPSecurePrefs.prototype._keyExport = function() {
         var privateKey = this.getFormValue(OpenPGPSecurePrefs.PRIVATE_KEY);
         OpenPGPUtils.saveTextAs(privateKey, 'key.asc');
     };
 
+    /**
+     * Export all public keys for downloading
+     *
+     * @private
+     */
     OpenPGPSecurePrefs.prototype._keyExportAll = function() {
         var publicKeys = this._keyStore.exportPublicKeys();
         OpenPGPUtils.saveTextAs(publicKeys, 'keys.asc');
     };
 
+    /**
+     * Toogle show/hide state of passphrase input
+     *
+     * @private
+     */
     OpenPGPSecurePrefs.prototype._togglePassphrase = function() {
         var input = document.getElementById(this._id + '_' + OpenPGPSecurePrefs.PASSPHRASE);
         if (input.getAttribute('type') == 'password') {
@@ -425,6 +482,11 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
         }
     };
 
+    /**
+     * Add public keys to key store
+     *
+     * @private
+     */
     OpenPGPSecurePrefs.prototype._keyAdd = function() {
         var self = this;
         if (this._handler._keyAddDialog) {
@@ -445,6 +507,11 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
         dialog.popup();
     };
 
+    /**
+     * Lookup public keys on key server
+     *
+     * @private
+     */
     OpenPGPSecurePrefs.prototype._keyLookup = function() {
         var self = this;
         if (this._handler._keyLookupDialog) {
@@ -474,6 +541,9 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
     delete OpenPGPSecurePrefs._loadCallbacks;
 }));
 
+/**
+ * Initialize
+ */
 OpenPGPSecurePrefs.init = function(handler) {
     OpenPGPSecurePrefs.registerSettings(handler);
 
