@@ -21,6 +21,9 @@
  * Written by Nguyen Van Nguyen <nguyennv1981@gmail.com>
  */
 
+/**
+ * Key store constructor.
+ */
 OpenPGPSecureKeyStore = function(handler) {
     this._handler = handler;
     this._fingerprints = [];
@@ -39,6 +42,9 @@ OpenPGPSecureKeyStore.REMOVE_CALLBACK = 'remove';
 OpenPGPSecureKeyStore.prototype = new Object();
 OpenPGPSecureKeyStore.prototype.constructor = OpenPGPSecureKeyStore;
 
+/**
+ * Initialize key store.
+ */
 OpenPGPSecureKeyStore.prototype.init = function() {
     var self = this;
 
@@ -88,6 +94,11 @@ OpenPGPSecureKeyStore.prototype.init = function() {
     });
 };
 
+/**
+ * Add public key to key store.
+ *
+ * @param {Key} key OpenPGP public key
+ */
 OpenPGPSecureKeyStore.prototype.addPublicKey = function(key) {
     if (key.isPublic()) {
         var self = this;
@@ -109,6 +120,11 @@ OpenPGPSecureKeyStore.prototype.addPublicKey = function(key) {
     }
 };
 
+/**
+ * Remove public key from key store.
+ *
+ * @param {String} fingerprint OpenPGP key fingerprint
+ */
 OpenPGPSecureKeyStore.prototype.removePublicKey = function(fingerprint) {
     var self = this;
     var removed = false;
@@ -128,6 +144,12 @@ OpenPGPSecureKeyStore.prototype.removePublicKey = function(fingerprint) {
     }
 };
 
+/**
+ * Add callback to key store.
+ *
+ * @param {AjxCallback} callback
+ * @param {String} type Callback type [add or remove]
+ */
 OpenPGPSecureKeyStore.prototype.addCallback = function(callback, type) {
     if (type === OpenPGPSecureKeyStore.REMOVE_CALLBACK) {
         this._removeCallbacks.push(callback);
@@ -137,14 +159,26 @@ OpenPGPSecureKeyStore.prototype.addCallback = function(callback, type) {
     }
 };
 
+/**
+ * Get passphrase of private key in key store.
+ */
 OpenPGPSecureKeyStore.prototype.getPassphrase = function() {
     return this.passphrase;
 };
 
+/**
+ * Get private key in key store.
+ */
 OpenPGPSecureKeyStore.prototype.getPrivateKey = function() {
     return this.privateKey;
 };
 
+/**
+ * Set private key to key store.
+ *
+ * @param {String} privateKey Armored private key
+ * @param {String} passphrase Passphrase for key decrypting
+ */
 OpenPGPSecureKeyStore.prototype.setPrivateKey = function(privateKey, passphrase) {
     var self = this;
     var privKey = openpgp.key.readArmored(privateKey);
@@ -172,14 +206,25 @@ OpenPGPSecureKeyStore.prototype.setPrivateKey = function(privateKey, passphrase)
     return this;
 };
 
+/**
+ * Get public key from private key in key store.
+ */
 OpenPGPSecureKeyStore.prototype.getPublicKey = function() {
     return this.privateKey ? this.privateKey.toPublic() : false;
 };
 
+/**
+ * Get all public keys in key store.
+ */
 OpenPGPSecureKeyStore.prototype.getPublicKeys = function() {
     return this.publicKeys;
 };
 
+/**
+ * Set all public keys to key store.
+ *
+ * @param {Array} publicKeys An array of armored public keys
+ */
 OpenPGPSecureKeyStore.prototype.setPublicKeys = function(publicKeys) {
     var self = this;
     publicKeys.forEach(function(armoredKey) {
@@ -195,6 +240,11 @@ OpenPGPSecureKeyStore.prototype.setPublicKeys = function(publicKeys) {
     return this;
 };
 
+/**
+ * Get public keys matching with email addresss.
+ *
+ * @param {Array} addresses Email addresses to search for
+ */
 OpenPGPSecureKeyStore.prototype.havingPublicKeys = function(addresses) {
     var dupes = [];
     var publicKeys = [];
@@ -213,6 +263,11 @@ OpenPGPSecureKeyStore.prototype.havingPublicKeys = function(addresses) {
     return publicKeys;
 };
 
+/**
+ * Get email addesses missing public key.
+ *
+ * @param {Array} addresses Email addresses to search for
+ */
 OpenPGPSecureKeyStore.prototype.publicKeyMissing = function(addresses) {
     var uidAddresses = [];
     this.publicKeys.forEach(function(key) {
@@ -234,10 +289,18 @@ OpenPGPSecureKeyStore.prototype.publicKeyMissing = function(addresses) {
     return missing;
 };
 
+/**
+ * Check public key is existed in key store.
+ *
+ * @param {String} fingerprint Fingerprint string of the key
+ */
 OpenPGPSecureKeyStore.prototype.publicKeyExisted = function(fingerprint) {
     return this._fingerprints[fingerprint] ? true : false;
 };
 
+/**
+ * Export all public keys in key store.
+ */
 OpenPGPSecureKeyStore.prototype.exportPublicKeys = function() {
     var packetlist = new openpgp.packet.List();
     this.publicKeys.forEach(function(key) {
@@ -246,6 +309,9 @@ OpenPGPSecureKeyStore.prototype.exportPublicKeys = function() {
     return openpgp.armor.encode(openpgp.enums.armor.public_key, packetlist.write());
 };
 
+/**
+ * Genarate public key information.
+ */
 OpenPGPSecureKeyStore.keyInfo = function(key) {
     var uids = [];
     var userIds = key.getUserIds();
@@ -271,6 +337,9 @@ OpenPGPSecureKeyStore.keyInfo = function(key) {
     };
 };
 
+/**
+ * Read all public keys from storage.
+ */
 OpenPGPSecureKeyStore.prototype._readPublicKeys = function() {
     var publicKeys = [];
     var storeKey = 'openpgp_secure_public_keys_' + this._userId;
@@ -280,6 +349,9 @@ OpenPGPSecureKeyStore.prototype._readPublicKeys = function() {
     return publicKeys;
 };
 
+/**
+ * Store all public keys to storage.
+ */
 OpenPGPSecureKeyStore.prototype._storePublicKeys = function() {
     var publicKeys = [];
     this.publicKeys.forEach(function(key) {
