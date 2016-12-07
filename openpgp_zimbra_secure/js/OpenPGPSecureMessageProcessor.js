@@ -21,6 +21,9 @@
  * Written by Nguyen Van Nguyen <nguyennv1981@gmail.com>
  */
 
+/**
+ * Message processor constructor.
+ */
 OpenPGPSecureMessageProcessor = function(handler, callback, csfeResult) {
     this._handler = handler;
     this._callback = callback;
@@ -30,6 +33,9 @@ OpenPGPSecureMessageProcessor = function(handler, callback, csfeResult) {
 OpenPGPSecureMessageProcessor.prototype = new Object();
 OpenPGPSecureMessageProcessor.prototype.constructor = OpenPGPSecureMessageProcessor;
 
+/**
+ * Processor the message.
+ */
 OpenPGPSecureMessageProcessor.prototype.process = function() {
     var pgpMsgs = [];
     var inlinePGPMsgs = [];
@@ -230,6 +236,12 @@ OpenPGPSecureMessageProcessor.prototype._loadInlinePGPMessages = function(inline
     });
 };
 
+/**
+ * Decrypt the given text of inline pgp message.
+ * @param {AjxCallback} callback
+ * @param {ZmMailMsg} msg
+ * @param {Object} response
+ */
 OpenPGPSecureMessageProcessor.prototype._decryptInlineMessage = function(callback, msg, response){
     var self = this;
     if (response.success) {
@@ -303,6 +315,9 @@ OpenPGPSecureMessageProcessor.prototype._onDecryptError = function(error){
     OpenPGPZimbraSecure.popupErrorDialog(error);
 };
 
+/**
+ * Add security header to message.
+ */
 OpenPGPSecureMessageProcessor.prototype._addSecurityHeader = function(msg, signatures) {
     var self = this;
     if (signatures.length > 0 && !msg._attrs) {
@@ -325,6 +340,9 @@ OpenPGPSecureMessageProcessor.prototype._addSecurityHeader = function(msg, signa
     });
 };
 
+/**
+ * Check message has pgp part.
+ */
 OpenPGPSecureMessageProcessor.hasPGPPart = function(part) {
     var ct = part.ct;
     if (OpenPGPUtils.isPGPContentType(ct)) {
@@ -345,6 +363,9 @@ OpenPGPSecureMessageProcessor.hasPGPPart = function(part) {
     return false;
 };
 
+/**
+ * Check message has inline pgp part.
+ */
 OpenPGPSecureMessageProcessor.hasInlinePGP = function(part) {
     if (part.content && OpenPGPUtils.hasInlinePGPContent(part.content)) {
         return true;
