@@ -29,16 +29,14 @@ function openpgp_zimbra_secure_HandlerObject() {
     this._sendingAttachments = [];
     this._pgpAttachments = {};
     this._keyStore = new OpenPGPSecureKeyStore(this);
-    this._securePassword = '';
-    var pwdKey = 'openpgp_secure_password_' + this.getUserID();
-    if (localStorage[pwdKey]) {
-        this._securePassword = localStorage[pwdKey];
-    }
-    if (this._securePassword.length == 0) {
-        localStorage[pwdKey] = this._securePassword = OpenPGPUtils.randomString({
+
+    var itemName = 'openpgp_secure_password_' + this.getUserID();
+    if (!localStorage[itemName]) {
+        localStorage[itemName] = OpenPGPUtils.randomString({
             length: 24
         });
     }
+    this._securePassword = localStorage[itemName];
 };
 
 openpgp_zimbra_secure_HandlerObject.prototype = new ZmZimletBase();
