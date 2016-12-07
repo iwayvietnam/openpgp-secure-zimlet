@@ -5,8 +5,8 @@ Summary:        OpenPGP Secure Zimlet
 
 Group:          Applications/Internet
 License:        AGPLv3
-URL:            https://github.com/nguyennv/openpgp-zimlet
-Source0:        https://github.com/nguyennv/openpgp-zimlet/archive/%{version}.tar.gz
+URL:            https://github.com/nguyennv/openpgp-secure-zimlet
+Source0:        https://github.com/nguyennv/openpgp-secure-zimlet/archive/%{version}.tar.gz
 
 Requires:       zimbra-core >= 8.6
 BuildRequires:  zip
@@ -31,11 +31,11 @@ cp -R openpgp_zimbra_secure/openpgp_zimbra_secure.zip $RPM_BUILD_ROOT/opt/zimbra
 
 %post
 if [ $1 -eq 2 ] ; then
-    su - zimbra -c "cp /opt/zimbra/zimlets-deployed/openpgp_zimbra_secure/config_template.xml /opt/zimbra/zimlets-deployed/openpgp-zimlet-config_template.xml"
+    su - zimbra -c "cp /opt/zimbra/zimlets-deployed/openpgp_zimbra_secure/config_template.xml /opt/zimbra/zimlets-deployed/openpgp-secure-zimlet-config_template.xml"
 fi
 su - zimbra -c "zmzimletctl deploy /opt/zimbra/zimlets-extra/openpgp_zimbra_secure.zip"
 if [ $1 -eq 2 ] ; then
-    su - zimbra -c "mv -f /opt/zimbra/zimlets-deployed/openpgp-zimlet-config_template.xml /opt/zimbra/zimlets-deployed/openpgp_zimbra_secure/config_template.xml"
+    su - zimbra -c "mv -f /opt/zimbra/zimlets-deployed/openpgp-secure-zimlet-config_template.xml /opt/zimbra/zimlets-deployed/openpgp_zimbra_secure/config_template.xml"
     su - zimbra -c "zmzimletctl configure /opt/zimbra/zimlets-deployed/openpgp_zimbra_secure/config_template.xml"
 fi
 

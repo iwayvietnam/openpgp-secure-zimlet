@@ -1,7 +1,7 @@
 # OpenPGP Secure Zimlet
  OpenPGP Secure Zimlet - Sign, verify, encrypt, and decrypt email with OpenPGP/MIME for Zimbra
 
-Bugs and feedback: https://github.com/nguyennv/openpgp-zimlet/issues
+Bugs and feedback: https://github.com/nguyennv/openpgp-secure-zimlet/issues
 
 ## Features
 - Automatically sign/encrypt mail when sending, verify/decrypt received mail
@@ -13,11 +13,11 @@ Bugs and feedback: https://github.com/nguyennv/openpgp-zimlet/issues
 ##Install OpenPGP Secure Zimlet
 ### Install from git
     [root@zimbra ~]# cd /tmp/
-    [root@zimbra ~]# git clone https://github.com/nguyennv/openpgp-zimlet
-    [root@zimbra ~]# cd /tmp/openpgp-zimlet
+    [root@zimbra ~]# git clone https://github.com/nguyennv/openpgp-secure-zimlet
+    [root@zimbra ~]# cd /tmp/openpgp-secure-zimlet
     [root@zimbra ~]# ./build.sh
     [root@zimbra ~]# su zimbra
-    [root@zimbra ~]# zmzimletctl deploy /tmp/openpgp-zimlet/openpgp_zimbra_secure.zip
+    [root@zimbra ~]# zmzimletctl deploy /tmp/openpgp-secure-zimlet/openpgp_zimbra_secure.zip
     [root@zimbra ~]# zmmailboxdctl restart
 
 ### License
