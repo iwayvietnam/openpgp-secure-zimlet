@@ -414,12 +414,12 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
             var textContents = [];
             var keyInfo = OpenPGPSecureKeyStore.keyInfo(publicKey);
             keyInfo.uids.forEach(function(uid, index) {
-                textContents.push('User ID[' + index + ']: ' + uid);
+                textContents.push(this._handler.getMessage('keyInfoUid') + '[' + index + ']: ' + uid);
             });
-            textContents.push('Fingerprint: ' + keyInfo.fingerprint);
-            textContents.push('Key ID: ' + keyInfo.keyid);
-            textContents.push('Created: ' + keyInfo.created);
-            textContents.push('Key Length: ' + keyInfo.keyLength);
+            textContents.push(this._handler.getMessage('keyInfoFingerprint') + ': ' + keyInfo.fingerprint);
+            textContents.push(this._handler.getMessage('keyInfoKeyId') + ': ' + keyInfo.keyid);
+            textContents.push(this._handler.getMessage('keyInfoCreated') + ': ' + keyInfo.created);
+            textContents.push(this._handler.getMessage('keyInfoKeylength') + ': ' + keyInfo.keyLength);
 
             var addr = OpenPGPUtils.getDefaultSenderAddress();
             var params = {
