@@ -30,7 +30,7 @@ function openpgp_zimbra_secure_HandlerObject() {
     this._pgpAttachments = {};
     this._keyStore = new OpenPGPSecureKeyStore(this);
 
-    var itemName = 'openpgp_secure_password_' + this.getUserID();
+    var itemName = 'openpgp-secure-password-' + this.getUserID();
     if (!localStorage[itemName]) {
         localStorage[itemName] = OpenPGPUtils.randomString({
             length: 24
