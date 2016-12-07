@@ -21,6 +21,9 @@
  * Written by Nguyen Van Nguyen <nguyennv1981@gmail.com>
  */
 
+/**
+ * Decrypt constructor.
+ */
 OpenPGPDecrypt = function(opts) {
     opts = opts || {
         privateKey: false,
@@ -40,6 +43,12 @@ OpenPGPDecrypt = function(opts) {
 OpenPGPDecrypt.prototype = new Object();
 OpenPGPDecrypt.prototype.constructor = OpenPGPDecrypt;
 
+/**
+ * Decrypt message.
+ *
+ * @param {String} message The email message for decrypting
+ * @return {Promise<Object>} the Promise object
+ */
 OpenPGPDecrypt.prototype.decrypt = function(message) {
     var self = this;
     var sequence = Promise.resolve(message);
@@ -138,6 +147,9 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
     });
 };
 
+/**
+ * Invoke onDecrypted callback.
+ */
 OpenPGPDecrypt.prototype.onDecrypted = function(message) {
     if (this._onDecrypted instanceof AjxCallback) {
         this._onDecrypted.run(message);
@@ -146,6 +158,9 @@ OpenPGPDecrypt.prototype.onDecrypted = function(message) {
     }
 };
 
+/**
+ * Invoke onError callback.
+ */
 OpenPGPDecrypt.prototype.onError = function(err) {
     if (this._onError instanceof AjxCallback) {
         this._onError.run(err);
@@ -154,6 +169,15 @@ OpenPGPDecrypt.prototype.onError = function(err) {
     }
 };
 
+/**
+ * Decrypt inline content.
+ *
+ * @param {String} content The content for decrypting
+ * @param {Array} publicKeys The public key for verify signature
+ * @param {Key} privateKey The private key for decrypting
+ * @param {AjxCallback/Function} onDecrypted The callback is invoke after decrypting
+ * @return {Promise<Object>} the Promise object
+ */
 OpenPGPDecrypt.decryptContent = function(content, publicKeys, privateKey, onDecrypted) {
     var sequence = Promise.resolve();
 
