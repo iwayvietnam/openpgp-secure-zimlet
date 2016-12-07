@@ -414,7 +414,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
             var textContents = [];
             var keyInfo = OpenPGPSecureKeyStore.keyInfo(publicKey);
             keyInfo.uids.forEach(function(uid, index) {
-                textContents.push(this._handler.getMessage('keyInfoUid') + '[' + index + ']: ' + uid);
+                textContents.push(self._handler.getMessage('keyInfoUid') + '[' + index + ']: ' + uid);
             });
             textContents.push(this._handler.getMessage('keyInfoFingerprint') + ': ' + keyInfo.fingerprint);
             textContents.push(this._handler.getMessage('keyInfoKeyId') + ': ' + keyInfo.keyid);
