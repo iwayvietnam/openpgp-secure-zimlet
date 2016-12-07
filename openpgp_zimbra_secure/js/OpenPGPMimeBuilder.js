@@ -21,6 +21,9 @@
  * Written by Nguyen Van Nguyen <nguyennv1981@gmail.com>
  */
 
+/**
+ * Mime builder  constructor.
+ */
 OpenPGPMimeBuilder = function() {};
 
 OpenPGPMimeBuilder.SIGNED_PREAMBLE = 'This is an OpenPGP/MIME signed message (RFC 4880 and 3156)';
@@ -34,6 +37,13 @@ OpenPGPMimeBuilder.VERSION_DESC = 'PGP/MIME Versions Identification';
 OpenPGPMimeBuilder.prototype = new Object();
 OpenPGPMimeBuilder.prototype.constructor = OpenPGPMimeBuilder;
 
+/**
+ * Build plain text mime node.
+ *
+ * @param {Array} contents The content parts of message for encrypting
+ * @param {Array} attachments The attachment parts message for encrypting
+ * @return {MimeNode} The plain text mime node
+ */
 OpenPGPMimeBuilder.prototype.buildPlainText = function(contents, attachments) {
     var MimeNode = window['emailjs-mime-builder'];
     var rootNode, contentNode;
@@ -79,6 +89,14 @@ OpenPGPMimeBuilder.prototype.buildPlainText = function(contents, attachments) {
     return rootNode;
 };
 
+/**
+ * Build signed mime node.
+ *
+ * @param {MimeNode} mimeNode The plain text mime node
+ * @param {String} signature The signature of plain text mime node
+ * @param {String} hashAlg The hash algorithm of signature
+ * @return {MimeNode} The signed mime node
+ */
 OpenPGPMimeBuilder.prototype.buildSigned = function(mimeNode, signature, hashAlg) {
     var MimeNode = window['emailjs-mime-builder'];
     var ctParts = [
@@ -96,6 +114,12 @@ OpenPGPMimeBuilder.prototype.buildSigned = function(mimeNode, signature, hashAlg
     return signedNode;
 };
 
+/**
+ * Build encrypted mime node.
+ *
+ * @param {String} cipherText The cipher text
+ * @return {MimeNode} The signed mime node
+ */
 OpenPGPMimeBuilder.prototype.buildEncrypted = function(cipherText) {
     var MimeNode = window['emailjs-mime-builder'];
     var ctParts = [
