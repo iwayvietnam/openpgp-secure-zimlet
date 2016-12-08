@@ -181,8 +181,8 @@ OpenPGPUtils.binToString = function(buf){
 }
 
 OpenPGPUtils.utf8Decode = function(buf){
-    var decoder = new TextDecoder('utf-8');
-    return decoder.decode(buf);
+    var codec = window['emailjs-mime-codec'];
+    return codec.charset.decode(buf, 'utf-8');
 }
 
 OpenPGPUtils.fetchPart = function(part, baseUrl) {
