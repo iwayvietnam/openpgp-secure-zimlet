@@ -82,7 +82,7 @@ OpenPGPEncrypt.prototype.encrypt = function(contents, attachments) {
                 privateKeys: self._privateKey
             };
             return openpgp.sign(opts).then(function(signedText) {
-                var hashAlg = 'pgp-' + openpgp.util.get_hashAlgorithmString(self._privateKey.getPreferredHashAlgorithm());
+                var hashAlg = 'pgp-' + openpgp.util.get_hashAlgorithmString(openpgp.config.prefer_hash_algorithm);
                 var signatureHeader = '-----BEGIN PGP SIGNATURE-----';
                 var signature = signatureHeader + signedText.data.split(signatureHeader).pop();
                 return builder.buildSigned(mimeNode, signature, hashAlg.toLowerCase());
