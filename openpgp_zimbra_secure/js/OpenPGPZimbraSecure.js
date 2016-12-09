@@ -27,9 +27,9 @@
 function openpgp_zimbra_secure_HandlerObject() {
     this._pgpMessageCache = appCtxt.isChildWindow ? window.opener.openpgp_zimbra_secure_HandlerObject.getInstance()._pgpMessageCache : {};
     this._pgpAttachments = appCtxt.isChildWindow ? window.opener.openpgp_zimbra_secure_HandlerObject.getInstance()._pgpAttachments : {};
-    this._keyStore = appCtxt.isChildWindow ? window.opener.openpgp_zimbra_secure_HandlerObject.getInstance().getKeyStore() : new OpenPGPSecureKeyStore(this);
-
     this._overridedClasses = {};
+
+    this._keyStore = new OpenPGPSecureKeyStore(this);
 
     var itemName = 'openpgp-secure-password-' + this.getUserID();
     if (!localStorage[itemName]) {
@@ -718,13 +718,13 @@ OpenPGPZimbraSecure.prototype._initOpenPGP = function() {
     var sequence = Promise.resolve();
     sequence.then(function() {
         var path = self.getResource('js/openpgpjs/openpgp.worker.min.js');
-        return openpgp.initWorker({
+        openpgp.initWorker({
             path: path
         });
+        return self._keyStore.init();
     })
     .then(function() {
         if (!appCtxt.isChildWindow) {
-            self._keyStore.init();
             OpenPGPSecurePrefs.init(self);
         }
     });
@@ -800,7 +800,7 @@ OpenPGPZimbraSecure.popupErrorDialog = function(errorCode){
 
     var dialog = appCtxt.getHelpMsgDialog();
     dialog.setMessage(msg, DwtMessageDialog.CRITICAL_STYLE, title);
-    dialog.setHelpURL(appCtxt.get(ZmSetting.SMIME_HELP_URI));
+    dialog.setHelpURL(appCtxt.get(ZmSetting.HELP_URI));
     dialog.popup();
 };
 
