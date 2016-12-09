@@ -803,7 +803,7 @@ OpenPGPZimbraSecure.popupErrorDialog = function(errorCode){
 
     var dialog = appCtxt.getHelpMsgDialog();
     dialog.setMessage(msg, DwtMessageDialog.CRITICAL_STYLE, title);
-    dialog.setHelpURL(appCtxt.get(ZmSetting.SMIME_HELP_URI));
+    dialog.setHelpURL(appCtxt.get(ZmSetting.HELP_URI));
     dialog.popup();
 };
 
