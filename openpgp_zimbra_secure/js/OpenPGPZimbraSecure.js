@@ -718,13 +718,16 @@ OpenPGPZimbraSecure.prototype._initOpenPGP = function() {
     var sequence = Promise.resolve();
     sequence.then(function() {
         var path = self.getResource('js/openpgpjs/openpgp.worker.min.js');
-        return openpgp.initWorker({
+        openpgp.initWorker({
             path: path
         });
+        if (!appCtxt.isChildWindow) {
+            return self._keyStore.init();
+        }
+        return true;
     })
     .then(function() {
         if (!appCtxt.isChildWindow) {
-            self._keyStore.init();
             OpenPGPSecurePrefs.init(self);
         }
     });
