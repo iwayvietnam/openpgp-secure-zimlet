@@ -27,7 +27,6 @@
 function openpgp_zimbra_secure_HandlerObject() {
     this._pgpMessageCache = appCtxt.isChildWindow ? window.opener.openpgp_zimbra_secure_HandlerObject.getInstance()._pgpMessageCache : {};
     this._pgpAttachments = appCtxt.isChildWindow ? window.opener.openpgp_zimbra_secure_HandlerObject.getInstance()._pgpAttachments : {};
-    this._sendingAttachments = [];
     this._keyStore = new OpenPGPSecureKeyStore(this);
 
     var itemName = 'openpgp-secure-password-' + this.getUserID();
