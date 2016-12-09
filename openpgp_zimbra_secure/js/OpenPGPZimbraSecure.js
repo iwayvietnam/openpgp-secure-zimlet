@@ -26,8 +26,8 @@
  */
 function openpgp_zimbra_secure_HandlerObject() {
     this._pgpMessageCache = appCtxt.isChildWindow ? window.opener.openpgp_zimbra_secure_HandlerObject.getInstance()._pgpMessageCache : {};
+    this._pgpAttachments = appCtxt.isChildWindow ? window.opener.openpgp_zimbra_secure_HandlerObject.getInstance()._pgpAttachments : {};
     this._sendingAttachments = [];
-    this._pgpAttachments = {};
     this._keyStore = new OpenPGPSecureKeyStore(this);
 
     var itemName = 'openpgp-secure-password-' + this.getUserID();
@@ -75,17 +75,15 @@ OpenPGPZimbraSecure.prototype.init = function() {
 
     AjxDispatcher.addPackageLoadFunction('MailCore', new AjxCallback(this, function(){
         self._overrideZmMailMsg();
-        self._overrideZmMailMsgView();
 
-        if (!appCtxt.isChildWindow) {
-            var responseLoadMsgsFunc = ZmConv.prototype._handleResponseLoadMsgs;
-            ZmConv.prototype._handleResponseLoadMsgs = function(callback, result) {
-                var newCallback = new AjxCallback(this, function(newResult) {
-                    responseLoadMsgsFunc.call(this, callback, newResult || result);
-                });
-                self._handleMessageResponse(newCallback, result);
-            };
-        }
+        var responseLoadMsgsFunc = ZmConv.prototype._handleResponseLoadMsgs;
+        ZmConv.prototype._handleResponseLoadMsgs = function(callback, result) {
+            var newCallback = new AjxCallback(this, function(newResult) {
+                responseLoadMsgsFunc.call(this, callback, newResult || result);
+            });
+            self._handleMessageResponse(newCallback, result);
+        };
+        self._overrideZmMailMsgView();
     }));
 
     AjxDispatcher.addPackageLoadFunction('Startup1_2', new AjxCallback(this, function() {
@@ -111,16 +109,6 @@ OpenPGPZimbraSecure.prototype._handleNewWindow = function() {
     this._overrideZmSearch();
     this._overrideZmMailMsgView();
     this._overrideZmComposeView();
-
-    var deepCopyFunc = ZmNewWindow.prototype._deepCopyMsg;
-    ZmNewWindow.prototype._deepCopyMsg = function(msg) {
-        var newMsg = deepCopyFunc.call(this, msg);
-        var oldMsg = newMsg.cloneOf;
-        if (oldMsg && oldMsg.attrs) {
-            newMsg.attrs = oldMsg.attrs;
-        }
-        return newMsg;
-    };
 };
 
 /**
