@@ -78,7 +78,7 @@ OpenPGPZimbraSecure.prototype.init = function() {
         self._overrideZmMailMsg();
         self._overrideZmMailMsgView();
 
-        if (!appCtxt.isChildWindow && !this._overridedClasses['ZmComposeView']) {
+        if (!appCtxt.isChildWindow && !this._overridedClasses['ZmConv']) {
             var responseLoadMsgsFunc = ZmConv.prototype._handleResponseLoadMsgs;
             ZmConv.prototype._handleResponseLoadMsgs = function(callback, result) {
                 var newCallback = new AjxCallback(this, function(newResult) {
@@ -86,7 +86,7 @@ OpenPGPZimbraSecure.prototype.init = function() {
                 });
                 self._handleMessageResponse(newCallback, result);
             };
-            this._overridedClasses['ZmComposeView'] = true;
+            this._overridedClasses['ZmConv'] = true;
         }
     }));
 
