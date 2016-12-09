@@ -74,6 +74,7 @@ OpenPGPEncrypt.prototype.encrypt = function(contents, attachments) {
                 return builder.buildEncrypted(cipherText.data);
             }, function(err) {
                 self.onError(err);
+                return false;
             });
         }
         else if (self._shouldSign && self._privateKey) {
@@ -88,12 +89,15 @@ OpenPGPEncrypt.prototype.encrypt = function(contents, attachments) {
                 return builder.buildSigned(mimeNode, signature, hashAlg.toLowerCase());
             }, function(err) {
                 self.onError(err);
+                return false;
             });
         }
         return mimeNode;
     })
     .then(function(mimeNode) {
-        self.onCallback(self._onEncrypted, mimeNode);
+        if (mimeNode) {
+            self.onCallback(self._onEncrypted, mimeNode);
+        }
         return mimeNode;
     });
 };
