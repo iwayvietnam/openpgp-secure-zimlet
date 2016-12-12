@@ -85,9 +85,11 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
         parser.end();
 
         if (signed) {
-            signedNode = parser.node._childNodes.find(function(node) {
+            parser.node._childNodes.forEach(function(node) {
                 var ct = node.contentType.value;
-                return !OpenPGPUtils.isPGPContentType(ct);
+                if (!signedNode && !OpenPGPUtils.isPGPContentType(ct)) {
+                    signedNode = node;
+                };
             });
         }
 
@@ -136,9 +138,12 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
                 parser.write(message.content);
                 parser.end();
 
-                var signedNode = parser.node._childNodes.find(function(node) {
+                var signedNode = false;
+                parser.node._childNodes.forEach(function(node) {
                     var ct = node.contentType.value;
-                    return !OpenPGPUtils.isPGPContentType(ct);
+                    if (!signedNode && !OpenPGPUtils.isPGPContentType(ct)) {
+                        signedNode = node;
+                    };
                 });
                 if (signedNode) {
                     message.content = signedNode.raw.replace(/\r?\n/g, '\r\n');

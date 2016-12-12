@@ -200,11 +200,14 @@ OpenPGPZimbraSecure.prototype._overrideZmMailMsgView = function() {
                     var link = pnSrc || mceSrc || Dwt.getAttr(elem, aname);
 
                     if (link && link.substring(0, 4) === 'cid:') {
-                        var attachment = pgpMessage.attachments.find(function(attachment) {
-                            return (attachment.cid && attachment.cid === link.substring(4));
+                        var attachment = false;
+                        pgpMessage.attachments.forEach(function(attach) {
+                            if (!attachment && (attach.cid && attach.cid === link.substring(4))) {
+                                attachment = attach;
+                            };
                         });
                         if (attachment) {
-                            var content = OpenPGPUtils.base64Encode(attachment.content);
+                            var content = OpenPGPUtils.base64Encode(OpenPGPUtils.stringToBin(attachment.content));
                             var newLink = 'data:' + attachment.type + ';base64,' + content.replace(/\r?\n/g, '');
                             elem.setAttribute('src', newLink);
                         }
