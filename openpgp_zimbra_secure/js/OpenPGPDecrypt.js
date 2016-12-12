@@ -54,20 +54,44 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
     var sequence = Promise.resolve(message);
 
     return sequence.then(function(message) {
+        var encrypted = false;
+        var signed = false;
+        var signedNode = false;
+        var cipherText = '';
+        var signature = '';
+
         var parser = new window['emailjs-mime-parser']();
+        parser.onheader = function(node){
+            var ct = node.contentType.value;
+            if (OpenPGPUtils.isEncryptedMessage(ct)) {
+                encrypted = true;
+            }
+            if (OpenPGPUtils.isSignedMessage(ct)) {
+                signed = true;
+            }
+        };
+        parser.onbody = function(node, chunk){
+            if (encrypted && OpenPGPUtils.hasInlinePGPContent(node.raw, OpenPGPUtils.OPENPGP_MESSAGE_HEADER)) {
+                cipherText = OpenPGPUtils.binToString(chunk);
+            }
+            if (signed) {
+                var ct = node.contentType.value;
+                if (OpenPGPUtils.isSignatureContentType(ct) || OpenPGPUtils.hasInlinePGPContent(node.raw, OpenPGPUtils.OPENPGP_SIGNED_MESSAGE_HEADER)) {
+                    signature = OpenPGPUtils.binToString(chunk);
+                }
+            }
+        };
         parser.write(message);
         parser.end();
 
-        var ct = parser.node.contentType.value;
-        if(OpenPGPUtils.isEncryptedMessage(ct) && self._privateKey) {
-            var cipherText = '';
-            var pgpNode = parser.node._childNodes.find(function(node) {
-                return OpenPGPUtils.hasInlinePGPContent(node.raw, OpenPGPUtils.OPENPGP_MESSAGE_HEADER);
+        if (signed) {
+            signedNode = parser.node._childNodes.find(function(node) {
+                var ct = node.contentType.value;
+                return !OpenPGPUtils.isPGPContentType(ct);
             });
-            if (pgpNode) {
-                cipherText = OpenPGPUtils.binToString(pgpNode.content);
-            }
+        }
 
+        if (encrypted && cipherText.length > 0) {
             var opts = {
                 message: openpgp.message.readArmored(cipherText),
                 publicKeys: self._publicKeys,
@@ -76,53 +100,67 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
             return openpgp.decrypt(opts).then(function(plainText) {
                 return {
                     content: plainText.data,
+                    signature: signature,
                     signatures: plainText.signatures,
-                    encrypted: true
+                    encrypted: encrypted
                 }
             });
         }
         else {
             return {
-                content: message,
+                content: signedNode ? signedNode.raw.replace(/\r?\n/g, '\r\n') : message,
+                signature: signature,
                 signatures: [],
-                encrypted: false
+                encrypted: encrypted
             }
         }
     }, function(err) {
         self.onError(err);
         return {
             content: message,
+            signature: '',
             signatures: [],
             encrypted: false
         }
     })
     .then(function(message) {
         if (message.encrypted === false || message.signatures.length == 0) {
-            var parser = new window['emailjs-mime-parser']();
-            parser.write(message.content);
-            parser.end();
+            if (message.signature.length == 0) {
+                var parser = new window['emailjs-mime-parser']();
+                parser.onbody = function(node, chunk){
+                    if (OpenPGPUtils.hasInlinePGPContent(node.raw, OpenPGPUtils.OPENPGP_SIGNED_MESSAGE_HEADER)) {
+                        message.signature = OpenPGPUtils.binToString(node.content);
+                    }
+                };
+                parser.write(message.content);
+                parser.end();
 
-            var ct = parser.node.contentType.value;
-            if (OpenPGPUtils.isSignedMessage(ct) && self._publicKeys.length > 0) {
-                var signedContent = '';
-                var signature = '';
-                parser.node._childNodes.forEach(function(node) {
+                var signedNode = parser.node._childNodes.find(function(node) {
                     var ct = node.contentType.value;
-                    if (OpenPGPUtils.isSignatureContentType(ct)) {
-                        signature = OpenPGPUtils.binToString(node.content);
-                    }
-                    else if (!OpenPGPUtils.isPGPContentType(ct)) {
-                        signedContent = node.raw.replace(/\r?\n/g, '\r\n');
-                    }
+                    return !OpenPGPUtils.isPGPContentType(ct);
                 });
-
-                var pgpMessage = openpgp.message.readSignedContent(signedContent, signature);
-                message.signatures = pgpMessage.verify(self._publicKeys);
-                if (signedContent.length > 0) {
-                    message.content = signedContent;
+                if (signedNode) {
+                    message.content = signedNode.raw.replace(/\r?\n/g, '\r\n');
                 }
             }
+
+            if (message.signature.length > 0) {
+                var pgpMessage = openpgp.message.readSignedContent(message.content, message.signature);
+                message.signatures = pgpMessage.verify(self._publicKeys);
+            }
         }
+
+        return message;
+    }, function(err) {
+        self.onError(err);
+        return {
+            content: message,
+            signature: '',
+            signatures: [],
+            encrypted: false
+        }
+    })
+    .then(function(message) {
         message.signatures.forEach(function(signature) {
             self._publicKeys.forEach(function(key) {
                 var keyid = key.primaryKey.keyid;
@@ -132,16 +170,6 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
             });
         });
 
-        return message;
-    }, function(err) {
-        self.onError(err);
-        return {
-            content: message,
-            signatures: [],
-            encrypted: false
-        }
-    })
-    .then(function(message) {
         self.onDecrypted(message);
         return message;
     });
