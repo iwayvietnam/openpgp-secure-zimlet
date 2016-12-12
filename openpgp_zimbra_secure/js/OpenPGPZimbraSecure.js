@@ -256,23 +256,21 @@ OpenPGPZimbraSecure.prototype._overrideZmComposeView = function() {
                 var pgpMessage = self._pgpMessageCache[msg.id];
                 if (pgpMessage.encrypted && pgpMessage.attachments.length > 0) {
                     var controller = this.getController();
-                    var aids = [];
                     var draftAids = [];
                     var url = appCtxt.get(ZmSetting.CSFE_ATTACHMENT_UPLOAD_URI) + '?fmt=raw';
-                    pgpMessage.attachments.forEach(function(attachment) {
+                    pgpMessage.attachments.forEach(function(attachment, index) {
                         var callback = new AjxCallback(function(response) {
                             if (response.success) {
                                 var values = JSON.parse('[' + response.text.replace(/'/g, '"')  + ']');
                                 if (values && values.length == 3 && values[0] == 200) {
                                     attachment.aid = values[2];
-                                    aids.push(attachment.aid);
                                     if (!attachment.cid) {
                                         draftAids.push(attachment.aid);
                                     }
                                 }
-                                if (aids.length == pgpMessage.attachments.length) {
-                                    controller.saveDraft(ZmComposeController.DRAFT_TYPE_AUTO, draftAids.join(','));
-                                }
+                            }
+                            if (pgpMessage.attachments.length == index + 1) {
+                                controller.saveDraft(ZmComposeController.DRAFT_TYPE_AUTO, draftAids.join(','));
                             }
                         });
                         var content = (attachment.type.indexOf(ZmMimeTable.TEXT) == -1) ? OpenPGPUtils.stringToBin(attachment.content) : attachment.content;
