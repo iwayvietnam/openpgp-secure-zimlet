@@ -146,13 +146,8 @@ OpenPGPUtils.localStorageRead = function(key, pwd) {
  * @param {String|Uint8Array} data Data to be encoded into base64
  */
 OpenPGPUtils.base64Encode = function(data) {
-    if (!window.btoa) {
-        var codec = window['emailjs-mime-codec'];
-        return codec.base64.encode(data);
-    }
-    else {
-        return window.btoa(data);
-    }
+    var codec = window['emailjs-mime-codec'];
+    return codec.base64.encode(data);
 };
 
 /*
@@ -161,13 +156,8 @@ OpenPGPUtils.base64Encode = function(data) {
  * @param {String} data Base64 encoded data
  */
 OpenPGPUtils.base64Decode = function(base64) {
-    if (!window.atob) {
-        var codec = window['emailjs-mime-codec'];
-        return codec.base64.decode(base64, 'string');
-    }
-    else {
-        return window.atob(base64);
-    }
+    var codec = window['emailjs-mime-codec'];
+    return codec.base64.decode(base64, 'string');
 };
 
 OpenPGPUtils.stringToBin = function(string){
