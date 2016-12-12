@@ -160,6 +160,16 @@ OpenPGPUtils.base64Decode = function(base64) {
     return codec.base64.decode(base64, 'string');
 };
 
+/*
+ * Decodes base64 encoded string into an array
+ *
+ * @param {String} data Base64 encoded data
+ */
+OpenPGPUtils.base64ToBin = function(base64) {
+    var codec = window['emailjs-mime-codec'];
+    return codec.base64.decode(base64);
+};
+
 OpenPGPUtils.stringToBin = function(string){
     var codec = window['emailjs-mime-codec'];
     return codec.toTypedArray(string);

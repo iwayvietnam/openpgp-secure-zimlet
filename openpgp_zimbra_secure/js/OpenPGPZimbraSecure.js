@@ -757,7 +757,7 @@ OpenPGPZimbraSecure.decryptAttachment = function(name, url) {
                 }
                 else {
                     var opts = {
-                        message: openpgp.message.read(OpenPGPUtils.stringToBin(data)),
+                        message: openpgp.message.read(OpenPGPUtils.base64ToBin(response.text)),
                         privateKey: handler.getKeyStore().getPrivateKey(),
                         format: 'binary'
                     };
