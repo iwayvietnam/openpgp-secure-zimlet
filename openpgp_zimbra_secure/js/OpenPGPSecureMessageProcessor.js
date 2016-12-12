@@ -163,10 +163,10 @@ OpenPGPSecureMessageProcessor.prototype.onDecrypted = function(callback, msg, me
         if (ct.value === ZmMimeTable.TEXT_HTML ||
             ct.value === ZmMimeTable.TEXT_PLAIN ||
             ct.value === ZmMimeTable.TEXT_XML) {
-            content = OpenPGPUtils.utf8Decode(node.content);
+            content = OpenPGPUtils.utf8Decode(chunk);
         }
         else {
-            content = OpenPGPUtils.binToString(node.content);
+            content = OpenPGPUtils.binToString(chunk);
         }
         if (pgpMessage.encrypted && cd && isAttach) {
             var attachment = {
@@ -292,7 +292,7 @@ OpenPGPSecureMessageProcessor.prototype._decryptInlineMessage = function(callbac
                     var parser = new window['emailjs-mime-parser']();
                     parser.onbody = function(node, chunk){
                         var ct = node.contentType;
-                        var content = OpenPGPUtils.binToString(node.content);
+                        var content = OpenPGPUtils.binToString(chunk);
                         var hasPGPKey = OpenPGPUtils.isPGPKeysContentType(ct.value) || OpenPGPUtils.hasInlinePGPContent(content, OpenPGPUtils.OPENPGP_PUBLIC_KEY_HEADER);
                         if (hasPGPKey) {
                             pgpMessage.hasPGPKey = hasPGPKey;
