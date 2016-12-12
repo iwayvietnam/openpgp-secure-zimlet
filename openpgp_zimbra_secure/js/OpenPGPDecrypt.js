@@ -128,8 +128,9 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
             if (message.signature.length == 0) {
                 var parser = new window['emailjs-mime-parser']();
                 parser.onbody = function(node, chunk){
-                    if (OpenPGPUtils.hasInlinePGPContent(node.raw, OpenPGPUtils.OPENPGP_SIGNED_MESSAGE_HEADER)) {
-                        message.signature = OpenPGPUtils.binToString(node.content);
+                    var ct = node.contentType.value;
+                    if (OpenPGPUtils.isSignatureContentType(ct) || OpenPGPUtils.hasInlinePGPContent(node.raw, OpenPGPUtils.OPENPGP_SIGNED_MESSAGE_HEADER)) {
+                        signature = OpenPGPUtils.binToString(chunk);
                     }
                 };
                 parser.write(message.content);
