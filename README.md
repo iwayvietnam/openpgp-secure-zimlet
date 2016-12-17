@@ -20,6 +20,12 @@ Bugs and feedback: https://github.com/nguyennv/openpgp-secure-zimlet/issues
     [root@zimbra ~]# zmzimletctl deploy /tmp/openpgp-secure-zimlet/openpgp_zimbra_secure.zip
     [root@zimbra ~]# zmmailboxdctl restart
 
+## Supported environments
+This zimlet has been tested with Zimbra Collaboration Open Source Edition 8.6 and 8.7. This zimlet is not available for use in Zimbra Desktop.
+Platform:
+- Windows: Internet Explorer 11, Google Chrome, Chromium, Mozilla Firefox
+- Linux: Google Chrome, Chromium, Mozilla Firefox, Opera
+
 ### License
 
 Copyright (C) 2016  Nguyen Van Nguyen
