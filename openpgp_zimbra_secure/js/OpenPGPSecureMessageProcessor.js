@@ -147,6 +147,7 @@ OpenPGPSecureMessageProcessor.prototype._decryptMessage = function(callback, msg
 OpenPGPSecureMessageProcessor.prototype.onDecrypted = function(callback, msg, message) {
     var self = this;
     var pgpMessage = {
+        textContent: '',
         signatures: message.signatures,
         encrypted: message.encrypted,
         attachments: [],
@@ -164,6 +165,7 @@ OpenPGPSecureMessageProcessor.prototype.onDecrypted = function(callback, msg, me
             ct.value === ZmMimeTable.TEXT_PLAIN ||
             ct.value === ZmMimeTable.TEXT_XML) {
             content = OpenPGPUtils.utf8Decode(chunk);
+            pgpMessage.textContent = content;
         }
         else {
             content = OpenPGPUtils.binToString(chunk);
@@ -282,6 +284,7 @@ OpenPGPSecureMessageProcessor.prototype._decryptInlineMessage = function(callbac
                     }
 
                     var pgpMessage = {
+                        textContent: result.content,
                         signatures: result.signatures,
                         encrypted: false,
                         attachments: [],
