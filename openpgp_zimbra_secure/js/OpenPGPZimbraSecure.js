@@ -609,7 +609,6 @@ OpenPGPZimbraSecure.prototype.initializeToolbar = function(app, toolbar, control
             };
             button.addSelectionListener(printListener.bind(controller));
         }
-        console.log(button);
     }
 
     if (viewId.indexOf(ZmId.VIEW_COMPOSE) >= 0) {
