@@ -300,3 +300,75 @@
         </td>
     </tr>
 </template>
+
+<template id='openpgp_zimbra_secure#EncryptedPrint'>
+    <style type="text/css" media="screen">
+        .EncryptedPrintSubject {
+            font-family: Tahoma,Arial,Helvetica,sans-serif;
+            font-size: 12pt;
+            font-weight: bold;
+            padding: 10px;
+        }
+        .EncryptedMsgHdrName {
+            font-family: Tahoma,Arial,Helvetica,sans-serif;
+            font-weight: bold;
+            padding: 3px 0;
+            text-align: right;
+            white-space: nowrap;
+        }
+    </style>
+    <table cellpadding="0" cellspacing="5"  width="100%">
+    <tr><td>
+        <div class="EncryptedPrintSubject">${subject}</div>
+        <hr/>
+    </td></tr>
+    </table>
+    <table width="100%" cellpadding="0" cellspacing="0" class="Msg" style="padding:10px;">
+        <tr><td>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#eee;" >
+                <tr><td align="left">
+                    <table width="100%" align="left" cellpadding="2" cellspacing="0" border="0">
+                        <tr>
+                            <td class='EncryptedMsgHdrName'><$=ZmMsg.fromLabel$></td>
+                            <td class='EncryptedMsgHdrValue'>${from}</td>
+                        </tr>
+                        <tr>
+                            <td class='EncryptedMsgHdrName'><$=ZmMsg.subjectLabel$></td>
+                            <td class='EncryptedMsgHdrValue'>${subject}</td>
+                        </tr>
+                        <tr>
+                            <td class='EncryptedMsgHdrName'><$=ZmMsg.toLabel$></td>
+                            <td class='EncryptedMsgHdrValue'>${toRecipient}</td>
+                        </tr>
+                        <$ if (data.ccRecipient) { $>
+                            <tr>
+                                <td class='EncryptedMsgHdrName'><$=ZmMsg.ccLabel$></td>
+                                <td class='EncryptedMsgHdrValue'>${ccRecipient}</td>
+                            </tr>
+                        <$ } $>
+                        <$ if (data.bccRecipient) { $>
+                            <tr>
+                                <td class='EncryptedMsgHdrName'><$=ZmMsg.bccLabel$></td>
+                                <td class='EncryptedMsgHdrValue'>${bccRecipient}</td>
+                            </tr>
+                        <$ } $>
+                        <$ if (data.replyTo) { $>
+                            <tr>
+                                <td class='EncryptedMsgHdrName'><$=ZmMsg.replyTo$>:</td>
+                                <td class='EncryptedMsgHdrValue'>${replyTo}</td>
+                            </tr>
+                        <$ } $>
+                        <tr>
+                            <td class='EncryptedMsgHdrName'><$=ZmMsg.sentAt$>:</td>
+                            <td class='EncryptedMsgHdrValue'>${sentAt}</td>
+                        </tr>
+                    </table>
+                </td></tr>
+            </table>
+        </td></tr>
+        <tr><td style="padding:5px; font-family: monospace" valign='top'>
+            <div id="iframeBody" class="MsgBody-html">${msgBody}</div>
+            <hr>
+        </td></tr>
+    </table>
+</template>
