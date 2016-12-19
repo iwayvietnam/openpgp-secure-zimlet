@@ -77,6 +77,7 @@ OpenPGPZimbraSecure.prototype.init = function() {
     AjxDispatcher.addPackageLoadFunction('MailCore', new AjxCallback(this, function(){
         self._overrideZmMailMsg();
         self._overrideZmMailMsgView();
+        self._overrideZmMsgController();
 
         if (!appCtxt.isChildWindow && !this._overridedClasses['ZmConv']) {
             var responseLoadMsgsFunc = ZmConv.prototype._handleResponseLoadMsgs;
@@ -243,6 +244,94 @@ OpenPGPZimbraSecure.prototype._overrideZmMailMsgView = function() {
 
         ZmMailMsgView.displayAdditionalHdrsInMsgView.securityHeader = '<span class="securityHeader">' + this.getMessage('messageSecurityHeader') + '</span>';
         this._overridedClasses['ZmMailMsgView'] = true;
+    }
+};
+
+/**
+ * Override ZmMsgController class.
+ */
+OpenPGPZimbraSecure.prototype._overrideZmMsgController = function() {
+    if (!this._overridedClasses['ZmMsgController']) {
+        var self = this;
+        var listener = ZmMsgController.prototype._printListener;
+        ZmMsgController.prototype._printListener = function(ev) {
+            var id;
+            var item = this._msg;
+            console.log(item);
+            if (item instanceof ZmConv) {
+                id = item.msgIds[0];
+            }
+            else {
+                id = item.id;
+            }
+
+            var pgpMessage = self._pgpMessageCache[id];
+            if (pgpMessage && pgpMessage.encrypted && pgpMessage.textContent.length > 0) {
+                var pgpMessage = self._pgpMessageCache[id];
+
+                var parrams = {
+                    from: item.sentByAddr,
+                    subject: item.subject,
+                    toRecipient: false,
+                    ccRecipient: false,
+                    bccRecipient: false,
+                    replyTo: false,
+                    sentAt: new Date(item.sentDate),
+                    msgBody: pgpMessage.textContent
+                };
+
+                var toAddresses = item.getAddresses(AjxEmailAddress.TO).getArray();
+                if (toAddresses.length > 0) {
+                    var to = [];
+                    toAddresses.forEach(function(addr) {
+                        to.push(AjxStringUtil.htmlEncode(addr.toString()));
+                    });
+                    parrams.toRecipient = to.join(', ');
+                }
+
+                var ccAddresses = item.getAddresses(AjxEmailAddress.CC).getArray();
+                if (ccAddresses.length > 0) {
+                    var cc = [];
+                    ccAddresses.forEach(function(addr) {
+                        cc.push(AjxStringUtil.htmlEncode(addr.toString()));
+                    });
+                    parrams.ccRecipient = cc.join(', ');
+                }
+
+                var bccAddresses = item.getAddresses(AjxEmailAddress.BCC).getArray();
+                if (bccAddresses.length > 0) {
+                    var bcc = [];
+                    bccAddresses.forEach(function(addr) {
+                        bcc.push(AjxStringUtil.htmlEncode(addr.toString()));
+                    });
+                    parrams.bccRecipient = bcc.join(', ');
+                }
+
+                var replyToAddresses = item.getAddresses(AjxEmailAddress.REPLY_TO).getArray();
+                if (replyToAddresses.length > 0) {
+                    var replyTo = [];
+                    replyToAddresses.forEach(function(addr) {
+                        replyTo.push(AjxStringUtil.htmlEncode(addr.toString()));
+                    });
+                    parrams.replyTo = replyTo.join(', ');
+                }
+
+                var printWindow = window.open('', 'Print-Window', 'width=800, height=600');
+                printWindow.document.open();
+                printWindow.document.write(OpenPGPUtils.renderTemplate('EncryptedPrint', parrams));
+                printWindow.document.close();
+                printWindow.focus();
+                printWindow.print();
+            }
+            else {
+                listener.call(this, ev);
+            }
+        };
+
+        var controller = AjxDispatcher.run('GetMsgController');
+        controller._listeners[ZmOperation.PRINT] = controller._printListener.bind(controller);
+
+        this._overridedClasses['ZmMsgController'] = true;
     }
 };
 
