@@ -202,6 +202,28 @@ OpenPGPSecureMessageProcessor.prototype.onDecrypted = function(callback, msg, me
     parser.write(message.content);
     parser.end();
 
+    if (pgpMessage.encrypted && pgpMessage.textContent.length > 0) {
+        DOMPurify.addHook('uponSanitizeAttribute', function(node, data) {
+            if (data.attrName == 'src' && data.attrValue.indexOf('cid:') >= 0) {
+                node.setAttribute('pnsrc', data.attrValue);
+                var cid = data.attrValue.substring(4);
+                var attachment = false;
+                pgpMessage.attachments.forEach(function(attach) {
+                    if (!attachment && (attach.cid && attach.cid === cid)) {
+                        attachment = attach;
+                    };
+                });
+
+                if (attachment) {
+                    var content = OpenPGPUtils.base64Encode(OpenPGPUtils.stringToBin(attachment.content));
+                    data.attrValue = 'data:' + attachment.type + ';base64,' + content.replace(/\r?\n/g, '');
+                }
+            }
+        });
+        pgpMessage.textContent = DOMPurify.sanitize(pgpMessage.textContent);
+        DOMPurify.removeHook('uponSanitizeAttribute');
+    }
+
     pgpMessage.mimeNode = parser.node;
     this._handler._pgpMessageCache[msg.id] = pgpMessage;
     this._addSecurityHeader(msg, pgpMessage.signatures);
