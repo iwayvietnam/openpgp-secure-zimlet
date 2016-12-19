@@ -20,7 +20,7 @@
  *
  * Written by Nguyen Van Nguyen <nguyennv1981@gmail.com>
 -->
-<zimlet name="openpgp_zimbra_secure" version="1.0.3"
+<zimlet name="openpgp_zimbra_secure" version="1.0.4"
         label="${msg.label}"
         description="${msg.description}"
         target="main compose-window view-window">
