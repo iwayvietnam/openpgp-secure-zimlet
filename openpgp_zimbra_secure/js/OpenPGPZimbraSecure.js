@@ -289,6 +289,7 @@ OpenPGPZimbraSecure.prototype._overrideZmMailListController = function() {
         var self = this;
         var listener = ZmMailListController.prototype._printListener;
         ZmMailListController.prototype._printListener = function(ev) {
+            var msg = this.getMsg();
             if (msg) {
                 var pgpMessage = self._pgpMessageCache[msg.id];
                 if (pgpMessage && pgpMessage.encrypted && pgpMessage.textContent.length > 0) {
@@ -585,6 +586,32 @@ OpenPGPZimbraSecure.prototype.onPublicKeyChange = function() {
  * @param {String} viewId
  */
 OpenPGPZimbraSecure.prototype.initializeToolbar = function(app, toolbar, controller, viewId) {
+    var self = this;
+    if (AjxUtil.indexOf(toolbar.opList, ZmOperation.PRINT) && (controller instanceof ZmConvListController)) {
+        var button = toolbar.getButton(ZmOperation.PRINT);
+        if (button) {
+            button.removeSelectionListeners();
+            var listener = controller._printListener;
+            var printListener = function(ev) {
+                var msg = controller.getMsg();
+                if (msg) {
+                    var pgpMessage = self._pgpMessageCache[msg.id];
+                    if (pgpMessage && pgpMessage.encrypted && pgpMessage.textContent.length > 0) {
+                        self._encryptedMessagePrint(msg, pgpMessage);
+                    }
+                    else {
+                        listener.call(controller, ev);
+                    }
+                }
+                else {
+                    listener.call(controller, ev);
+                }
+            };
+            button.addSelectionListener(printListener.bind(controller));
+        }
+        console.log(button);
+    }
+
     if (viewId.indexOf(ZmId.VIEW_COMPOSE) >= 0) {
         var button;
         var children = toolbar.getChildren();

@@ -22,6 +22,7 @@ Bugs and feedback: https://github.com/nguyennv/openpgp-secure-zimlet/issues
 
 ## Supported environments
 This zimlet has been tested with Zimbra Collaboration Open Source Edition 8.6 and 8.7. This zimlet is not available for use in Zimbra Desktop.
+
 Platform:
 - Windows: Internet Explorer 11, Google Chrome, Chromium, Mozilla Firefox
 - Linux: Google Chrome, Chromium, Mozilla Firefox, Opera
