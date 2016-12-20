@@ -38,6 +38,8 @@ OpenPGPSecureKeyStore = function(handler) {
     this.passphrase = '';
     this.privateKey = false;
     this.publicKeys = [];
+    this.contactPublicKeys = [];
+    this.globalPublicKeys = [];
 };
 
 OpenPGPSecureKeyStore.ADD_CALLBACK = 'add';
@@ -54,7 +56,10 @@ OpenPGPSecureKeyStore.prototype.init = function() {
 
     var sequence = Promise.resolve();
     return sequence.then(function() {
-        return self.setPublicKeys(self._readPublicKeys());
+        self.setPublicKeys(self._readPublicKeys());
+        self._scanContacts();
+        self._globalTrust();
+        return;
     })
     .then(function() {
         return OpenPGPUtils.localStorageRead(
@@ -218,10 +223,18 @@ OpenPGPSecureKeyStore.prototype.getPublicKey = function() {
 };
 
 /**
- * Get all public keys in key store.
+ * Get public keys from store.
  */
 OpenPGPSecureKeyStore.prototype.getPublicKeys = function() {
     return this.publicKeys;
+};
+
+/**
+ * Get all public keys.
+ */
+OpenPGPSecureKeyStore.prototype.getAllPublicKeys = function() {
+    var publicKeys = this.publicKeys;
+    return publicKeys.concat(this.contactPublicKeys).concat(this.globalPublicKeys);
 };
 
 /**
@@ -355,4 +368,52 @@ OpenPGPSecureKeyStore.prototype._readPublicKeys = function() {
 OpenPGPSecureKeyStore.prototype._storePublicKeys = function() {
     localStorage[this._publicKeysItem] = this.exportPublicKeys();
     appCtxt.notifyZimlet(OpenPGPZimbraSecure.NAME, 'onPublicKeyChange');
+};
+
+OpenPGPSecureKeyStore.prototype._scanContacts = function() {
+    var url = [
+        OpenPGPUtils.restUrl(), '/contacts?fmt=csv'
+    ].join('');
+
+    var callback = new AjxCallback(function(response) {
+        if (response.success) {
+            var entries = response.text.split('"');
+            entries.forEach(function(entry) {
+                if (OpenPGPUtils.hasInlinePGPContent(entry, OpenPGPUtils.OPENPGP_PUBLIC_KEY_HEADER)) {
+                    var contactKeys = openpgp.key.readArmored(entry);
+                    contactKeys.keys.forEach(function(key) {
+                        var fingerprint = key.primaryKey.getFingerprint();
+                        if (key.isPublic() && !self._fingerprints[fingerprint]) {
+                            self.contactPublicKeys.push(key);
+                            self._fingerprints[fingerprint] = fingerprint;
+                        }
+                    });
+                }
+            });
+        }
+    });
+
+    AjxRpc.invoke('', url, {}, callback, true);
+};
+
+OpenPGPSecureKeyStore.prototype._globalTrust = function() {
+    var resource = this._handler.getZimletContext().getConfig('global-trust');
+    if (resource) {
+        var url = this._handler.getResource(resource);
+
+        var callback = new AjxCallback(function(response) {
+            if (response.success) {
+                var globalKeys = openpgp.key.readArmored(response.text);
+                globalKeys.keys.forEach(function(key) {
+                    var fingerprint = key.primaryKey.getFingerprint();
+                    if (key.isPublic() && !self._fingerprints[fingerprint]) {
+                        self.globalPublicKeys.push(key);
+                        self._fingerprints[fingerprint] = fingerprint;
+                    }
+                });
+            }
+        });
+
+        AjxRpc.invoke('', url, {}, callback, true);
+    }
 };
