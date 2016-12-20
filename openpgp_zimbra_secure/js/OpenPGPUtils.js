@@ -375,6 +375,14 @@ OpenPGPUtils.renderTemplate = function(templateId, data) {
     return AjxTemplate.expand(OpenPGPZimbraSecure.NAME + '#' + templateId, data);
 };
 
+OpenPGPUtils.restUrl = function() {
+    return AjxUtil.formatUrl({
+        host: location.hostname,
+        path: '/home/' + appCtxt.getActiveAccount().name,
+        qsReset: true
+    });
+};
+
 /*
  * random string
  * https://github.com/valiton/node-random-string
