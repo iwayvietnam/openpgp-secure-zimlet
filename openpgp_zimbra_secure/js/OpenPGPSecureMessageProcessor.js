@@ -121,7 +121,7 @@ OpenPGPSecureMessageProcessor.prototype._decryptMessage = function(callback, msg
     if (response.success) {
         var decryptor = new OpenPGPDecrypt({
             privateKey: this._handler.getKeyStore().getPrivateKey(),
-            publicKeys: this._handler.getKeyStore().getPublicKeys(),
+            publicKeys: this._handler.getKeyStore().getAllPublicKeys(),
             onDecrypted: function(message) {
                 self.onDecrypted(callback, msg, message);
             },
@@ -292,7 +292,7 @@ OpenPGPSecureMessageProcessor.prototype._decryptInlineMessage = function(callbac
             }
             OpenPGPDecrypt.decryptContent(
                 content,
-                this._handler.getKeyStore().getPublicKeys(),
+                this._handler.getKeyStore().getAllPublicKeys(),
                 this._handler.getKeyStore().getPrivateKey(),
                 function(result) {
                     if (result.content) {

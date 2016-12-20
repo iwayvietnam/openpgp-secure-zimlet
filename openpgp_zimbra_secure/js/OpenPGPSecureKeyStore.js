@@ -264,21 +264,22 @@ OpenPGPSecureKeyStore.prototype.setPublicKeys = function(armoredKeys) {
  * @param {Array} addresses Email addresses to search for
  */
 OpenPGPSecureKeyStore.prototype.havingPublicKeys = function(addresses) {
+    var having = [];
     var dupes = [];
-    var publicKeys = [];
-    this.publicKeys.forEach(function(key) {
+    var publicKeys = this.getAllPublicKeys();
+    publicKeys.forEach(function(key) {
         var userIds = key.getUserIds();
         addresses.forEach(function(address) {
             userIds.forEach(function(uid) {
                 var fingerprint = key.primaryKey.getFingerprint();
                 if (uid.indexOf(address) >= 0 && !dupes[fingerprint + uid]) {
-                    publicKeys.push(key);
+                    having.push(key);
                     dupes[fingerprint + uid] = fingerprint + uid;
                 }
             });
         });
     });
-    return publicKeys;
+    return having;
 };
 
 /**
@@ -288,7 +289,8 @@ OpenPGPSecureKeyStore.prototype.havingPublicKeys = function(addresses) {
  */
 OpenPGPSecureKeyStore.prototype.publicKeyMissing = function(addresses) {
     var uidAddresses = [];
-    this.publicKeys.forEach(function(key) {
+    var publicKeys = this.getAllPublicKeys();
+    publicKeys.forEach(function(key) {
         var userIds = key.getUserIds();
         userIds.forEach(function(uid) {
             var addr = AjxEmailAddress.parse(uid);
