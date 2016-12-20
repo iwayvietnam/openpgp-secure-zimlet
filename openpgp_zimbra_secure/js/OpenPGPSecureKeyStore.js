@@ -319,11 +319,23 @@ OpenPGPSecureKeyStore.prototype.publicKeyExisted = function(fingerprint) {
 };
 
 /**
- * Export all public keys in key store.
+ * Export all public keys in store.
  */
 OpenPGPSecureKeyStore.prototype.exportPublicKeys = function() {
     var packetlist = new openpgp.packet.List();
     this.publicKeys.forEach(function(key) {
+        packetlist.read(key.toPacketlist().write());
+    });
+    return openpgp.armor.encode(openpgp.enums.armor.public_key, packetlist.write());
+};
+
+/**
+ * Export all public keys.
+ */
+OpenPGPSecureKeyStore.prototype.exportAllPublicKeys = function() {
+    var publicKeys = this.getAllPublicKeys();
+    var packetlist = new openpgp.packet.List();
+    publicKeys.forEach(function(key) {
         packetlist.read(key.toPacketlist().write());
     });
     return openpgp.armor.encode(openpgp.enums.armor.public_key, packetlist.write());
