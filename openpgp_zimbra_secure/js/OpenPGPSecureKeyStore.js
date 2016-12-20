@@ -56,7 +56,9 @@ OpenPGPSecureKeyStore.prototype.init = function() {
 
     var sequence = Promise.resolve();
     return sequence.then(function() {
-        self.setPublicKeys(self._readPublicKeys());
+        return self.setPublicKeys(self._readPublicKeys());
+    })
+    .then(function() {
         self._scanContacts();
         self._globalTrust();
         return;
@@ -319,11 +321,23 @@ OpenPGPSecureKeyStore.prototype.publicKeyExisted = function(fingerprint) {
 };
 
 /**
- * Export all public keys in key store.
+ * Export all public keys in store.
  */
 OpenPGPSecureKeyStore.prototype.exportPublicKeys = function() {
     var packetlist = new openpgp.packet.List();
     this.publicKeys.forEach(function(key) {
+        packetlist.read(key.toPacketlist().write());
+    });
+    return openpgp.armor.encode(openpgp.enums.armor.public_key, packetlist.write());
+};
+
+/**
+ * Export all public keys.
+ */
+OpenPGPSecureKeyStore.prototype.exportAllPublicKeys = function() {
+    var publicKeys = this.getAllPublicKeys();
+    var packetlist = new openpgp.packet.List();
+    publicKeys.forEach(function(key) {
         packetlist.read(key.toPacketlist().write());
     });
     return openpgp.armor.encode(openpgp.enums.armor.public_key, packetlist.write());
@@ -372,6 +386,9 @@ OpenPGPSecureKeyStore.prototype._storePublicKeys = function() {
     appCtxt.notifyZimlet(OpenPGPZimbraSecure.NAME, 'onPublicKeyChange');
 };
 
+/**
+ * Scan public keys from user contacts.
+ */
 OpenPGPSecureKeyStore.prototype._scanContacts = function() {
     var url = [
         OpenPGPUtils.restUrl(), '/contacts?fmt=csv'
@@ -398,6 +415,9 @@ OpenPGPSecureKeyStore.prototype._scanContacts = function() {
     AjxRpc.invoke('', url, {}, callback, true);
 };
 
+/**
+ * Load public keys from global trust.
+ */
 OpenPGPSecureKeyStore.prototype._globalTrust = function() {
     var resource = this._handler.getZimletContext().getConfig('global-trust');
     if (resource) {
