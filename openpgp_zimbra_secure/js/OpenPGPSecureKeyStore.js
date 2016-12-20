@@ -56,7 +56,10 @@ OpenPGPSecureKeyStore.prototype.init = function() {
 
     var sequence = Promise.resolve();
     return sequence.then(function() {
-        return self.setPublicKeys(self._readPublicKeys());
+        self.setPublicKeys(self._readPublicKeys());
+        self._scanContacts();
+        self._globalTrust();
+        return;
     })
     .then(function() {
         return OpenPGPUtils.localStorageRead(
