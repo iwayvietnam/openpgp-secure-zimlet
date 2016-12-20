@@ -56,7 +56,9 @@ OpenPGPSecureKeyStore.prototype.init = function() {
 
     var sequence = Promise.resolve();
     return sequence.then(function() {
-        self.setPublicKeys(self._readPublicKeys());
+        return self.setPublicKeys(self._readPublicKeys());
+    })
+    .then(function() {
         self._scanContacts();
         self._globalTrust();
         return;
