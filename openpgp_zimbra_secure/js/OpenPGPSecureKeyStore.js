@@ -39,6 +39,7 @@ OpenPGPSecureKeyStore = function(handler) {
     this.privateKey = false;
     this.publicKeys = [];
     this.contactPublicKeys = [];
+    this.globalPublicKeys = [];
 };
 
 OpenPGPSecureKeyStore.ADD_CALLBACK = 'add';
@@ -219,10 +220,18 @@ OpenPGPSecureKeyStore.prototype.getPublicKey = function() {
 };
 
 /**
- * Get all public keys in key store.
+ * Get public keys from store.
  */
 OpenPGPSecureKeyStore.prototype.getPublicKeys = function() {
     return this.publicKeys;
+};
+
+/**
+ * Get all public keys.
+ */
+OpenPGPSecureKeyStore.prototype.getAllPublicKeys = function() {
+    var publicKeys = this.publicKeys;
+    return publicKeys.concat(this.contactPublicKeys).concat(this.globalPublicKeys);
 };
 
 /**
@@ -382,4 +391,26 @@ OpenPGPSecureKeyStore.prototype._scanContacts = function() {
     });
 
     AjxRpc.invoke('', url, {}, callback, true);
+};
+
+OpenPGPSecureKeyStore.prototype._globalTrust = function() {
+    var resource = this._handler.getZimletContext().getConfig('global-trust');
+    if (resource) {
+        var url = this._handler.getResource(resource);
+
+        var callback = new AjxCallback(function(response) {
+            if (response.success) {
+                var globalKeys = openpgp.key.readArmored(response.text);
+                globalKeys.keys.forEach(function(key) {
+                    var fingerprint = key.primaryKey.getFingerprint();
+                    if (key.isPublic() && !self._fingerprints[fingerprint]) {
+                        self.globalPublicKeys.push(key);
+                        self._fingerprints[fingerprint] = fingerprint;
+                    }
+                });
+            }
+        });
+
+        AjxRpc.invoke('', url, {}, callback, true);
+    }
 };
