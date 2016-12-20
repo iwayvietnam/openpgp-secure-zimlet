@@ -384,6 +384,9 @@ OpenPGPSecureKeyStore.prototype._storePublicKeys = function() {
     appCtxt.notifyZimlet(OpenPGPZimbraSecure.NAME, 'onPublicKeyChange');
 };
 
+/**
+ * Scan public keys from user contacts.
+ */
 OpenPGPSecureKeyStore.prototype._scanContacts = function() {
     var url = [
         OpenPGPUtils.restUrl(), '/contacts?fmt=csv'
@@ -410,6 +413,9 @@ OpenPGPSecureKeyStore.prototype._scanContacts = function() {
     AjxRpc.invoke('', url, {}, callback, true);
 };
 
+/**
+ * Load public keys from global trust.
+ */
 OpenPGPSecureKeyStore.prototype._globalTrust = function() {
     var resource = this._handler.getZimletContext().getConfig('global-trust');
     if (resource) {
