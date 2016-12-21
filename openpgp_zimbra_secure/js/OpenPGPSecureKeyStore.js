@@ -390,6 +390,7 @@ OpenPGPSecureKeyStore.prototype._storePublicKeys = function() {
  * Scan public keys from user contacts.
  */
 OpenPGPSecureKeyStore.prototype._scanContacts = function() {
+    var self = this;
     var url = [
         OpenPGPUtils.restUrl(), '/contacts?fmt=csv'
     ].join('');
@@ -421,8 +422,8 @@ OpenPGPSecureKeyStore.prototype._scanContacts = function() {
 OpenPGPSecureKeyStore.prototype._globalTrust = function() {
     var resource = this._handler.getZimletContext().getConfig('global-trust');
     if (resource) {
+        var self = this;
         var url = this._handler.getResource(resource);
-
         var callback = new AjxCallback(function(response) {
             if (response.success) {
                 var globalKeys = openpgp.key.readArmored(response.text);
