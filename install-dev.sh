@@ -25,7 +25,7 @@ rm -Rf /opt/zimbra/zimlets-deployed/_dev/openpgp_zimbra_secure
 mkdir /opt/zimbra/zimlets-deployed/_dev
 cp -rv openpgp_zimbra_secure /opt/zimbra/zimlets-deployed/_dev
 
-echo "Flush all zimbra cached entries"
-su zimbra -c "/opt/zimbra/bin/zmprov fc all"
+echo "Flush zimbra cached zimlet"
+su zimbra -c "/opt/zimbra/bin/zmprov fc zimlet"
 
 exit 0
