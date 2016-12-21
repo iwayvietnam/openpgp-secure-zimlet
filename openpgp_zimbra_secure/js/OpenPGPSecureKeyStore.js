@@ -396,6 +396,7 @@ OpenPGPSecureKeyStore.prototype._scanContacts = function() {
 
     var callback = new AjxCallback(function(response) {
         if (response.success) {
+            var self = this;
             var entries = response.text.split('"');
             entries.forEach(function(entry) {
                 if (OpenPGPUtils.hasInlinePGPContent(entry, OpenPGPUtils.OPENPGP_PUBLIC_KEY_HEADER)) {
