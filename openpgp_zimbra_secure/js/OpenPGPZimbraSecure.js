@@ -494,15 +494,7 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
                 attLinkIds.push(linkId);
                 links.push('</span>');
 
-                if (attachment.size < 1024) {
-                    size = numFormatter.format(attachment.size) + ' ' + ZmMsg.b;
-                }
-                else if (attachment.size < (1024 * 1024)) {
-                    size = numFormatter.format(Math.round((attachment.size / 1024) * 10) / 10) + ' ' + ZmMsg.kb;
-                }
-                else {
-                    size = numFormatter.format(Math.round((attachment.size / (1024 * 1024)) * 10) / 10) + ' ' + ZmMsg.mb;
-                }
+                var size = AjxUtil.formatSize(attachment.size, false, 2);
                 links.push('&nbsp;(' + size + ')&nbsp;');
 
                 links.push('|&nbsp;');
