@@ -390,13 +390,13 @@ OpenPGPSecureKeyStore.prototype._storePublicKeys = function() {
  * Scan public keys from user contacts.
  */
 OpenPGPSecureKeyStore.prototype._scanContacts = function() {
+    var self = this;
     var url = [
         OpenPGPUtils.restUrl(), '/contacts?fmt=csv'
     ].join('');
 
     var callback = new AjxCallback(function(response) {
         if (response.success) {
-            var self = this;
             var entries = response.text.split('"');
             entries.forEach(function(entry) {
                 if (OpenPGPUtils.hasInlinePGPContent(entry, OpenPGPUtils.OPENPGP_PUBLIC_KEY_HEADER)) {
