@@ -48,22 +48,37 @@ OpenPGPUtils.OPENPGP_MESSAGE_HEADERS = [
     OpenPGPUtils.OPENPGP_PUBLIC_KEY_HEADER,
 ];
 
+/**
+ * Determine content type is openpgp signed message.
+ */
 OpenPGPUtils.isSignedMessage = function(cType) {
     return AjxUtil.indexOf([OpenPGPUtils.SIGNED_MESSAGE_CONTENT_TYPE], cType) !== -1;
 };
 
+/**
+ * Determine content type is openpgp ecnrypted message.
+ */
 OpenPGPUtils.isEncryptedMessage = function(cType) {
     return AjxUtil.indexOf([OpenPGPUtils.ENCRYPTED_MESSAGE_CONTENT_TYPE], cType) !== -1;
 };
 
+/**
+ * Determine zimbra mail message has openpgp signature content type.
+ */
 OpenPGPUtils.hasSignatureContentType = function(msg) {
     return msg.hasContentType(OpenPGPUtils.OPENPGP_SIGNATURE_CONTENT_TYPE);
 };
 
+/**
+ * Determine zimbra mail message has openpgp encrypted content type.
+ */
 OpenPGPUtils.hasEncryptedContentType = function(msg) {
     return msg.hasContentType(OpenPGPUtils.OPENPGP_ENCRYPTED_CONTENT_TYPE);
 };
 
+/**
+ * Determine zimbra mail message has openpgp content type.
+ */
 OpenPGPUtils.hasOPENPGPContentType = function(msg) {
     var has = false;
     OpenPGPUtils.OPENPGP_CONTENT_TYPES.forEach(function(ct) {
@@ -75,22 +90,37 @@ OpenPGPUtils.hasOPENPGPContentType = function(msg) {
     return has;
 };
 
+/**
+ * Determine content type is openpgp content type.
+ */
 OpenPGPUtils.isPGPContentType = function(cType) {
     return AjxUtil.indexOf(OpenPGPUtils.OPENPGP_CONTENT_TYPES, cType) !== -1;
 };
 
+/**
+ * Determine content type is openpgp signature content type.
+ */
 OpenPGPUtils.isSignatureContentType = function(cType) {
     return AjxUtil.indexOf([OpenPGPUtils.OPENPGP_SIGNATURE_CONTENT_TYPE], cType) !== -1;
 };
 
+/**
+ * Determine content type is openpgp encrypted content type.
+ */
 OpenPGPUtils.isEncryptedContentType = function(cType) {
     return AjxUtil.indexOf([OpenPGPUtils.OPENPGP_ENCRYPTED_CONTENT_TYPE], cType) !== -1;
 };
 
+/**
+ * Determine content type is openpgp key content type.
+ */
 OpenPGPUtils.isPGPKeysContentType = function(cType) {
     return AjxUtil.indexOf([OpenPGPUtils.OPENPGP_KEYS_CONTENT_TYPE], cType) !== -1;
 };
 
+/**
+ * Determine content is inline openpgp message.
+ */
 OpenPGPUtils.hasInlinePGPContent = function(content, header) {
     if (AjxUtil.indexOf(OpenPGPUtils.OPENPGP_MESSAGE_HEADERS, header) !== -1) {
         return content.indexOf(header) > 0;
@@ -106,10 +136,16 @@ OpenPGPUtils.hasInlinePGPContent = function(content, header) {
     return false;
 };
 
+/**
+ * Determine content disposition attachment.
+ */
 OpenPGPUtils.isAttachment = function(cd) {
     return cd.indexOf('attachment') >=0 || (cd.indexOf('inline') >=0 && cd.indexOf('filename') > 0);
 };
 
+/**
+ * Encrypt and save data to browser's local storage.
+ */
 OpenPGPUtils.localStorageSave = function(key, pwd, data) {
     var opts = {
         data: data,
@@ -121,6 +157,9 @@ OpenPGPUtils.localStorageSave = function(key, pwd, data) {
     });
 };
 
+/**
+ * Read data from browser's local storage and decrypt.
+ */
 OpenPGPUtils.localStorageRead = function(key, pwd) {
     var sequence = Promise.resolve();
     return sequence.then(function() {
@@ -170,21 +209,33 @@ OpenPGPUtils.base64ToBin = function(base64) {
     return codec.base64.decode(base64);
 };
 
+/*
+ * Convert string into an array
+ */
 OpenPGPUtils.stringToBin = function(string){
     var codec = window['emailjs-mime-codec'];
     return codec.toTypedArray(string);
 }
 
+/*
+ * Convert an array into string
+ */
 OpenPGPUtils.binToString = function(buf){
     var codec = window['emailjs-mime-codec'];
     return codec.fromTypedArray(buf);
 }
 
+/*
+ * Decode a utf-8 array
+ */
 OpenPGPUtils.utf8Decode = function(buf){
     var codec = window['emailjs-mime-codec'];
     return codec.charset.decode(buf, 'utf-8');
 }
 
+/**
+ * Fetch part content of a message.
+ */
 OpenPGPUtils.fetchPart = function(part, baseUrl) {
     var url, cType, cDisposition, iType;
     var addTimestamp = true;
@@ -231,6 +282,9 @@ OpenPGPUtils.fetchPart = function(part, baseUrl) {
     }
 };
 
+/**
+ * Visit recursion parent of an object.
+ */
 OpenPGPUtils.visitParent = function(parent, callback) {
     callback(parent);
     if (parent.parent) {
@@ -238,6 +292,9 @@ OpenPGPUtils.visitParent = function(parent, callback) {
     }
 };
 
+/**
+ * Visit mime part and its child mime part.
+ */
 OpenPGPUtils.visitMimePart = function(part, callback) {
     callback(part);
     if (part.mp) {
@@ -247,6 +304,9 @@ OpenPGPUtils.visitMimePart = function(part, callback) {
     }
 };
 
+/**
+ * Visit emailjs mime node and its child nodes.
+ */
 OpenPGPUtils.visitMimeNode = function(node, callback) {
     callback(node);
     if (Array.isArray(node._childNodes)) {
@@ -256,6 +316,9 @@ OpenPGPUtils.visitMimeNode = function(node, callback) {
     }
 };
 
+/**
+ * Build mime part from emailjs mime node.
+ */
 OpenPGPUtils.mimeNodeToZmMimePart = function(node, withAttachment) {
     var deep = 0;
     withAttachment = withAttachment | false;
@@ -327,6 +390,9 @@ OpenPGPUtils.mimeNodeToZmMimePart = function(node, withAttachment) {
     return mimePart;
 };
 
+/**
+ * Find body mime part.
+ */
 OpenPGPUtils.findBody = function(cType, part) {
     var bodyFound = false;
     if (part.mp) {
@@ -345,6 +411,9 @@ OpenPGPUtils.findBody = function(cType, part) {
     return bodyFound;
 };
 
+/**
+ * Get default sender email address.
+ */
 OpenPGPUtils.getDefaultSenderAddress = function() {
     var account = (appCtxt.accountList.defaultAccount ||
                    appCtxt.accountList.activeAccount ||
@@ -354,15 +423,24 @@ OpenPGPUtils.getDefaultSenderAddress = function() {
     return new AjxEmailAddress(identity.sendFromAddress, AjxEmailAddress.FROM, identity.sendFromDisplay);
 };
 
+/**
+ * Get message from zimlet.
+ */
 OpenPGPUtils.getMessage = function(key) {
     return OpenPGPZimbraSecure.getInstance().getMessage(key);
 };
 
+/**
+ * Save text data as download.
+ */
 OpenPGPUtils.saveTextAs = function(text, name) {
     var blob = new Blob([text], {type: ZmMimeTable.TEXT_PLAIN + '; charset=utf-8'});
     saveAs(blob, name);
 };
 
+/**
+ * Save data as download.
+ */
 OpenPGPUtils.saveAs = function(data, name, type) {
     if (typeof data === 'string') {
         data = OpenPGPUtils.stringToBin(data);
@@ -371,10 +449,16 @@ OpenPGPUtils.saveAs = function(data, name, type) {
     saveAs(blob, name);
 };
 
+/**
+ * Render template.
+ */
 OpenPGPUtils.renderTemplate = function(templateId, data) {
     return AjxTemplate.expand(OpenPGPZimbraSecure.NAME + '#' + templateId, data);
 };
 
+/**
+ * Build base rest url of current account.
+ */
 OpenPGPUtils.restUrl = function() {
     return AjxUtil.formatUrl({
         host: location.hostname,
