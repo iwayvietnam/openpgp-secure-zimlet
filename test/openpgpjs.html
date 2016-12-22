@@ -145,7 +145,7 @@
             });
             encryptor.shouldSign(true);
             encryptor.shouldEncrypt(false);
-            return encryptor.encrypt(result.message).then(function(mimeNode) {
+            return encryptor.encrypt(result.message.contents, result.message.attachments).then(function(mimeNode) {
                 result.mimeNode = mimeNode;
                 return result;
             });
@@ -189,7 +189,7 @@
             });
             encryptor.shouldSign(true);
             encryptor.shouldEncrypt(true);
-            return encryptor.encrypt(result.message).then(function(mimeNode) {
+            return encryptor.encrypt(result.message.contents, result.message.attachments).then(function(mimeNode) {
                 result.mimeNode = mimeNode;
                 return result;
             });
