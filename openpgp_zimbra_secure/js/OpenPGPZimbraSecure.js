@@ -78,17 +78,10 @@ OpenPGPZimbraSecure.prototype.init = function() {
         self._overrideZmMailMsg();
         self._overrideZmMailMsgView();
         self._overrideZmMsgController();
-        self._overrideZmMailListController();
 
-        if (!appCtxt.isChildWindow && !this._overridedClasses['ZmConv']) {
-            var responseLoadMsgsFunc = ZmConv.prototype._handleResponseLoadMsgs;
-            ZmConv.prototype._handleResponseLoadMsgs = function(callback, result) {
-                var newCallback = new AjxCallback(this, function(newResult) {
-                    responseLoadMsgsFunc.call(this, callback, newResult || result);
-                });
-                self._handleMessageResponse(newCallback, result);
-            };
-            this._overridedClasses['ZmConv'] = true;
+        if (!appCtxt.isChildWindow) {
+            self._overrideZmConv();
+            self._overrideZmMailListController();
         }
     }));
 
@@ -157,6 +150,23 @@ OpenPGPZimbraSecure.prototype._overrideZmMailMsg = function() {
             self._handleMessageResponse(newCallback, result);
         };
         this._overridedClasses['ZmMailMsg'] = true;
+    }
+};
+
+
+/**
+ * Override ZmConv class.
+ */
+OpenPGPZimbraSecure.prototype._overrideZmConv = function() {
+    if (!this._overridedClasses['ZmConv']) {
+        var responseLoadMsgsFunc = ZmConv.prototype._handleResponseLoadMsgs;
+        ZmConv.prototype._handleResponseLoadMsgs = function(callback, result) {
+            var newCallback = new AjxCallback(this, function(newResult) {
+                responseLoadMsgsFunc.call(this, callback, newResult || result);
+            });
+            self._handleMessageResponse(newCallback, result);
+        };
+        this._overridedClasses['ZmConv'] = true;
     }
 };
 
@@ -522,7 +532,7 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
         }
     }
 
-    if (pgpMessage.hasPGPKey) {
+    if (pgpMessage.hasPGPKey && !appCtxt.isChildWindow) {
         var pgpKey = pgpMessage.pgpKey;
         if (pgpKey) {
             var pubKey = openpgp.key.readArmored(pgpKey);
@@ -579,7 +589,7 @@ OpenPGPZimbraSecure.prototype.onPublicKeyChange = function() {
  */
 OpenPGPZimbraSecure.prototype.initializeToolbar = function(app, toolbar, controller, viewId) {
     var self = this;
-    if (AjxUtil.indexOf(toolbar.opList, ZmOperation.PRINT) && (controller instanceof ZmConvListController)) {
+    if (!appCtxt.isChildWindow && AjxUtil.indexOf(toolbar.opList, ZmOperation.PRINT) && (controller instanceof ZmConvListController)) {
         var button = toolbar.getButton(ZmOperation.PRINT);
         if (button) {
             button.removeSelectionListeners();
