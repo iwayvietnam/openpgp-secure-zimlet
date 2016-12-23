@@ -27,6 +27,9 @@ Platform:
 - Windows: Internet Explorer 11, Google Chrome, Chromium, Mozilla Firefox
 - Linux: Google Chrome, Chromium, Mozilla Firefox, Opera
 
+## Global Trust Key Store
+OpenPGP Secure Zimlet now is support [global trust key store](https://github.com/iwayvietnam/openpgp-secure-zimlet/wiki/Global-Trust-Key-Store).
+
 ### License
 
 Copyright (C) 2016-present iWay Vietnam - http://www.iwayvietnam.com
