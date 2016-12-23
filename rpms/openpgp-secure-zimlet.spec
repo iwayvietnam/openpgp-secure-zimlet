@@ -13,7 +13,7 @@ BuildRequires:  zip
 BuildArch:      noarch
 
 %description
-OpenPGP Secure Zimlet - Sign, verify, encrypt, and decrypt email with PGP/MIME by OpenPGP for Zimbra.
+OpenPGP Secure Zimlet - Add PGP/MIME support to Zimbra Webmail.
 
 %prep
 %setup -q
