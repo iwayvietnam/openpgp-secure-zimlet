@@ -458,12 +458,16 @@ OpenPGPUtils.renderTemplate = function(templateId, data) {
 
 /**
  * Build base rest url of current account.
+ *
+ * @param {String} object Rest object
+ * @param {hash} params Set of query string names and values
  */
-OpenPGPUtils.restUrl = function() {
+OpenPGPUtils.restUrl = function(object, params) {
     return AjxUtil.formatUrl({
         host: location.hostname,
-        path: '/home/' + appCtxt.getActiveAccount().name,
-        qsReset: true
+        path: '/home/' + appCtxt.getActiveAccount().name + '/' + object,
+        qsReset: true,
+        qsArgs: params
     });
 };
 
