@@ -57,6 +57,9 @@ fi
 
 
 %changelog
+* Fri Dec 23 2016 Nguyen Van Nguyen <nguyennv1981@gmail.com> - 1.0.6-1
+- Update to release 1.0.6
+
 * Fri Dec 23 2016 Truong Anh Tuan <tuanta@iwayvetnam.com> - 1.0.5-2
 - Update source URL
 
