@@ -13,7 +13,7 @@ Bugs and feedback: https://github.com/nguyennv/openpgp-secure-zimlet/issues
 ##Install OpenPGP Secure Zimlet
 ### Install from git
     [root@zimbra ~]# cd /tmp/
-    [root@zimbra ~]# git clone https://github.com/nguyennv/openpgp-secure-zimlet
+    [root@zimbra ~]# git clone https://github.com/iwayvietnam/openpgp-secure-zimlet
     [root@zimbra ~]# cd /tmp/openpgp-secure-zimlet
     [root@zimbra ~]# ./build.sh
     [root@zimbra ~]# su zimbra
@@ -29,7 +29,7 @@ Platform:
 
 ### License
 
-Copyright (C) 2016  Nguyen Van Nguyen
+Copyright (C) 2016-present iWay Vietnam - http://www.iwayvietnam.com
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
