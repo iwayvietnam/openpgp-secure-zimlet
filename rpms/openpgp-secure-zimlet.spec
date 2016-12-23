@@ -63,16 +63,16 @@ fi
 * Tue Dec 20 2016 Nguyen Van Nguyen <nguyennv1981@gmail.com> - 1.0.5-1
 - Update to release 1.0.5
 
-* Tue Dec 19 2016 Nguyen Van Nguyen <nguyennv1981@gmail.com> - 1.0.4-1
+* Mon Dec 19 2016 Nguyen Van Nguyen <nguyennv1981@gmail.com> - 1.0.4-1
 - Update to release 1.0.4
 
-* Tue Dec 12 2016 Nguyen Van Nguyen <nguyennv1981@gmail.com> - 1.0.3-1
+* Mon Dec 12 2016 Nguyen Van Nguyen <nguyennv1981@gmail.com> - 1.0.3-1
 - Update to release 1.0.3
 
-* Tue Dec 09 2016 Nguyen Van Nguyen <nguyennv1981@gmail.com> - 1.0.2-1
+* Fri Dec 09 2016 Nguyen Van Nguyen <nguyennv1981@gmail.com> - 1.0.2-1
 - Update to release 1.0.2.
 
-* Tue Dec 08 2016 Nguyen Van Nguyen <nguyennv1981@gmail.com> - 1.0.1-1
+* Thu Dec 08 2016 Nguyen Van Nguyen <nguyennv1981@gmail.com> - 1.0.1-1
 - Update to release 1.0.1.
 
 * Sun Nov 20 2016 Nguyen Van Nguyen <nguyennv1981@gmail.com> - 1.0.0-1
