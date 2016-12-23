@@ -5,8 +5,8 @@ Summary:        OpenPGP Secure Zimlet
 
 Group:          Applications/Internet
 License:        AGPLv3
-URL:            https://github.com/nguyennv/openpgp-secure-zimlet
-Source0:        https://github.com/nguyennv/openpgp-secure-zimlet/archive/%{version}.tar.gz
+URL:            https://github.com/iwayvietnam/openpgp-secure-zimlet
+Source0:        https://github.com/iwayvietnam/openpgp-secure-zimlet/archive/%{version}.tar.gz
 
 Requires:       zimbra-core >= 8.6
 BuildRequires:  zip
