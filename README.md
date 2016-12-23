@@ -9,6 +9,8 @@ Bugs and feedback: https://github.com/nguyennv/openpgp-secure-zimlet/issues
 - Support [OpenPGP Message](https://www.ietf.org/rfc/rfc4880.txt) signed/encrypted received messages
 - Support decrypting OpenPGP/MIME and OpenPGP Message encrypted attachments
 - Support GUI for easy configuration and OpenPGP key management
+- Support automatic contacts's public keys scanning
+- Support [global trust key store](https://github.com/iwayvietnam/openpgp-secure-zimlet/wiki/Global-Trust-Key-Store)
 
 ##Install OpenPGP Secure Zimlet
 ### Install from git
@@ -27,12 +29,8 @@ Platform:
 - Windows: Internet Explorer 11, Google Chrome, Chromium, Mozilla Firefox
 - Linux: Google Chrome, Chromium, Mozilla Firefox, Opera
 
-## Global Trust Key Store
-OpenPGP Secure Zimlet now is support [global trust key store](https://github.com/iwayvietnam/openpgp-secure-zimlet/wiki/Global-Trust-Key-Store).
-
 ### License
-
-Copyright (C) 2016-present iWay Vietnam - http://www.iwayvietnam.com
+Copyright (C) 2016-present [iWay Vietnam](http://www.iwayvietnam.com)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
