@@ -1,7 +1,7 @@
 # OpenPGP Secure Zimlet
  OpenPGP Secure Zimlet - Sign, verify, encrypt, and decrypt email with OpenPGP/MIME for Zimbra
 
-Bugs and feedback: https://github.com/nguyennv/openpgp-secure-zimlet/issues
+Bugs and feedback: https://github.com/iwayvietnam/openpgp-secure-zimlet/issues
 
 ## Features
 - Automatically sign/encrypt mail when sending, verify/decrypt received mail
