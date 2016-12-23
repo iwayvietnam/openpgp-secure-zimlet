@@ -6,8 +6,8 @@ Bugs and feedback: https://github.com/nguyennv/openpgp-secure-zimlet/issues
 ## Features
 - Automatically sign/encrypt mail when sending, verify/decrypt received mail
 - Support [OpenPGP/MIME](https://www.ietf.org/rfc/rfc3156.txt) on both message sending and receiving
-- Support [Inline-PGP](https://www.ietf.org/rfc/rfc4880.txt) signed/encrypted received messages
-- Support decrypting OpenPGP/MIME and Inline-PGP encrypted attachments
+- Support [OpenPGP Message](https://www.ietf.org/rfc/rfc4880.txt) signed/encrypted received messages
+- Support decrypting OpenPGP/MIME and OpenPGP Message encrypted attachments
 - Support GUI for easy configuration and OpenPGP key management
 
 ##Install OpenPGP Secure Zimlet
@@ -26,6 +26,9 @@ This zimlet has been tested with Zimbra Collaboration Open Source Edition 8.6 an
 Platform:
 - Windows: Internet Explorer 11, Google Chrome, Chromium, Mozilla Firefox
 - Linux: Google Chrome, Chromium, Mozilla Firefox, Opera
+
+## Global Trust Key Store
+OpenPGP Secure Zimlet now is support [global trust key store](https://github.com/iwayvietnam/openpgp-secure-zimlet/wiki/Global-Trust-Key-Store).
 
 ### License
 

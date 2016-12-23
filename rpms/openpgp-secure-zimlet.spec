@@ -1,6 +1,6 @@
 Name:           openpgp-secure-zimlet
-Version:        1.0.5
-Release:        2%{?dist}
+Version:        1.0.6
+Release:        1%{?dist}
 Summary:        OpenPGP Secure Zimlet
 
 Group:          Applications/Internet
