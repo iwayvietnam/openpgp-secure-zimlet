@@ -391,9 +391,7 @@ OpenPGPSecureKeyStore.prototype._storePublicKeys = function() {
  */
 OpenPGPSecureKeyStore.prototype._scanContacts = function() {
     var self = this;
-    var url = [
-        OpenPGPUtils.restUrl(), '/contacts?fmt=csv'
-    ].join('');
+    var url = OpenPGPUtils.restUrl('contacts', {fmt: 'csv'});
 
     var callback = new AjxCallback(function(response) {
         if (response.success) {
