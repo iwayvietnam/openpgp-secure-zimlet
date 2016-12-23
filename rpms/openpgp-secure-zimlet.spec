@@ -1,12 +1,12 @@
 Name:           openpgp-secure-zimlet
 Version:        1.0.5
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        OpenPGP Secure Zimlet
 
 Group:          Applications/Internet
 License:        AGPLv3
-URL:            https://github.com/nguyennv/openpgp-secure-zimlet
-Source0:        https://github.com/nguyennv/openpgp-secure-zimlet/archive/%{version}.tar.gz
+URL:            https://github.com/iwayvietnam/openpgp-secure-zimlet
+Source0:        https://github.com/iwayvietnam/openpgp-secure-zimlet/archive/%{version}.tar.gz
 
 Requires:       zimbra-core >= 8.6
 BuildRequires:  zip
@@ -57,6 +57,9 @@ fi
 
 
 %changelog
+* Fri Dec 23 2016 Truong Anh Tuan <tuanta@iwayvetnam.com> - 1.0.5-2
+- Update source URL
+
 * Tue Dec 20 2016 Nguyen Van Nguyen <nguyennv1981@gmail.com> - 1.0.5-1
 - Update to release 1.0.5
 
