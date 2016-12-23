@@ -1,7 +1,7 @@
 /**
  * ***** BEGIN LICENSE BLOCK *****
  * OpenPGP Zimbra Secure is the open source digital signature and encrypt for Zimbra Collaboration Open Source Edition software
- * Copyright (C) 2016-present Nguyen Van Nguyen <nguyennv1981@gmail.com>
+ * Copyright (C) 2016-present iWay Vietnam - http://www.iwayvietnam.com
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -636,7 +636,7 @@ OpenPGPZimbraSecure.prototype.initializeToolbar = function(app, toolbar, control
         if (!button) {
             var index = AjxUtil.indexOf(toolbar.opList, ZmOperation.COMPOSE_OPTIONS) + 1;
             var id = Dwt.getNextId() + '_' + OpenPGPZimbraSecure.BUTTON_CLASS;
-            
+
             var securityButton = new DwtToolBarButton({
                 parent: toolbar,
                 id: id + '_checkbox',
@@ -915,6 +915,9 @@ OpenPGPZimbraSecure.getClientVersion = function() {
     return appCtxt.get(ZmSetting.CLIENT_VERSION);
 };
 
+/**
+ * Open new window for encrypted message printing.
+ */
 OpenPGPZimbraSecure.prototype._encryptedMessagePrint = function(msg, pgpMessage) {
     var parrams = {
         from: msg.sentByAddr,
