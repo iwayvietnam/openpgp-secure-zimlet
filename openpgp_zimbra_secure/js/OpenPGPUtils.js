@@ -144,6 +144,13 @@ OpenPGPUtils.isAttachment = function(cd) {
 };
 
 /**
+ * Determine content is html.
+ */
+OpenPGPUtils.isHtml = function(str) {
+    return /<[a-z][\s\S]*>/i.test(str);
+};
+
+/**
  * Encrypt and save data to browser's local storage.
  */
 OpenPGPUtils.localStorageSave = function(key, pwd, data) {

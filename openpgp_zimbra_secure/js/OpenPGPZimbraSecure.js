@@ -927,7 +927,7 @@ OpenPGPZimbraSecure.prototype._encryptedMessagePrint = function(msg, pgpMessage)
         bccRecipient: false,
         replyTo: false,
         sentAt: new Date(msg.sentDate),
-        msgBody: pgpMessage.textContent
+        msgBody: OpenPGPUtils.isHtml(pgpMessage.textContent) ? pgpMessage.textContent : AjxStringUtil.convertToHtml(pgpMessage.textContent, false, '<pre>', '</pre>')
     };
 
     var toAddresses = msg.getAddresses(AjxEmailAddress.TO).getArray();
