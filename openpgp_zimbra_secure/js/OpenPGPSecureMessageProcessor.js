@@ -308,7 +308,7 @@ OpenPGPSecureMessageProcessor.prototype._decryptInlineMessage = function(callbac
                     var pgpMessage = {
                         textContent: result.content,
                         signatures: result.signatures,
-                        encrypted: false,
+                        encrypted: result.encrypted,
                         attachments: [],
                         hasPGPKey: msg.hasPGPKey,
                         pgpKey: msg.pgpKey

@@ -110,7 +110,7 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
         }
         else {
             return {
-                content: signedNode ? signedNode.raw.replace(/\r?\n/g, '\r\n') : message,
+                content: signedNode ? signedNode.raw.replace(/\r?\n/g, AjxStringUtil.CRLF) : message,
                 signature: signature,
                 signatures: [],
                 encrypted: encrypted
@@ -146,7 +146,7 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
                     };
                 });
                 if (signedNode) {
-                    message.content = signedNode.raw.replace(/\r?\n/g, '\r\n');
+                    message.content = signedNode.raw.replace(/\r?\n/g, AjxStringUtil.CRLF);
                 }
             }
 
@@ -224,6 +224,7 @@ OpenPGPDecrypt.decryptContent = function(content, publicKeys, privateKey, onDecr
             };
             return openpgp.decrypt(opts).then(function(plainText) {
                 return {
+                    encrypted: true,
                     content: plainText.data,
                     signatures: plainText.signatures
                 };
@@ -231,6 +232,7 @@ OpenPGPDecrypt.decryptContent = function(content, publicKeys, privateKey, onDecr
         }
         else {
             return {
+                encrypted: false,
                 content: content,
                 signatures: []
             };
@@ -238,6 +240,7 @@ OpenPGPDecrypt.decryptContent = function(content, publicKeys, privateKey, onDecr
     }, function(err) {
         OpenPGPZimbraSecure.popupErrorDialog(err);
         return {
+            encrypted: false,
             content: content,
             signatures: []
         };
@@ -250,6 +253,7 @@ OpenPGPDecrypt.decryptContent = function(content, publicKeys, privateKey, onDecr
             };
             return openpgp.verify(opts).then(function(signature) {
                 return {
+                    encrypted: false,
                     content: signature.data,
                     signatures: signature.signatures
                 };
@@ -261,6 +265,7 @@ OpenPGPDecrypt.decryptContent = function(content, publicKeys, privateKey, onDecr
     }, function(err) {
         OpenPGPZimbraSecure.popupErrorDialog(err);
         return {
+            encrypted: false,
             content: content,
             signatures: []
         };
