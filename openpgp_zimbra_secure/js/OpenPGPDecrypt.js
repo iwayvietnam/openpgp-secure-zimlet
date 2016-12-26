@@ -110,7 +110,7 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
         }
         else {
             return {
-                content: signedNode ? signedNode.raw.replace(/\r?\n/g, '\r\n') : message,
+                content: signedNode ? signedNode.raw.replace(/\r?\n/g, AjxStringUtil.CRLF) : message,
                 signature: signature,
                 signatures: [],
                 encrypted: encrypted
@@ -146,7 +146,7 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
                     };
                 });
                 if (signedNode) {
-                    message.content = signedNode.raw.replace(/\r?\n/g, '\r\n');
+                    message.content = signedNode.raw.replace(/\r?\n/g, AjxStringUtil.CRLF);
                 }
             }
 
