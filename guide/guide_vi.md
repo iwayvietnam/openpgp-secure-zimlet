@@ -1,7 +1,7 @@
 # Hướng dẫn cài đặt và sử dụng OpenPGP Secure Zimlet
 ## Hướng dẫn kích hoạt và cấu hình OpenPGP Secure Zimlet
 ### Kích hoạt OpenPGP Secure Zimlet
-1. Tại trang chủ chọn mục **Preferences -> Zimlets**
+1. Tại trang chủ chọn mục **Preferences -> Zimlets**&nbsp;
 ![zimlet-prefs.png](zimlet-prefs.png)
 1. Chọn "**OpenPGP Secure Email**" để kích hoạt OpenPGP Secure Zimlet
 ![zimlet-select.png](zimlet-select.png)
