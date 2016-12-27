@@ -9,11 +9,7 @@
 ### Cấu hình OpenPGP Security
 1. Tại trang chủ chọn mục **Preferences -> OpenPGP Security**
 ![openpgp-pref-select.png](openpgp-pref-select.png)
-1. Mục "**OpenPGP Mail Security**" bao gồm các lựa chọn:
-* **Auto (remember last settings)**: OpenPGP Security sẽ sử dụng lựa chọn gửi thư gần nhất.
-* **Do not sign or encrypt**: Không sử dụng tính năng ký số và mã hóa nội dung thư.
-* **Sign Only**: Chỉ sử dụng tính năng ký số nội dung thư.
-* **Sign and encrypt**: Sử dụng đồng thời tính năng ký số và mã hóa nội dung thư.
+1. Mục "**OpenPGP Mail Security**" bao gồm các lựa chọn:* **Auto (remember last settings)**: OpenPGP Security sẽ sử dụng lựa chọn gửi thư gần nhất.* **Do not sign or encrypt**: Không sử dụng tính năng ký số và mã hóa nội dung thư.* **Sign Only**: Chỉ sử dụng tính năng ký số nội dung thư.* **Sign and encrypt**: Sử dụng đồng thời tính năng ký số và mã hóa nội dung thư.
 ![openpgp-secure-config.png](openpgp-secure-config.png)
 
 ### Manage your Key Pair
