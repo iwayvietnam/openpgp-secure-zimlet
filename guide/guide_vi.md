@@ -14,7 +14,8 @@
   - **Do not sign or encrypt**: Không sử dụng tính năng ký số và mã hóa nội dung thư.<br/>
   - **Sign Only**: Chỉ sử dụng tính năng ký số nội dung thư.<br/>
   - **Sign and encrypt**: Sử dụng đồng thời tính năng ký số và mã hóa nội dung thư.
- ![openpgp-secure-config.png](openpgp-secure-config.png)   
+ ![openpgp-secure-config.png](openpgp-secure-config.png)
+ 
 ### **Key pair**<br/>
  1. Tại trang chủ chọn mục **Preferences -> OpenPGP Security**. Mục **Key pair** sẽ có giao diện như hình mình họa bên dưới. Người dùng điền các thông tin đã có sẵn vào các mục ***Private key***, ***Passphrase*** và ***Public key***.<br/>
  ![openpgp-keypair-config-empty.png](openpgp-keypair-config-empty.png)
