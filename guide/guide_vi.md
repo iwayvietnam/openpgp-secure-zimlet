@@ -25,43 +25,44 @@
 2. **Quản lý cặp khóa (Key pair)**
  2.1. Tại trang chủ chọn mục **Preferences -> OpenPGP Security**. Mục **Key pair** sẽ có giao diện như hình mình họa bên dưới. Người dùng điền các thông tin đã có sẵn vào các mục ***Private key***, ***Passphrase*** và ***Public key***.
  ![openpgp-keypair-config-empty.png](openpgp-keypair-config-empty.png)
-1. You can enter you existed key pair or
-1. Click "Generate key pair" button, a "Generate key pair" will appear.
+ 2.2. Trong trường hợp người dùng chưa có cặp khóa hoặc muốn tạo một cặp khóa mới, chọn **Generate key pair** sẽ xuất hiện một pop-up yêu cầu nhập đầy đủ các thông tin về Họ tên (Name), Địa chỉ hòm thư điện tử (Email), Mật khẩu khóa (Passphrase) và lựa chọn độ dài của khóa (Key length).
 ![openpgp-keypair-genarate.png](openpgp-keypair-genarate.png)
-1. After click "Ok" button. Your key pair is generated and "Key pair" Section will look like this
+ 2.3. Sau khi điền đầy đủ thông tin yêu cầu, chọn **OK** để tiến hành khởi tạo cặp khóa. Cặp khóa được khởi tạo sẽ được hiển thị như trong hình.
 ![openpgp-keypair-config.png](openpgp-keypair-config.png)
-1. You can submit your public key to pgp key server by clicking "Submit to Key server" button.
-1. You can send your public key to someone by clicking "Send public key" button. A new compose window will open for sending your public key.
+ 2.4. Người dùng có thể gửi khóa công khai (Public key) đến máy chủ (thao tác này sẽ giúp người dùng khác có thể tìm kiếm được khóa công khai của bạn) bằng cách bấm vào tùy chọn **Submit to key server**.
+ 2.5. Trong trường hợp cần gửi khóa công khai của mình đến người khác, người dùng có thể chọn **Send public key**. Một cửa sổ soạn thạo thư mới sẽ xuất hiện cho phép bạn gửi khóa công khai của bạn cho người nhận.
 ![openpgp-public-key-send.png](openpgp-public-key-send.png)
-1. You can save your private key to a file by clicking "Export key" button.
+ 2.6. Chọn **Export key** để lưu offline khóa bí mật (Private key) của người dùng về thiết bị.
 
-### Manage public keys
-1. Open your Preferences in Zimbra.
-1. Navigate to "OpenPGP Security" you will see "Public keys" Section
+3. **Manage public keys**
+ 3.1. Tại trang chủ chọn mục **Preferences -> OpenPGP Security**. Mục **Manage public keys** sẽ có giao diện như hình mình họa bên dưới.
 ![openpgp-public-key-list.png](openpgp-public-key-list.png)
-1. You can lookup someone's public key on key server by clicking "Key server lookup" button.
+ 3.2. Tùy chọn **Key server lookup** sẽ hỗ trợ người dùng tìm kiếm và thêm khóa công khai của người dùng khác từ máy chủ.
 ![openpgp-public-key-lookup.png](openpgp-public-key-lookup.png)
-1. You can add armored public keys by clicking "Add public key" button.
+ 3.2. Tùy chọn **Add public key** sẽ hỗ trợ người dùng thêm trực tiếp khóa công khai của người dùng bằng cách Paste nội dung khóa công khai của người dùng cần thêm, sau đó chọn **OK** để hoàn tất việc thêm khóa công khai mới vào danh sách.
 ![openpgp-public-key-add.png](openpgp-public-key-add.png)
-1. You can download all public keys and save to file by clicking "Export all keys" button.
-1. Your can delete a public key by right click a public on list and choose "Delete"
+ 3.3. Tùy chọn **Export all keys** sẽ hỗ trợ lưu offline toàn bộ danh sách khóa công khai về thiết bị của người dùng.
+ 3.4. Người dùng có thể xóa khóa công khai trong danh sách bằng cách click chuột phải vào khóa công khai cần xóa và chọn **Delete**.
 ![openpgp-public-key-delete.png](openpgp-public-key-delete.png)
 
-### Composing
-1. In "Mail" tab click "New Message". A "Compose" tab will appears.
-1. On toolbar of "Compose" tab. You can choose "Don't Sign", "Sign", "Sign and Encrypt" your message
-![openpgp-compose-select-sign.png](openpgp-compose-select-sign.png)
-1. You can sign your message on "Compose" tab like this
+### Soạn thảo thư sử dụng OpenPGP Secure Zimlet
+1. Tại mục **Mail** chọn **New Message**. Một cửa sổ soạn thảo thư mới sẽ xuất hiện
+1. Trên thanh tác vụ của cửa sổ soạn thảo thư, người dùng có thể lựa chọn:
+   > **Don't sign**: Không sử dụng tính năng ký số và mã hóa nội dung thư.
+   
+   > **Sign**: Chỉ sử dụng tính năng ký số nội dung thư.
+   
+   > **Sign and encrypt**: Sử dụng đồng thời tính năng ký số và mã hóa nội dung thư.
+
+ ![openpgp-compose-select-sign.png](openpgp-compose-select-sign.png)
+1. Sau khi chọn tùy chọn phù hợp, bấm **Send** để gửi thư.
 ![openpgp-compose-sign.png](openpgp-compose-sign.png)
-1. If you don't have your private key, a waring dialog will appears
+1. Trong trường hợp người dùng chưa có khóa bí mật, một popup cảnh báo sẽ xuất hiện với nội dung như hình bên dưới.
 ![openpgp-compose-sign-warn.png](openpgp-compose-sign-warn.png)
-1. You can sign and encrypt your message on "Compose" tab like this
-![openpgp-compose-encrypt.png](openpgp-compose-encrypt.png)
-1. If one or more receivers don't have public key, a waring dialog will appears
+1. Trong trường hợp người dùng chưa có khóa công khai của người nhận, một popup cảnh báo sẽ xuất hiện với nội dung như hình bên dưới. 
 ![openpgp-compose-encrypt-warn.png](openpgp-compose-encrypt-warn.png)
 
-### Reading signed/encrypted messages
-1. Reading signed message
+### Đọc thư có nội dung được ký số/mã hóa
+* Thư có nội dung ký số/mã hóa sẽ được mã hóa và có chú thích như hình minh họa bên dưới.
 ![openpgp-read-inline-signed-message.png](openpgp-read-inline-signed-message.png)
-1. Reading encrypted message
 ![openpgp-read-inline-ecrypted-message.png](openpgp-read-inline-ecrypted-message.png)
