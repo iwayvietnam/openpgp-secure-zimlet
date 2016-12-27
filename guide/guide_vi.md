@@ -1,13 +1,13 @@
 # Hướng dẫn cài đặt và sử dụng OpenPGP Secure Zimlet
 ## Hướng dẫn cài đặt
 ### Kích hoạt OpenPGP Secure Zimlet
-1. Tại trang chủ chọn mục Preferences -> Zimlets
+1. Tại trang chủ chọn mục **Preferences -> Zimlets**
 ![zimlet-prefs.png](zimlet-prefs.png)
-1. Chọn "OpenPGP Secure Email" để kích hoạt OpenPGP Secure Zimlet
+1. Chọn "**OpenPGP Secure Email**" để kích hoạt OpenPGP Secure Zimlet
 ![zimlet-select.png](zimlet-select.png)
 
 ### Cấu hình OpenPGP Security
-1. Tại trang chủ chọn mục Preferences -> OpenPGP Security
+1. Tại trang chủ chọn mục **Preferences -> OpenPGP Security**
 ![openpgp-pref-select.png](openpgp-pref-select.png)
 1. Choose mail security method in "OpenPGP Mail Security" section
 ![openpgp-secure-config.png](openpgp-secure-config.png)
