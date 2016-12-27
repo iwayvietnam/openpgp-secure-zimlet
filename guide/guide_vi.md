@@ -7,11 +7,12 @@
 ![zimlet-select.png](zimlet-select.png)
 
 ### Cấu hình OpenPGP Security
-1. Tại trang chủ chọn mục **Preferences -> OpenPGP Security**
+1. OpenPGP Mail Sercurity
+ 1. Tại trang chủ chọn mục **Preferences -> OpenPGP Security**
 ![openpgp-pref-select.png](openpgp-pref-select.png)
-1. Mục "**OpenPGP Mail Security**" bao gồm các lựa chọn:
+ 1. Mục "**OpenPGP Mail Security**" bao gồm các tùy chọn gửi thư:
 
-> **Auto (remember last settings)**: OpenPGP Security sẽ sử dụng lựa chọn gửi thư gần nhất.
+> **Auto (remember last settings)**: OpenPGP Security sẽ sử dụng tùy chọn gửi thư gần nhất.
 
 > **Do not sign or encrypt**: Không sử dụng tính năng ký số và mã hóa nội dung thư.
 
@@ -21,8 +22,8 @@
 
 ![openpgp-secure-config.png](openpgp-secure-config.png)
 
-### Manage your Key Pair
-1. Open your Preferences in Zimbra.
+### Quản lý cặp khóa
+1. Tại trang chủ chọn mục **Preferences -> OpenPGP Security**.
 1. Navigate to "OpenPGP Security" you will see "Key pair" Section
 ![openpgp-keypair-config-empty.png](openpgp-keypair-config-empty.png)
 1. You can enter you existed key pair or
