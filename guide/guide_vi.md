@@ -2,30 +2,29 @@
 ## Hướng dẫn kích hoạt và cấu hình OpenPGP Secure Zimlet
 ### Kích hoạt OpenPGP Secure Zimlet
 1. Tại trang chủ chọn mục **Preferences -> Zimlets**
- ![zimlet-prefs.png](zimlet-prefs.png)
+![zimlet-prefs.png](zimlet-prefs.png)
 1. Chọn "**OpenPGP Secure Email**" để kích hoạt OpenPGP Secure Zimlet
- ![zimlet-select.png](zimlet-select.png)
+![zimlet-select.png](zimlet-select.png)
 
 ### Cấu hình OpenPGP Security
-1. OpenPGP Mail Sercurity
- 1. Tại trang chủ chọn mục **Preferences -> OpenPGP Security**
- ![openpgp-pref-select.png](openpgp-pref-select.png)
- 1. Mục "**OpenPGP Mail Security**" bao gồm các tùy chọn gửi thư:
-
-   > **Auto (remember last settings)**: OpenPGP Security sẽ sử dụng tùy chọn gửi thư gần nhất.
-
-   > **Do not sign or encrypt**: Không sử dụng tính năng ký số và mã hóa nội dung thư.
-
-   > **Sign Only**: Chỉ sử dụng tính năng ký số nội dung thư.
-
-   > **Sign and encrypt**: Sử dụng đồng thời tính năng ký số và mã hóa nội dung thư.
-
-   ![openpgp-secure-config.png](openpgp-secure-config.png)
-
-### Quản lý cặp khóa
-1. Tại trang chủ chọn mục **Preferences -> OpenPGP Security**.
-1. Navigate to "OpenPGP Security" you will see "Key pair" Section
-![openpgp-keypair-config-empty.png](openpgp-keypair-config-empty.png)
+1. **OpenPGP Mail Sercurity**
+ 1.1. Tại trang chủ chọn mục **Preferences -> OpenPGP Security**&nbsp;
+![openpgp-pref-select.png](openpgp-pref-select.png)
+ 1.2. Mục "**OpenPGP Mail Security**" bao gồm các tùy chọn gửi thư:
+   
+   > **Auto (remember last settings)**: OpenPGP Security sẽ sử dụng tùy chọn gửi thư gần nhất.
+   
+   > **Do not sign or encrypt**: Không sử dụng tính năng ký số và mã hóa nội dung thư.
+   
+   > **Sign Only**: Chỉ sử dụng tính năng ký số nội dung thư.
+   
+   > **Sign and encrypt**: Sử dụng đồng thời tính năng ký số và mã hóa nội dung thư.
+   
+   ![openpgp-secure-config.png](openpgp-secure-config.png)
+   
+2. **Quản lý cặp khóa (Key pair)**
+ 2.1. Tại trang chủ chọn mục **Preferences -> OpenPGP Security**. Mục **Key pair** sẽ có giao diện như hình mình họa bên dưới. Người dùng điền các thông tin đã có sẵn vào các mục ***Private key***, ***Passphrase*** và ***Public key***.
+ ![openpgp-keypair-config-empty.png](openpgp-keypair-config-empty.png)
 1. You can enter you existed key pair or
 1. Click "Generate key pair" button, a "Generate key pair" will appear.
 ![openpgp-keypair-genarate.png](openpgp-keypair-genarate.png)
