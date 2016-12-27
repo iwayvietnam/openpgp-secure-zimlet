@@ -76,7 +76,7 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
             }
             if (signed) {
                 var ct = node.contentType.value;
-                if (OpenPGPUtils.isSignatureContentType(ct) || OpenPGPUtils.hasInlinePGPContent(node.raw, OpenPGPUtils.OPENPGP_SIGNED_MESSAGE_HEADER)) {
+                if (OpenPGPUtils.isSignatureContentType(ct) || OpenPGPUtils.hasInlinePGPContent(node.raw, OpenPGPUtils.OPENPGP_SIGNATURE_HEADER)) {
                     signature = OpenPGPUtils.binToString(chunk);
                 }
             }
@@ -131,7 +131,7 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
                 var parser = new window['emailjs-mime-parser']();
                 parser.onbody = function(node, chunk){
                     var ct = node.contentType.value;
-                    if (OpenPGPUtils.isSignatureContentType(ct) || OpenPGPUtils.hasInlinePGPContent(node.raw, OpenPGPUtils.OPENPGP_SIGNED_MESSAGE_HEADER)) {
+                    if (OpenPGPUtils.isSignatureContentType(ct) || OpenPGPUtils.hasInlinePGPContent(node.raw, OpenPGPUtils.OPENPGP_SIGNATURE_HEADER)) {
                         signature = OpenPGPUtils.binToString(chunk);
                     }
                 };

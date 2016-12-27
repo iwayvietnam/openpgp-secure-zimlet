@@ -37,16 +37,21 @@ OpenPGPUtils.OPENPGP_CONTENT_TYPES = [
 ];
 
 OpenPGPUtils.OPENPGP_MESSAGE_HEADER = 'BEGIN PGP MESSAGE';
+OpenPGPUtils.OPENPGP_SIGNATURE_HEADER = 'BEGIN PGP SIGNATURE'
 OpenPGPUtils.OPENPGP_SIGNED_MESSAGE_HEADER = 'BEGIN PGP SIGNED MESSAGE';
 OpenPGPUtils.OPENPGP_PRIVATE_KEY_HEADER = 'BEGIN PGP PRIVATE KEY BLOCK';
 OpenPGPUtils.OPENPGP_PUBLIC_KEY_HEADER = 'BEGIN PGP PUBLIC KEY BLOCK';
 
+
 OpenPGPUtils.OPENPGP_MESSAGE_HEADERS = [
     OpenPGPUtils.OPENPGP_MESSAGE_HEADER,
+    OpenPGPUtils.OPENPGP_SIGNATURE_HEADER,
     OpenPGPUtils.OPENPGP_SIGNED_MESSAGE_HEADER,
     OpenPGPUtils.OPENPGP_PRIVATE_KEY_HEADER,
     OpenPGPUtils.OPENPGP_PUBLIC_KEY_HEADER,
 ];
+
+OpenPGPUtils.AMORED_HEADER_REG = /^-----BEGIN PGP (MESSAGE, PART \d+\/\d+|MESSAGE, PART \d+|SIGNED MESSAGE|MESSAGE|PUBLIC KEY BLOCK|PRIVATE KEY BLOCK|SIGNATURE)-----$\n/m;
 
 /**
  * Determine content type is openpgp signed message.
@@ -134,6 +139,17 @@ OpenPGPUtils.hasInlinePGPContent = function(content, header) {
         }
     }
     return false;
+};
+
+/**
+ * Determine content is armored.
+ */
+OpenPGPUtils.isArmored = function(content) {
+    var header = content.replace(/[\t\r ]+\n/g, '\n').match(OpenPGPUtils.AMORED_HEADER_REG);
+    if (!header) {
+        return false;
+    }
+    return true;
 };
 
 /**
