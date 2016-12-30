@@ -30,6 +30,8 @@ OpenPGPSecurePrefs = function(shell, section, controller, handler) {
 };
 
 OpenPGPSecurePrefs.SECURITY = 'OPENPGP_SECURITY';
+OpenPGPSecurePrefs.KEY_SERVER = 'OPENPGP_KEY_SERVER';
+
 OpenPGPSecurePrefs.PRIVATE_KEY = 'OPENPGP_PRIVATE_KEY';
 OpenPGPSecurePrefs.PASSPHRASE = 'OPENPGP_PASSPHRASE';
 OpenPGPSecurePrefs.PUBLIC_KEY = 'OPENPGP_PUBLIC_KEY';
@@ -45,7 +47,8 @@ OpenPGPSecurePrefs.KEY_LOOKUP = 'OPENPGP_KEY_LOOKUP';
 OpenPGPSecurePrefs.PASSPHRASE_TOGGLE = 'OPENPGP_PASSPHRASE_TOGGLE';
 
 OpenPGPSecurePrefs.SECURITY_SETTINGS = [
-    OpenPGPSecurePrefs.SECURITY
+    OpenPGPSecurePrefs.SECURITY,
+    OpenPGPSecurePrefs.KEY_SERVER
 ];
 
 OpenPGPSecurePrefs._loadCallbacks = [];
@@ -66,6 +69,14 @@ OpenPGPSecurePrefs.registerSettings = function(handler) {
         dataType: ZmSetting.D_STRING,
         defaultValue: OpenPGPZimbraSecure.OPENPGP_AUTO
     });
+
+    var keyServer = handler.getZimletContext().getConfig('openpgp-key-server');
+    zmSettings.registerSetting(OpenPGPSecurePrefs.KEY_SERVER, {
+        type: ZmSetting.T_PREF,
+        dataType: ZmSetting.D_STRING,
+        defaultValue: keyServer
+    });
+
     zmSettings.registerSetting(OpenPGPSecurePrefs.PRIVATE_KEY, {
         type: ZmSetting.T_PREF,
         dataType: ZmSetting.D_STRING,
@@ -147,6 +158,14 @@ OpenPGPSecurePrefs.registerPrefs = function(handler) {
         ]
     });
 
+    var keyServers = JSON.parse(handler.getZimletContext().getConfig('openpgp-key-servers'));
+    ZmPref.registerPref(OpenPGPSecurePrefs.KEY_SERVER, {
+        displayName:      handler.getMessage('prefKeyServer'),
+        displayContainer: ZmPref.TYPE_SELECT,
+        displayOptions:   keyServers,
+        options:          keyServers
+    });
+
     ZmPref.registerPref(OpenPGPSecurePrefs.PRIVATE_KEY, {
         displayName:      handler.getMessage('prefPrivateKey'),
         displayContainer: ZmPref.TYPE_TEXTAREA
@@ -197,6 +216,7 @@ OpenPGPSecurePrefs.registerPrefs = function(handler) {
         manageDirty: true,
         prefs: [
             ZmSetting[OpenPGPSecurePrefs.SECURITY],
+            ZmSetting[OpenPGPSecurePrefs.KEY_SERVER],
             ZmSetting[OpenPGPSecurePrefs.PRIVATE_KEY],
             ZmSetting[OpenPGPSecurePrefs.PASSPHRASE],
             ZmSetting[OpenPGPSecurePrefs.PUBLIC_KEY],
@@ -393,7 +413,7 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
         var self = this;
         var publicKey = this._keyStore.getPublicKey();
         if (publicKey) {
-            var keyServer = this._handler.getZimletContext().getConfig('openpgp-key-server');
+            var keyServer = this.getFormValue(OpenPGPSecurePrefs.KEY_SERVER);
             var hkp = new openpgp.HKP(keyServer);
             hkp.upload(publicKey.armor()).then(function() {
                 self._handler.displayStatusMessage(self._handler.getMessage('publicKeySubmitted'));
@@ -514,24 +534,20 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
      */
     OpenPGPSecurePrefs.prototype._keyLookup = function() {
         var self = this;
-        if (this._handler._keyLookupDialog) {
-            var dialog = this._handler._keyLookupDialog;
-            dialog.getView().reset();
-        }
-        else {
-            var dialog = this._handler._keyLookupDialog = new KeyLookupDialog(
-                this._handler,
-                function() {
-                    var publicKeys = dialog.getPublicKeys();
-                    publicKeys.forEach(function(armoredKey) {
-                        var pubKey = openpgp.key.readArmored(armoredKey);
-                        pubKey.keys.forEach(function(key) {
-                            self._keyStore.addPublicKey(key);
-                        });
+        var keyServer = this.getFormValue(OpenPGPSecurePrefs.KEY_SERVER);
+        var dialog = new KeyLookupDialog(
+            this._handler,
+            keyServer,
+            function() {
+                var publicKeys = dialog.getPublicKeys();
+                publicKeys.forEach(function(armoredKey) {
+                    var pubKey = openpgp.key.readArmored(armoredKey);
+                    pubKey.keys.forEach(function(key) {
+                        self._keyStore.addPublicKey(key);
                     });
-                }
-            );
-        }
+                });
+            }
+        );
         dialog.popup();
     };
 

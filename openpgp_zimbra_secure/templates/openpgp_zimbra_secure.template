@@ -38,10 +38,13 @@
         <tr>
             <td class='ZOptionsSectionMain'>
                 <table width=100%>
-                
                     <tr>
-                        <td class='ZOptionsLabelTop'><$=openpgp_zimbra_secure.prefSign$></td>
+                        <td class='ZOptionsLabelTop'><$=openpgp_zimbra_secure.prefSecurity$></td>
                         <td class='ZOptionsField'><div id='${id}_OPENPGP_SECURITY' tabindex='35'></div></td>
+                    </tr>
+                    <tr>
+                        <td class='ZOptionsLabelTop'><$=openpgp_zimbra_secure.prefKeyServer$></td>
+                        <td class='ZOptionsField'><div id='${id}_OPENPGP_KEY_SERVER'></div></td>
                     </tr>
                 </table>
             </td>
