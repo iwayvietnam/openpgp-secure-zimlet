@@ -890,7 +890,7 @@ OpenPGPZimbraSecure.popupErrorDialog = function(errorCode){
     }
     var msg = OpenPGPUtils.getMessage(errorCode);
     var title = OpenPGPUtils.getMessage(errorCode + '-title');
-    var helpUrl = handler.getZimletContext().getConfig('help-url');
+    var helpUrl = this.getZimletContext().getConfig('help-url');
 
     var dialog = appCtxt.getHelpMsgDialog();
     dialog.setMessage(msg, DwtMessageDialog.CRITICAL_STYLE, title);
