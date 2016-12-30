@@ -26,8 +26,7 @@ KeyLookupView = function(params) {
     DwtComposite.call(this, params);
 
     this._handler = params.handler;
-    var keyServer = this._handler.getZimletContext().getConfig('openpgp-key-server');
-    this._hkp = new openpgp.HKP(keyServer);
+    this._hkp = new openpgp.HKP(params.keyServer);
 
     this._createHtmlFromTemplate(this.TEMPLATE, {
         id: this.getHTMLElId()

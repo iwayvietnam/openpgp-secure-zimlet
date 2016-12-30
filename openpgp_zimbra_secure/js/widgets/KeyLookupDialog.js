@@ -21,8 +21,7 @@
  * Written by Nguyen Van Nguyen <nguyennv1981@gmail.com>
  */
 
-KeyLookupDialog = function(handler, onOk, onCancel) {
-    var keyServer = handler.getZimletContext().getConfig('openpgp-key-server');
+KeyLookupDialog = function(handler, keyServer, onOk, onCancel) {
     OpenPGPDialog.call(
         this,
         handler,
@@ -34,7 +33,8 @@ KeyLookupDialog = function(handler, onOk, onCancel) {
 
     this.setView(new KeyLookupView({
         parent: this,
-        handler: handler
+        handler: handler,
+        keyServer: keyServer
     }));
 };
 
