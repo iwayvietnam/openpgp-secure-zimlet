@@ -22,7 +22,17 @@
 -->
 <zimletConfig name="openpgp_zimbra_secure" version="0.1">
     <global>
-        <property name="openpgp-key-server">https://pgp.key-server.io</property>
+        <property name="openpgp-key-server">https://pgp.mit.edu</property>
+        <property name="openpgp-key-servers">
+        [
+            "https://pgp.mit.edu",
+            "https://keys.fedoraproject.org",
+            "https://keyserver.ubuntu.com",
+            "https://pgp.key-server.io",
+            "https://sks-keyservers.net",
+            "https://keyserver.pgp.com"
+        ]
+        </property>
         <property name="global-trust">global-trust.asc</property>
     </global>
 </zimletConfig>
