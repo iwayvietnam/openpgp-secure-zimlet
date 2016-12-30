@@ -22,7 +22,7 @@
 -->
 <zimletConfig name="openpgp_zimbra_secure" version="0.1">
     <global>
-        <property name="openpgp-key-server">https://pgp.key-server.io</property>
+        <property name="openpgp-key-server">https://pgp.key-server.org</property>
         <property name="global-trust">global-trust.asc</property>
     </global>
 </zimletConfig>
