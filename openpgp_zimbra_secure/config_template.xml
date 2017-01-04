@@ -36,5 +36,6 @@
         ]
         </property>
         <property name="global-trust">global-trust.asc</property>
+        <property name="help-url">https://github.com/iwayvietnam/openpgp-secure-zimlet/wiki/OpenPGP-Secure-Zimlet-Guide</property>
     </global>
 </zimletConfig>
