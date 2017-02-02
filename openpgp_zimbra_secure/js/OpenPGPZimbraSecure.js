@@ -655,7 +655,7 @@ OpenPGPZimbraSecure.prototype.initializeToolbar = function(app, toolbar, control
             var listener = new AjxListener(this, this._handleSelectSigning, [securityButton]);
 
             var nosignButton = new DwtMenuItem({parent: securityMenu, style: DwtMenuItem.RADIO_STYLE, radioGroupId: signingRadioId});
-            nosignButton.setText(this.getMessage('dontSignMessage'));
+            nosignButton.setText(this.getMessage('dontEncryptMessage'));
             nosignButton.addSelectionListener(listener);
             nosignButton.setData('sign', OpenPGPZimbraSecure.OPENPGP_DONTSIGN);
 
@@ -685,7 +685,7 @@ OpenPGPZimbraSecure.prototype.initializeToolbar = function(app, toolbar, control
 
 OpenPGPZimbraSecure.prototype._setSecurityImage = function(button, value) {
     var security_types = {};
-    security_types[OpenPGPZimbraSecure.OPENPGP_DONTSIGN] = {label: this.getMessage('dontSignMessage'), className: 'PGPDontSign'};
+    security_types[OpenPGPZimbraSecure.OPENPGP_DONTSIGN] = {label: this.getMessage('dontEncryptMessage'), className: 'PGPDontSign'};
     security_types[OpenPGPZimbraSecure.OPENPGP_SIGN] = {label: this.getMessage('signMessage'), className: 'PGPSign'};
     security_types[OpenPGPZimbraSecure.OPENPGP_SIGNENCRYPT] = {label: this.getMessage('signAndEncryptMessage'), className: 'PGPSignEncrypt'};
 
@@ -695,7 +695,7 @@ OpenPGPZimbraSecure.prototype._setSecurityImage = function(button, value) {
     }
     else {
         button.setImage('DontSign');
-        button.setText(this.getMessage('dontSignMessage'));
+        button.setText(this.getMessage('dontEncryptMessage'));
     }
 };
 
