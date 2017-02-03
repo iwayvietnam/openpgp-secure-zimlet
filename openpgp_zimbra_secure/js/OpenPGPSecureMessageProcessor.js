@@ -400,8 +400,15 @@ OpenPGPSecureMessageProcessor.hasPGPPart = function(part) {
  * Check message has inline pgp part.
  */
 OpenPGPSecureMessageProcessor.hasInlinePGP = function(part) {
-    if (part.content && OpenPGPUtils.isArmored(part.content)) {
-        return true;
+    if (part.content) {
+        var content;
+        if (part.ct.indexOf(ZmMimeTable.TEXT_HTML) >= 0) {
+            content = AjxStringUtil.stripTags(part.content);
+        }
+        else {
+            content = part.content;
+        }
+        return OpenPGPUtils.isArmored(content);
     } else if (!part.mp) {
         return false;
     }
