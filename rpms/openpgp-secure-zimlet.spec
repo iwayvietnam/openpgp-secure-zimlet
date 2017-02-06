@@ -1,5 +1,5 @@
 Name:           openpgp-secure-zimlet
-Version:        1.0.9
+Version:        1.0.10
 Release:        1%{?dist}
 Summary:        OpenPGP Secure Zimlet
 
@@ -57,6 +57,9 @@ fi
 
 
 %changelog
+* Mon Feb 06 2017 Nguyen Van Nguyen <nguyennv1981@gmail.com> - 1.0.10-1
+- Update to release 1.0.10
+
 * Thu Feb 02 2017 Nguyen Van Nguyen <nguyennv1981@gmail.com> - 1.0.9-1
 - Update to release 1.0.9
 
