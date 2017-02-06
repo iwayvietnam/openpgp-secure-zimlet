@@ -285,7 +285,7 @@ OpenPGPSecureMessageProcessor.prototype._decryptInlineMessage = function(callbac
         });
         if (contentPart) {
             if (contentPart.ct.indexOf(ZmMimeTable.TEXT_HTML) >= 0) {
-                var content = AjxStringUtil.stripTags(contentPart.content);
+                var content = AjxStringUtil.trim(AjxStringUtil.stripTags(contentPart.content));
             }
             else {
                 var content = contentPart.content;
@@ -400,8 +400,15 @@ OpenPGPSecureMessageProcessor.hasPGPPart = function(part) {
  * Check message has inline pgp part.
  */
 OpenPGPSecureMessageProcessor.hasInlinePGP = function(part) {
-    if (part.content && OpenPGPUtils.isArmored(part.content)) {
-        return true;
+    if (part.content) {
+        var content;
+        if (part.ct.indexOf(ZmMimeTable.TEXT_HTML) >= 0) {
+            content = AjxStringUtil.trim(AjxStringUtil.stripTags(part.content));
+        }
+        else {
+            content = part.content;
+        }
+        return OpenPGPUtils.isArmored(content);
     } else if (!part.mp) {
         return false;
     }
