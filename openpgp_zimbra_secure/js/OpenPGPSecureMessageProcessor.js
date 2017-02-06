@@ -285,7 +285,7 @@ OpenPGPSecureMessageProcessor.prototype._decryptInlineMessage = function(callbac
         });
         if (contentPart) {
             if (contentPart.ct.indexOf(ZmMimeTable.TEXT_HTML) >= 0) {
-                var content = AjxStringUtil.stripTags(contentPart.content);
+                var content = AjxStringUtil.trim(AjxStringUtil.stripTags(contentPart.content));
             }
             else {
                 var content = contentPart.content;
@@ -403,7 +403,7 @@ OpenPGPSecureMessageProcessor.hasInlinePGP = function(part) {
     if (part.content) {
         var content;
         if (part.ct.indexOf(ZmMimeTable.TEXT_HTML) >= 0) {
-            content = AjxStringUtil.stripTags(part.content);
+            content = AjxStringUtil.trim(AjxStringUtil.stripTags(part.content));
         }
         else {
             content = part.content;
