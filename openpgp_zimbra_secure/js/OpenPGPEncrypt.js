@@ -72,29 +72,18 @@ OpenPGPEncrypt.prototype.encrypt = function(contents, attachments) {
             }
             return openpgp.encrypt(opts).then(function(cipherText) {
                 return builder.buildEncrypted(cipherText.data);
-            }, function(err) {
-                self.onError(err);
-                return false;
             });
         }
         else if (self._shouldSign && self._privateKey) {
-            var opts = {
-                data: mimeNode.build(),
-                privateKeys: self._privateKey
-            };
-            return openpgp.sign(opts).then(function(signedText) {
-                var hashAlg = 'pgp-' + openpgp.util.get_hashAlgorithmString(openpgp.config.prefer_hash_algorithm);
-                var signatureHeader = '-----BEGIN PGP SIGNATURE-----';
-                var signature = signatureHeader + signedText.data.split(signatureHeader).pop();
-                return builder.buildSigned(mimeNode, signature, hashAlg.toLowerCase());
-            }, function(err) {
-                self.onError(err);
-                return false;
-            });
+            var hashAlg = 'pgp-' + openpgp.util.get_hashAlgorithmString(openpgp.config.prefer_hash_algorithm);
+            var signature = self._detachedSign(mimeNode.build());
+            return builder.buildSigned(mimeNode, signature, hashAlg.toLowerCase());
         }
         return mimeNode;
-    })
-    .then(function(mimeNode) {
+    }, function(err) {
+        self.onError(err);
+        return false;
+    }).then(function(mimeNode) {
         if (mimeNode) {
             self.onCallback(self._onEncrypted, mimeNode);
         }
@@ -137,7 +126,7 @@ OpenPGPEncrypt.prototype.shouldSign = function(shouldSign) {
 };
 
 /**
- * Get/set encrypt; state.
+ * Get/set encrypt state.
  */
 OpenPGPEncrypt.prototype.shouldEncrypt = function(shouldEncrypt) {
     if (typeof shouldEncrypt === 'undefined') {
@@ -147,3 +136,14 @@ OpenPGPEncrypt.prototype.shouldEncrypt = function(shouldEncrypt) {
         this._shouldEncrypt = shouldEncrypt ? true : false;
     }
 };
+
+/**
+ * Detached sign.
+ */
+OpenPGPEncrypt.prototype._detachedSign = function(content) {
+    var message = openpgp.message.fromBinary(OpenPGPUtils.stringToBin(content));
+    var signedMessage = message.sign([this._privateKey]);
+    var signature = signedMessage.packets.filterByTag(openpgp.enums.packet.signature);
+    var armored = openpgp.armor.encode(openpgp.enums.armor.message, signature.write());
+    return armored.replace('PGP MESSAGE', 'PGP SIGNATURE');
+}
