@@ -145,5 +145,5 @@ OpenPGPEncrypt.prototype._detachedSign = function(content) {
     var signedMessage = message.sign([this._privateKey]);
     var signature = signedMessage.packets.filterByTag(openpgp.enums.packet.signature);
     var armored = openpgp.armor.encode(openpgp.enums.armor.message, signature.write());
-    return armored.replace('PGP MESSAGE', 'PGP SIGNATURE');
+    return armored.replace(/PGP MESSAGE/g, 'PGP SIGNATURE');
 }
