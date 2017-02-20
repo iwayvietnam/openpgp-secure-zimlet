@@ -37,7 +37,6 @@ OpenPGPDecrypt = function(opts) {
 
     this._privateKey = opts.privateKey;
     this._publicKeys = opts.publicKeys;
-    this._messageEncrypted = false;
 };
 
 OpenPGPDecrypt.prototype = new Object();

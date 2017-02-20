@@ -28,7 +28,6 @@ OpenPGPEncrypt = function(opts) {
     opts = opts || {
         privateKey: false,
         publicKeys: [],
-        passphrase: '',
         beforeEncrypt: false,
         onEncrypted: false,
         onError: false
