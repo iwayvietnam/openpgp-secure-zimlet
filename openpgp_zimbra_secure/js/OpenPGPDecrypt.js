@@ -37,7 +37,6 @@ OpenPGPDecrypt = function(opts) {
 
     this._privateKey = opts.privateKey;
     this._publicKeys = opts.publicKeys;
-    this._messageEncrypted = false;
 };
 
 OpenPGPDecrypt.prototype = new Object();
@@ -132,7 +131,7 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
                 parser.onbody = function(node, chunk){
                     var ct = node.contentType.value;
                     if (OpenPGPUtils.isSignatureContentType(ct) || OpenPGPUtils.hasInlinePGPContent(node.raw, OpenPGPUtils.OPENPGP_SIGNATURE_HEADER)) {
-                        signature = OpenPGPUtils.binToString(chunk);
+                        message.signature = OpenPGPUtils.binToString(chunk);
                     }
                 };
                 parser.write(message.content);
