@@ -56,7 +56,7 @@ OpenPGPMimeBuilder.prototype.buildPlainText = function(contents, attachments) {
             var inlineAttachments = this._inlineAttachments(attachments);
             if (inlineAttachments.length > 0) {
                 contents.forEach(function(mp){
-                    if (mp.ct === ZmMimeTable.TEXT_PLAIN) {
+                    if (mp.ct.indexOf(ZmMimeTable.TEXT_PLAIN) !== -1) {
                         contentNode.createChild(mp.ct)
                             .setContent(mp.content._content)
                             .setHeader('content-transfer-encoding', 'quoted-printable');
@@ -65,7 +65,7 @@ OpenPGPMimeBuilder.prototype.buildPlainText = function(contents, attachments) {
 
                 var relatedNode = contentNode.createChild(ZmMimeTable.MULTI_RELATED);
                 contents.forEach(function(mp){
-                    if (mp.ct === ZmMimeTable.TEXT_HTML) {
+                    if (mp.ct.indexOf(ZmMimeTable.TEXT_HTML) !== -1) {
                         relatedNode.createChild(mp.ct)
                             .setContent(mp.content._content)
                             .setHeader('content-transfer-encoding', 'quoted-printable');
