@@ -49,14 +49,43 @@ OpenPGPMimeBuilder.prototype.buildPlainText = function(contents, attachments) {
     var rootNode, contentNode;
     var mimeNode = new MimeNode();
 
-    if (contents && contents.length > 0) {
+    contents = contents || [];
+    if (contents.length > 0) {
         if (contents.length > 1) {
             contentNode = mimeNode.createChild(ZmMimeTable.MULTI_ALT);
-            contents.forEach(function(mp){
-                contentNode.createChild(mp.ct)
-                    .setContent(mp.content._content)
-                    .setHeader('content-transfer-encoding', 'quoted-printable');
-            });
+            var inlineAttachments = this._inlineAttachments(attachments);
+            if (inlineAttachments.length > 0) {
+                contents.forEach(function(mp){
+                    if (mp.ct === ZmMimeTable.TEXT_PLAIN) {
+                        contentNode.createChild(mp.ct)
+                            .setContent(mp.content._content)
+                            .setHeader('content-transfer-encoding', 'quoted-printable');
+                    }
+                });
+
+                var relatedNode = contentNode.createChild(ZmMimeTable.MULTI_RELATED);
+                contents.forEach(function(mp){
+                    if (mp.ct === ZmMimeTable.TEXT_HTML) {
+                        relatedNode.createChild(mp.ct)
+                            .setContent(mp.content._content)
+                            .setHeader('content-transfer-encoding', 'quoted-printable');
+                    }
+                });
+                inlineAttachments.forEach(function(mp){
+                    relatedNode.createChild(mp.ct)
+                        .setHeader('content-transfer-encoding', mp.cte)
+                        .setHeader('content-disposition', mp.cd)
+                        .setHeader('content-id', mp.ci)
+                        .setContent(mp.data);
+                });
+            }
+            else {
+                contents.forEach(function(mp){
+                    contentNode.createChild(mp.ct)
+                        .setContent(mp.content._content)
+                        .setHeader('content-transfer-encoding', 'quoted-printable');
+                });
+            }
         }
         else {
             var mp = contents[0];
@@ -69,17 +98,16 @@ OpenPGPMimeBuilder.prototype.buildPlainText = function(contents, attachments) {
         contentNode = new MimeNode(ZmMimeTable.TEXT_PLAIN);
     }
 
-    if (attachments && attachments.length > 0) {
+    attachments = attachments || [];
+    var normalAttachments = this._normalAttachments(attachments);
+    if (normalAttachments.length > 0) {
         rootNode = mimeNode.createChild(ZmMimeTable.MULTI_MIXED);
         rootNode.appendChild(contentNode);
-        attachments.forEach(function(mp){
+        normalAttachments.forEach(function(mp){
             var attachNode = rootNode.createChild(mp.ct)
                 .setHeader('content-transfer-encoding', mp.cte)
                 .setHeader('content-disposition', mp.cd)
                 .setContent(mp.data);
-            if (mp.ci) {
-                attachNode.setHeader('content-id', mp.ci);
-            }
         });
     }
     else {
@@ -139,3 +167,23 @@ OpenPGPMimeBuilder.prototype.buildEncrypted = function(cipherText) {
         .setContent(cipherText);
     return encryptedNode;
 };
+
+OpenPGPMimeBuilder.prototype._inlineAttachments = function(attachments) {
+    var inlineAttachments = [];
+    attachments.forEach(function(mp){
+        if (mp.ci) {
+            inlineAttachments.push(mp);
+        }
+    });
+    return inlineAttachments;
+}
+
+OpenPGPMimeBuilder.prototype._normalAttachments = function(attachments) {
+    var normalAttachments = [];
+    attachments.forEach(function(mp){
+        if (!mp.ci) {
+            normalAttachments.push(mp);
+        }
+    });
+    return normalAttachments;
+}
