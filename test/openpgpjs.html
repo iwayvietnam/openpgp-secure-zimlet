@@ -81,6 +81,7 @@
 
     var defineMessage = function() {
         var contents = [], attachments = [];
+        var cid = 'j1ohjwj40.15b847f10fa1414d@openpgp';
 
         contents.push({
             ct: 'text/plain; charset=utf-8',
@@ -91,15 +92,22 @@
         contents.push({
             ct: 'text/html; charset=utf-8',
             content: {
-                _content: '<strong>Test signed formatted message with attachment</strong>'
+                _content: '<strong>Test signed formatted message with attachment</strong>\n<img src="cid:' + cid + '" alt="">'
             }
         });
 
         attachments.push({
-            ct: 'image/png; name=image.png',
+            ct: 'image/png; name=valid.png',
             cd: 'attachment',
+            ci: '<' + cid + '>',
             data: formatPEM('iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAvVBMVEUAAAAPug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug8Pug/2MSuoAAAAPnRSTlMAAQMEBQYHCQoLDA0QEhQZHyAiIyQmKSwzNDU4Q0RFUVtoc3eFiYuqtLW3vsHFx8zP0dPV2dze4Ojv9fn7/Z3mkNsAAACTSURBVBgZBcGHIhsAAEDBVyE2JWLPmm1V7ZW4//8sd1Ud/MHH+XJVNbwBfB1WNfsGwGnVNQD8rC0Ad3uv7uoC4N+gJVZ65nj8ye2gRuw28avWP//O1MaEw148zNXaTG1Osd8V93NVoymsto3HYY2ncF/9xtPizhcYV8N3AM6qWrgFOKmqfhz9x+RytaqqGizNV1XfgD0jxoFnSPoAAAAASUVORK5CYII=')
         });
+        attachments.push({
+            ct: 'image/png; name=corrupt.png',
+            cd: 'attachment',
+            data: formatPEM('iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAApVBMVEUAAAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAB0VaXZAAAANnRSTlMAAQIDBQwNExQZGh0eHyAjKSorLS4wMTRRUlhwgIOOlZeYm7m6wMzOz9HZ2t7g6Ont8fX3+fstoyDcAAAAh0lEQVQYGQXBhyICAABAwVcysmc2mSEj4f7/09xVtX75sHiZngyqquEN4H1c1fAZV2fnXzisuoWNesJytXbAuGYwrWuwXXMw6g3s1SfY6hfs1w84aA4mBWx1Df6+l8CoXXBa4K66g+OC5Vq1MsP92QUcVTW8AXxsVlWtXz4uXqeTQVVVVVVV/5JEH13hQwyRAAAAAElFTkSuQmCC')
+        });
+
         return {
             contents: contents,
             attachments: attachments
