@@ -36,6 +36,7 @@ OpenPGPSecureKeyStore = function(handler) {
     this._publicKeysItem = 'openpgp-secure-public-keys-' + uid;
 
     this.passphrase = '';
+    this.armoredPrivateKey = '';
     this.privateKey = false;
     this.publicKeys = [];
     this.contactPublicKeys = [];
@@ -80,6 +81,7 @@ OpenPGPSecureKeyStore.prototype.init = function() {
             )
             .then(function(privateKey) {
                 if (privateKey) {
+                    self.armoredPrivateKey = privateKey;
                     var privKey = openpgp.key.readArmored(privateKey);
                     privKey.keys.forEach(function(key) {
                         if (key.decrypt(passphrase)) {
@@ -112,13 +114,12 @@ OpenPGPSecureKeyStore.prototype.init = function() {
  */
 OpenPGPSecureKeyStore.prototype.addPublicKey = function(key) {
     if (key.isPublic()) {
-        var self = this;
         var added = false;
 
         var fingerprint = key.primaryKey.getFingerprint();
-        if (!self._fingerprints[fingerprint]) {
-            self._fingerprints[fingerprint] = fingerprint;
-            self.publicKeys.push(key);
+        if (!this._fingerprints[fingerprint]) {
+            this._fingerprints[fingerprint] = fingerprint;
+            this.publicKeys.push(key);
             added = true;
         }
 
@@ -185,36 +186,10 @@ OpenPGPSecureKeyStore.prototype.getPrivateKey = function() {
 };
 
 /**
- * Set private key to key store.
- *
- * @param {String} privateKey Armored private key
- * @param {String} passphrase Passphrase for key decrypting
+ * Get armored private key in key store.
  */
-OpenPGPSecureKeyStore.prototype.setPrivateKey = function(privateKey, passphrase) {
-    var self = this;
-    var privKey = openpgp.key.readArmored(privateKey);
-    privKey.keys.forEach(function(key) {
-        if (key.decrypt(passphrase)) {
-            self.privateKey = key;
-            self.passphrase = passphrase;
-            self.addPublicKey(key.toPublic());
-
-            OpenPGPUtils.localStorageSave(
-                self._privateKeyItem,
-                self._handler.getSecurePassword(),
-                privateKey
-            );
-            OpenPGPUtils.localStorageSave(
-                self._passphraseItem,
-                self._handler.getSecurePassword(),
-                passphrase
-            );
-        }
-        else {
-            throw new Error(this._handler.getMessage('decryptPrivateKeyError'));
-        }
-    });
-    return this;
+OpenPGPSecureKeyStore.prototype.getArmoredPrivateKey = function() {
+    return this.armoredPrivateKey;
 };
 
 /**
@@ -237,6 +212,40 @@ OpenPGPSecureKeyStore.prototype.getPublicKeys = function() {
 OpenPGPSecureKeyStore.prototype.getAllPublicKeys = function() {
     var publicKeys = this.publicKeys;
     return publicKeys.concat(this.contactPublicKeys).concat(this.globalPublicKeys);
+};
+
+/**
+ * Set private key to key store.
+ *
+ * @param {String} privateKey Armored private key
+ * @param {String} passphrase Passphrase for key decrypting
+ */
+OpenPGPSecureKeyStore.prototype.setPrivateKey = function(privateKey, passphrase) {
+    var self = this;
+    var privKey = openpgp.key.readArmored(privateKey);
+    privKey.keys.forEach(function(key) {
+        if (key.decrypt(passphrase)) {
+            self.armoredPrivateKey = privateKey;
+            self.privateKey = key;
+            self.passphrase = passphrase;
+            self.addPublicKey(key.toPublic());
+
+            OpenPGPUtils.localStorageSave(
+                self._privateKeyItem,
+                self._handler.getSecurePassword(),
+                privateKey
+            );
+            OpenPGPUtils.localStorageSave(
+                self._passphraseItem,
+                self._handler.getSecurePassword(),
+                passphrase
+            );
+        }
+        else {
+            throw new Error(self._handler.getMessage('decryptPrivateKeyError'));
+        }
+    });
+    return this;
 };
 
 /**
