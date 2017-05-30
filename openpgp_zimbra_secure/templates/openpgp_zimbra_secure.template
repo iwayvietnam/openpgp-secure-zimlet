@@ -81,11 +81,6 @@
                     </tr>
 
                     <tr>
-                        <td class='ZOptionsLabelTop'><$=openpgp_zimbra_secure.prefPublicKey$></td>
-                        <td class='ZOptionsField'><div id='${id}_OPENPGP_PUBLIC_KEY'></div></td>
-                    </tr>
-
-                    <tr>
                         <td class='ZOptionsLabelTop'></td>
                         <td class='ZOptionsField'>
                             <table class='ZPropertySheet' border=0 cellspacing=0 cellpadding=0 width=100%>
