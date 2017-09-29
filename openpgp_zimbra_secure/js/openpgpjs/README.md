@@ -21,7 +21,7 @@ OpenPGP.js [![Build Status](https://travis-ci.org/openpgpjs/openpgpjs.svg?branch
 
 * If the user's browser supports [native WebCrypto](http://caniuse.com/#feat=cryptography) via the `window.crypto.subtle` api, this will be used. Under node.js the native [crypto module](https://nodejs.org/api/crypto.html#crypto_crypto) is used. This can be deactivated by setting `openpgp.config.use_native = false`.
 
-* The library implements the [IETF proposal](https://tools.ietf.org/html/draft-ford-openpgp-format-00) for authenticated encryption [using native AES-GCM](https://github.com/openpgpjs/openpgpjs/pull/430). This makes symmetric encryption about 30x faster on supported platforms. Since the specification has not been finalized and other OpenPGP implementations haven't adopted it yet, the feature is currently behind a flag. You can activate it by setting `openpgp.config.aead_protect = true`.
+* The library implements the [IETF proposal](https://tools.ietf.org/html/draft-ford-openpgp-format-00) for authenticated encryption [using native AES-GCM](https://github.com/openpgpjs/openpgpjs/pull/430). This makes symmetric encryption about 30x faster on supported platforms. Since the specification has not been finalized and other OpenPGP implementations haven't adopted it yet, the feature is currently behind a flag. You can activate it by setting `openpgp.config.aead_protect = true`. **Note: activating this setting can break compatibility with other OpenPGP implementations, so be careful if that's one of your requirements.**
 
 * For environments that don't provide native crypto, the library falls back to [asm.js](http://caniuse.com/#feat=asmjs) implementations of AES, SHA-1, and SHA-256. We use [Rusha](https://github.com/srijs/rusha) and [asmCrypto Lite](https://github.com/openpgpjs/asmcrypto-lite) (a minimal subset of asmCrypto.js built specifically for OpenPGP.js).
 
@@ -87,12 +87,16 @@ openpgp.decrypt(options).then(function(plaintext) {
 var options, encrypted;
 
 var pubkey = '-----BEGIN PGP PUBLIC KEY BLOCK ... END PGP PUBLIC KEY BLOCK-----';
-var privkey = '-----BEGIN PGP PRIVATE KEY BLOCK ... END PGP PRIVATE KEY BLOCK-----';
+var privkey = '-----BEGIN PGP PRIVATE KEY BLOCK ... END PGP PRIVATE KEY BLOCK-----'; //encrypted private key
+var passphrase = 'secret passphrase'; //what the privKey is encrypted with
+
+var privKeyObj = openpgp.key.readArmored(privkey).keys[0];
+privKeyObj.decrypt(passphrase);
 
 options = {
     data: 'Hello, World!',                             // input as String (or Uint8Array)
     publicKeys: openpgp.key.readArmored(pubkey).keys,  // for encryption
-    privateKeys: openpgp.key.readArmored(privkey).keys // for signing (optional)
+    privateKeys: privKeyObj // for signing (optional)
 };
 
 openpgp.encrypt(options).then(function(ciphertext) {
@@ -104,7 +108,7 @@ openpgp.encrypt(options).then(function(ciphertext) {
 options = {
     message: openpgp.message.readArmored(encrypted),     // parse armored message
     publicKeys: openpgp.key.readArmored(pubkey).keys,    // for verification (optional)
-    privateKey: openpgp.key.readArmored(privkey).keys[0] // for decryption
+    privateKey: privKeyObj // for decryption
 };
 
 openpgp.decrypt(options).then(function(plaintext) {
@@ -157,13 +161,17 @@ hkp.upload(pubkey).then(function() { ... });
 var options, cleartext, validity;
 
 var pubkey = '-----BEGIN PGP PUBLIC KEY BLOCK ... END PGP PUBLIC KEY BLOCK-----';
-var privkey = '-----BEGIN PGP PRIVATE KEY BLOCK ... END PGP PRIVATE KEY BLOCK-----';
+var privkey = '-----BEGIN PGP PRIVATE KEY BLOCK ... END PGP PRIVATE KEY BLOCK-----'; //encrypted private key
+var passphrase = 'secret passphrase'; //what the privKey is encrypted with
+
+var privKeyObj = openpgp.key.readArmored(privkey).keys[0];
+privKeyObj.decrypt(passphrase);
 ```
 
 ```js
 options = {
     data: 'Hello, World!',                             // input as String (or Uint8Array)
-    privateKeys: openpgp.key.readArmored(privkey).keys // for signing
+    privateKeys: privKeyObj // for signing
 };
 
 openpgp.sign(options).then(function(signed) {
@@ -185,33 +193,46 @@ openpgp.verify(options).then(function(verified) {
 });
 ```
 
-#### Create and verify *detached* signatures for binary data
+#### Create and verify *detached* signatures
 
 ```js
-var content, detachedSig, validity;
+var options, cleartext, detachedSig, validity;
 
 var pubkey = '-----BEGIN PGP PUBLIC KEY BLOCK ... END PGP PUBLIC KEY BLOCK-----';
-var privkey = '-----BEGIN PGP PRIVATE KEY BLOCK ... END PGP PRIVATE KEY BLOCK-----';
+var privkey = '-----BEGIN PGP PRIVATE KEY BLOCK ... END PGP PRIVATE KEY BLOCK-----'; //encrypted private key
+var passphrase = 'secret passphrase'; //what the privKey is encrypted with
+
+var privKeyObj = openpgp.key.readArmored(privkey).keys[0];
+privKeyObj.decrypt(passphrase);
 ```
 
 ```js
-content = 'Hello, World!';                               // input as String
-var privateKeys = openpgp.key.readArmored(privkey).keys; // for signing
-var bytes = openpgp.util.str2Uint8Array(content);        // convert text to binary
-var message = openpgp.message.fromBinary(bytes);
-var signedMessage = message.sign(privateKeys);
-var signature = signedMessage.packets.filterByTag(openpgp.enums.packet.signature);
-var armoredMessage = openpgp.armor.encode(openpgp.enums.armor.message, signature.write());
-armoredMessage = armoredMessage.replace('-----BEGIN PGP MESSAGE-----\r\n', '-----BEGIN PGP SIGNATURE-----\r\n');
-armoredMessage = armoredMessage.replace('-----END PGP MESSAGE-----\r\n', '-----END PGP SIGNATURE-----\r\n');
-detachedSig = armoredMessage; // '-----BEGIN PGP SIGNATURE ... END PGP SIGNATURE-----'
+options = {
+    data: 'Hello, World!',                             // input as String (or Uint8Array)
+    privateKeys: privKeyObj, // for signing
+    detached: true
+};
+
+openpgp.sign(options).then(function(signed) {
+    cleartext = signed.data;
+    detachedSig = signed.signature;
+});
 ```
 
+
 ```js
-var publicKeys = openpgp.key.readArmored(pubkey).keys; // for verifying signatures
-var msg = openpgp.message.readSignedContent(content, detachedSig);
-var result = msg.verify(publicKeys);
-validity = result[0].valid; // true
+options = {
+    message: openpgp.cleartext.readArmored(cleartext), // parse armored message
+    signature: openpgp.signature.readArmored(detachedSig), // parse detached signature
+    publicKeys: openpgp.key.readArmored(pubkey).keys   // for verification
+};
+
+openpgp.verify(options).then(function(verified) {
+    validity = verified.signatures[0].valid; // true
+    if (validity) {
+        console.log('signed by key id ' + verified.signatures[0].keyid.toHex());
+    }
+});
 ```
 
 ### Documentation
