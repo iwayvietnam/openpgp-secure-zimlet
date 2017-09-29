@@ -12,7 +12,7 @@ Bugs and feedback: https://github.com/iwayvietnam/openpgp-secure-zimlet/issues
 - Support automatic contacts's public keys scanning
 - Support [global trust key store](https://github.com/iwayvietnam/openpgp-secure-zimlet/wiki/Global-Trust-Key-Store)
 
-##Install OpenPGP Secure Zimlet
+## Install OpenPGP Secure Zimlet
 ### Install from git
     [root@zimbra ~]# cd /tmp/
     [root@zimbra ~]# git clone https://github.com/iwayvietnam/openpgp-secure-zimlet
