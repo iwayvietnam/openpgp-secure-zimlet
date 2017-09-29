@@ -380,6 +380,18 @@ OpenPGPZimbraSecure.prototype._overrideZmComposeView = function() {
     }
 };
 
+OpenPGPZimbraSecure.prototype.override = function(object, funcName, newFunc) {
+    newFunc = newFunc || this[funcName];
+    if (newFunc) {
+        var oldFunc = object[funcName];
+        object[funcName] = function() {
+            newFunc.func = oldFunc;
+            return newFunc.apply(this, arguments);
+        }
+        object[funcName].func = oldFunc;
+    }
+}
+
 /**
  * Get openpgp key store.
  */

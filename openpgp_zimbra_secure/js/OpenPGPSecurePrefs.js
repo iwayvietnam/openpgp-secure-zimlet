@@ -34,7 +34,6 @@ OpenPGPSecurePrefs.KEY_SERVER = 'OPENPGP_KEY_SERVER';
 
 OpenPGPSecurePrefs.PRIVATE_KEY = 'OPENPGP_PRIVATE_KEY';
 OpenPGPSecurePrefs.PASSPHRASE = 'OPENPGP_PASSPHRASE';
-OpenPGPSecurePrefs.PUBLIC_KEY = 'OPENPGP_PUBLIC_KEY';
 OpenPGPSecurePrefs.PUBLIC_KEYS = 'OPENPGP_PUBLIC_KEYS';
 
 OpenPGPSecurePrefs.KEYPAIR_GEN = 'OPENPGP_KEYPAIR_GEN';
@@ -86,11 +85,6 @@ OpenPGPSecurePrefs.registerSettings = function(handler) {
         type: ZmSetting.T_PREF,
         dataType: ZmSetting.D_STRING,
         defaultValue: keyStore.getPassphrase()
-    });
-    zmSettings.registerSetting(OpenPGPSecurePrefs.PUBLIC_KEY, {
-        type: ZmSetting.T_PREF,
-        dataType: ZmSetting.D_STRING,
-        defaultValue: publicKey ? publicKey.armor().trim().replace(/\r?\n/g, '\n') : ''
     });
     zmSettings.registerSetting(OpenPGPSecurePrefs.KEYPAIR_GEN, {
         type: ZmSetting.T_PREF,
@@ -175,11 +169,6 @@ OpenPGPSecurePrefs.registerPrefs = function(handler) {
         displayContainer: ZmPref.TYPE_STATIC
     });
 
-    ZmPref.registerPref(OpenPGPSecurePrefs.PUBLIC_KEY, {
-        displayName:      handler.getMessage('prefPublicKey'),
-        displayContainer: ZmPref.TYPE_TEXTAREA
-    });
-
     ZmPref.registerPref(OpenPGPSecurePrefs.KEYPAIR_GEN, {
         displayContainer: ZmPref.TYPE_STATIC
     });
@@ -219,7 +208,6 @@ OpenPGPSecurePrefs.registerPrefs = function(handler) {
             ZmSetting[OpenPGPSecurePrefs.KEY_SERVER],
             ZmSetting[OpenPGPSecurePrefs.PRIVATE_KEY],
             ZmSetting[OpenPGPSecurePrefs.PASSPHRASE],
-            ZmSetting[OpenPGPSecurePrefs.PUBLIC_KEY],
             ZmSetting[OpenPGPSecurePrefs.KEYPAIR_GEN],
             ZmSetting[OpenPGPSecurePrefs.KEY_SUBMIT],
             ZmSetting[OpenPGPSecurePrefs.KEY_SEND],
@@ -278,14 +266,6 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
         var passphrase = passphraseSetting.origValue = passphraseSetting.getValue();
 
         this._keyStore.setPrivateKey(privateKey, passphrase);
-        var publicKey = this._keyStore.getPublicKey();
-        if (publicKey) {
-            var value = publicKey.armor().trim().replace(/\r?\n/g, '\n');
-            this.setFormValue(OpenPGPSecurePrefs.PUBLIC_KEY, value);
-            var publicKeySetting = zmSettings.getSetting(OpenPGPSecurePrefs.PUBLIC_KEY);
-            publicKeySetting.setValue(value);
-            publicKeySetting.origValue = value;
-        }
 
         this._controller.setDirty(this._section.id, false);
 
@@ -394,7 +374,6 @@ AjxDispatcher.addPackageLoadFunction('Preferences', new AjxCallback(function() {
                     return dialog.generateKey().then(function(key) {
                         self.setFormValue(OpenPGPSecurePrefs.PRIVATE_KEY, key.privateKey.replace(/\r?\n/g, '\n'));
                         self.setFormValue(OpenPGPSecurePrefs.PASSPHRASE, key.passphrase);
-                        self.setFormValue(OpenPGPSecurePrefs.PUBLIC_KEY, key.publicKey.replace(/\r?\n/g, '\n'));
 
                         return key;
                     });

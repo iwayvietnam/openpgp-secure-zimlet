@@ -81,11 +81,6 @@
                     </tr>
 
                     <tr>
-                        <td class='ZOptionsLabelTop'><$=openpgp_zimbra_secure.prefPublicKey$></td>
-                        <td class='ZOptionsField'><div id='${id}_OPENPGP_PUBLIC_KEY'></div></td>
-                    </tr>
-
-                    <tr>
                         <td class='ZOptionsLabelTop'></td>
                         <td class='ZOptionsField'>
                             <table class='ZPropertySheet' border=0 cellspacing=0 cellpadding=0 width=100%>
@@ -373,5 +368,18 @@
             <div id="iframeBody" class="MsgBody-html">${msgBody}</div>
             <hr>
         </td></tr>
+    </table>
+</template>
+
+<template id='openpgp_zimbra_secure#PrivateKeyView'>
+    <table border=0 cellspacing=0 cellpadding=0 width=100% class='PrivateKeyTable'>
+        <tr class='PrivateKeyRow'>
+            <td><$=openpgp_zimbra_secure.privateKeyDialogLabel$></td>
+            <td><div id='${id}_txtPrivateKey'></div></td>
+        </tr>
+        <tr class='PrivateKeyRow'>
+            <td><$=openpgp_zimbra_secure.privateKeyDialogPassphrase$></td>
+            <td><div id='${id}_txtPassphrase'></div></td>
+        </tr>
     </table>
 </template>

@@ -28,7 +28,6 @@ OpenPGPEncrypt = function(opts) {
     opts = opts || {
         privateKey: false,
         publicKeys: [],
-        passphrase: '',
         beforeEncrypt: false,
         onEncrypted: false,
         onError: false
@@ -72,29 +71,25 @@ OpenPGPEncrypt.prototype.encrypt = function(contents, attachments) {
             }
             return openpgp.encrypt(opts).then(function(cipherText) {
                 return builder.buildEncrypted(cipherText.data);
-            }, function(err) {
-                self.onError(err);
-                return false;
             });
         }
         else if (self._shouldSign && self._privateKey) {
             var opts = {
                 data: mimeNode.build(),
-                privateKeys: self._privateKey
+                privateKeys: self._privateKey,
+                detached: true
             };
-            return openpgp.sign(opts).then(function(signedText) {
+
+            return openpgp.sign(opts).then(function(signed) {
                 var hashAlg = 'pgp-' + openpgp.util.get_hashAlgorithmString(openpgp.config.prefer_hash_algorithm);
-                var signatureHeader = '-----BEGIN PGP SIGNATURE-----';
-                var signature = signatureHeader + signedText.data.split(signatureHeader).pop();
-                return builder.buildSigned(mimeNode, signature, hashAlg.toLowerCase());
-            }, function(err) {
-                self.onError(err);
-                return false;
+                return builder.buildSigned(mimeNode, signed.signature, hashAlg.toLowerCase());
             });
         }
         return mimeNode;
-    })
-    .then(function(mimeNode) {
+    }, function(err) {
+        self.onError(err);
+        return false;
+    }).then(function(mimeNode) {
         if (mimeNode) {
             self.onCallback(self._onEncrypted, mimeNode);
         }
@@ -137,7 +132,7 @@ OpenPGPEncrypt.prototype.shouldSign = function(shouldSign) {
 };
 
 /**
- * Get/set encrypt; state.
+ * Get/set encrypt state.
  */
 OpenPGPEncrypt.prototype.shouldEncrypt = function(shouldEncrypt) {
     if (typeof shouldEncrypt === 'undefined') {
