@@ -380,7 +380,30 @@ OpenPGPZimbraSecure.prototype._overrideZmComposeView = function() {
     }
 };
 
-OpenPGPZimbraSecure.prototype.override = function(object, funcName, newFunc) {
+/**
+ * Override class function.
+ */
+OpenPGPZimbraSecure.prototype.overrideClass = function(funcName, newFunc) {
+    if (!this._overridedClasses[funcName]) {
+        var path = funcName.split('.');
+        var object = window;
+        for (var i = 0; i < path.length - 1; i++) {
+            object = object[path[i]];
+            if (!object) {
+                // The path doesn't exist
+                console.log("Not overriding " + funcName + "; " + path.slice(0, i + 1).join('.') + " doesn't exist");
+                return;
+            }
+        }
+
+        this._overridedClasses[funcName] = this.overrideObject(object, path[path.length - 1], newFunc);
+    }
+}
+
+/**
+ * Override object function.
+ */
+OpenPGPZimbraSecure.prototype.overrideObject = function(object, funcName, newFunc) {
     newFunc = newFunc || this[funcName];
     if (newFunc) {
         var oldFunc = object[funcName];
@@ -389,7 +412,9 @@ OpenPGPZimbraSecure.prototype.override = function(object, funcName, newFunc) {
             return newFunc.apply(this, arguments);
         }
         object[funcName].func = oldFunc;
+        return true;
     }
+    return false;
 }
 
 /**
