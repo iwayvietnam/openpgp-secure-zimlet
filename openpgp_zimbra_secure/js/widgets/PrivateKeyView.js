@@ -21,8 +21,8 @@
  * Written by Nguyen Van Nguyen <nguyennv1981@gmail.com>
  */
 
-DecryptKeyView = function(params) {
-    params.className = params.className || 'DwtComposite DecryptKeyView';
+PrivateKeyView = function(params) {
+    params.className = params.className || 'DwtComposite PrivateKeyView';
     DwtComposite.call(this, params);
 
     this._privateKey = params.privateKey;
@@ -34,16 +34,16 @@ DecryptKeyView = function(params) {
     this._initialize();
 };
 
-DecryptKeyView.prototype = new DwtComposite;
-DecryptKeyView.prototype.constructor = DecryptKeyView;
+PrivateKeyView.prototype = new DwtComposite;
+PrivateKeyView.prototype.constructor = PrivateKeyView;
 
-DecryptKeyView.prototype.toString = function() {
-    return 'DecryptKeyView';
+PrivateKeyView.prototype.toString = function() {
+    return 'PrivateKeyView';
 };
 
-DecryptKeyView.prototype.TEMPLATE = OpenPGPZimbraSecure.NAME + '#DecryptKeyView';
+PrivateKeyView.prototype.TEMPLATE = OpenPGPZimbraSecure.NAME + '#PrivateKeyView';
 
-DecryptKeyView.prototype._initialize = function() {
+PrivateKeyView.prototype._initialize = function() {
     var id = this.getHTMLElId();
 
     var txtPrivateKey = this.txtPrivateKey = new DwtInputField({

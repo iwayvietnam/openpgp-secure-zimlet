@@ -21,20 +21,19 @@
  * Written by Nguyen Van Nguyen <nguyennv1981@gmail.com>
  */
 
-DecryptKeyDialog = function(handler, onOk, onCancel) {
+PrivateKeyDialog = function(handler, onOk, onCancel) {
     OpenPGPDialog.call(
         this,
         handler,
-        handler.getMessage('decryptKeyTitle'),
+        handler.getMessage('privateKeyDialogTitle'),
         onOk,
         onCancel,
         [DwtDialog.CANCEL_BUTTON, DwtDialog.OK_BUTTON]
     );
 
-    this.armoredPrivateKey = keyStore.getArmoredPrivateKey();
+    this.armoredPrivateKey = handler.getKeyStore().getArmoredPrivateKey();
     this.privateKey = false;
 
-    var keyStore = handler.getKeyStore();
     var view = new DecryptView({
         parent: this,
         privateKey: armoredPrivateKey
@@ -42,18 +41,18 @@ DecryptKeyDialog = function(handler, onOk, onCancel) {
     this.setView(view);
 };
 
-DecryptKeyDialog.prototype = new OpenPGPDialog;
-DecryptKeyDialog.prototype.constructor = DecryptKeyDialog;
+PrivateKeyDialog.prototype = new OpenPGPDialog;
+PrivateKeyDialog.prototype.constructor = PrivateKeyDialog;
 
-DecryptKeyDialog.prototype.toString = function() {
-    return 'DecryptKeyDialog';
+PrivateKeyDialog.prototype.toString = function() {
+    return 'PrivateKeyDialog';
 };
 
-DecryptKeyDialog.prototype.getPrivateKey = function() {
+PrivateKeyDialog.prototype.getPrivateKey = function() {
     return this.privateKey;
 }
 
-DecryptKeyDialog.prototype.decrypt = function() {
+PrivateKeyDialog.prototype.decryptKey = function() {
     var self = this;
     var view = this.getView();
     var privateKey = view.txtPrivateKey.getValue();

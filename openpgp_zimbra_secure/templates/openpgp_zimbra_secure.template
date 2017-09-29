@@ -371,14 +371,14 @@
     </table>
 </template>
 
-<template id='openpgp_zimbra_secure#DecryptKeyView'>
-    <table border=0 cellspacing=0 cellpadding=0 width=100% class='DecryptKeyTable'>
-        <tr class='DecryptKeyRow'>
-            <td><$=openpgp_zimbra_secure.decryptKeyPrivateKey$></td>
+<template id='openpgp_zimbra_secure#PrivateKeyView'>
+    <table border=0 cellspacing=0 cellpadding=0 width=100% class='PrivateKeyTable'>
+        <tr class='PrivateKeyRow'>
+            <td><$=openpgp_zimbra_secure.privateKeyDialogLabel$></td>
             <td><div id='${id}_txtPrivateKey'></div></td>
         </tr>
-        <tr class='DecryptKeyRow'>
-            <td><$=openpgp_zimbra_secure.decryptKeyPassphrase$></td>
+        <tr class='PrivateKeyRow'>
+            <td><$=openpgp_zimbra_secure.privateKeyDialogPassphrase$></td>
             <td><div id='${id}_txtPassphrase'></div></td>
         </tr>
     </table>
