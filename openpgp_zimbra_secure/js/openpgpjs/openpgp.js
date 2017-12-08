@@ -4841,7 +4841,7 @@ exports.default = {
   tolerant: true, // ignore unsupported/unrecognizable packets instead of throwing an error
   show_version: true,
   show_comment: true,
-  versionstring: "OpenPGP.js v2.5.11",
+  versionstring: "OpenPGP.js v2.5.14",
   commentstring: "https://openpgpjs.org",
   keyserver: "https://keyserver.ubuntu.com",
   node_store: './openpgp.store'
@@ -12193,7 +12193,7 @@ function splitHeaders(text) {
  */
 function verifyHeaders(headers) {
   for (var i = 0; i < headers.length; i++) {
-    if (!/^[^:\s]+: .+$/.test(headers[i])) {
+    if (!/^([^\s:]|[^\s:][^:]*[^\s:]): .+$/.test(headers[i])) {
       throw new Error('Improperly formatted armor header: ' + headers[i]);
     }
     if (_config2.default.debug && !/^(Version|Comment|MessageID|Hash|Charset): .+$/.test(headers[i])) {
@@ -13143,6 +13143,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.Key = Key;
+exports.read = read;
 exports.readArmored = readArmored;
 exports.generate = generate;
 exports.reformat = reformat;
@@ -14179,24 +14180,20 @@ SubKey.prototype.update = function (subKey, primaryKey) {
 };
 
 /**
- * Reads an OpenPGP armored text and returns one or multiple key objects
- * @param {String} armoredText text to be parsed
+ * Reads an unarmored OpenPGP key list and returns one or multiple key objects
+ * @param {Uint8Array} data to be parsed
  * @return {{keys: Array<module:key~Key>, err: (Array<Error>|null)}} result object with key and error arrays
  * @static
  */
-function readArmored(armoredText) {
+function read(data) {
   var result = {};
   result.keys = [];
   try {
-    var input = _armor2.default.decode(armoredText);
-    if (!(input.type === _enums2.default.armor.public_key || input.type === _enums2.default.armor.private_key)) {
-      throw new Error('Armored text not of type key');
-    }
     var packetlist = new _packet2.default.List();
-    packetlist.read(input.data);
+    packetlist.read(data);
     var keyIndex = packetlist.indexOfTag(_enums2.default.packet.publicKey, _enums2.default.packet.secretKey);
     if (keyIndex.length === 0) {
-      throw new Error('No key packet found in armored text');
+      throw new Error('No key packet found');
     }
     for (var i = 0; i < keyIndex.length; i++) {
       var oneKeyList = packetlist.slice(keyIndex[i], keyIndex[i + 1]);
@@ -14213,6 +14210,26 @@ function readArmored(armoredText) {
     result.err.push(e);
   }
   return result;
+}
+
+/**
+ * Reads an OpenPGP armored text and returns one or multiple key objects
+ * @param {String} armoredText text to be parsed
+ * @return {{keys: Array<module:key~Key>, err: (Array<Error>|null)}} result object with key and error arrays
+ * @static
+ */
+function readArmored(armoredText) {
+  try {
+    var input = _armor2.default.decode(armoredText);
+    if (!(input.type === _enums2.default.armor.public_key || input.type === _enums2.default.armor.private_key)) {
+      throw new Error('Armored text not of type key');
+    }
+    return read(input.data);
+  } catch (e) {
+    var result = { keys: [], err: [] };
+    result.err.push(e);
+    return result;
+  }
 }
 
 /**
@@ -14284,6 +14301,10 @@ function reformat(options) {
     if (options.keyType !== _enums2.default.publicKey.rsa_encrypt_sign) {
       // RSA Encrypt-Only and RSA Sign-Only are deprecated and SHOULD NOT be generated
       throw new Error('Only RSA Encrypt or Sign supported');
+    }
+
+    if (!options.privateKey.decrypt()) {
+      throw new Error('Key not decrypted');
     }
 
     if (!options.passphrase) {
@@ -16107,8 +16128,11 @@ function onError(message, error) {
   if (_config2.default.debug) {
     console.error(error.stack);
   }
-  // rethrow new high level error for api users
-  throw new Error(message + ': ' + error.message);
+
+  // update error message
+  error.message = message + ': ' + error.message;
+
+  throw error;
 }
 
 /**
@@ -16475,8 +16499,7 @@ function parseClonedPackets(options, method) {
   if (options.key) {
     options.key = packetlistCloneToKey(options.key);
   }
-  if (options.message && (method === 'sign' || method === 'verify')) {
-    // sign and verify support only CleartextMessage
+  if (options.message && options.message.signature) {
     options.message = packetlistCloneToCleartextMessage(options.message);
   } else if (options.message) {
     options.message = packetlistCloneToMessage(options.message);
@@ -21145,7 +21168,10 @@ AsyncProxy.prototype.onMessage = function (event) {
     case 'method-return':
       if (msg.err) {
         // fail
-        this.tasks[msg.id].reject(new Error(msg.err));
+        var err = new Error(msg.err);
+        // add worker stack
+        err.workerStack = msg.stack;
+        this.tasks[msg.id].reject(err);
       } else {
         // success
         this.tasks[msg.id].resolve(msg.data);
