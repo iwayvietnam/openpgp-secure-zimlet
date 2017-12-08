@@ -170,6 +170,7 @@
                     $('#mime-message').text(mimeNode.build());
                 },
                 onEncrypted: function(mimeNode) {
+                    mimeNode.addHeader('Subject', 'Giá trị của một quốc gia không phải được xác định bằng của cải mà bằng các tiêu chuẩn đạo đức, dân chủ, văn minh và văn hóa.');
                     $('#signed-message').text(mimeNode.build());
                 },
                 onError: function(error) {
@@ -214,6 +215,7 @@
                 privateKey: result.privateKey,
                 publicKeys: [result.publicKey],
                 onEncrypted: function(mimeNode) {
+                    mimeNode.addHeader('Subject', 'ATOK Passport お申し込み完了＆ユーザー登録完了（定額利用サービス）');
                     $('#encrypted-message').text(mimeNode.build());
                 },
                 onError: function(error) {
