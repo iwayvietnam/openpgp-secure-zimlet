@@ -657,6 +657,7 @@
                     return mimecodec.mimeWordEncode(value, 'Q', 52);
                 }
                 return value;
+
             default:
                 value = (value || '').toString().replace(/\r?\n|\r/g, ' ');
                 // mimeWordsEncode only encodes if needed, otherwise the original string is returned
