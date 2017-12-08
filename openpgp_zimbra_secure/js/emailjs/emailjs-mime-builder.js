@@ -651,6 +651,12 @@
 
                 return value.join(' ').trim();
 
+            case 'Subject':
+                value = (value || '').toString().replace(/\r?\n|\r/g, ' ');
+                if (/([^\s\u0080-\uFFFF]*[\u0080-\uFFFF]+[^\s\u0080-\uFFFF]*(?:\s+[^\s\u0080-\uFFFF]*[\u0080-\uFFFF]+[^\s\u0080-\uFFFF]*\s*)?)+/g.test(value)) {
+                    return mimecodec.mimeWordEncode(value, 'Q', 52);
+                }
+                return value;
             default:
                 value = (value || '').toString().replace(/\r?\n|\r/g, ' ');
                 // mimeWordsEncode only encodes if needed, otherwise the original string is returned

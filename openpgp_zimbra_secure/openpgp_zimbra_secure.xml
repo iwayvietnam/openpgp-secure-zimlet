@@ -43,6 +43,8 @@
     <include>js/widgets/KeyAddView.js</include>
     <include>js/widgets/ImportPublicKeyDialog.js</include>
     <include>js/widgets/ImportPublicKeyView.js</include>
+    <include>js/widgets/PrivateKeyDialog.js</include>
+    <include>js/widgets/PrivateKeyView.js</include>
 
     <include>js/fetch/fetch.js</include>
     <include>js/DOMPurify/purify.min.js</include>
