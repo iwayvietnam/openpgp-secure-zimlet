@@ -45,7 +45,7 @@
     <include>js/widgets/ImportPublicKeyView.js</include>
 
     <include>js/fetch/fetch.js</include>
-    <include>js/DOMPurify/purify.min.js</include>
+    <include>js/DOMPurify/purify.js</include>
     <include>js/FileSaver/FileSaver.min.js</include>
     <include>js/punycode/punycode.js</include>
     <include>js/emailjs/emailjs-addressparser.js</include>
