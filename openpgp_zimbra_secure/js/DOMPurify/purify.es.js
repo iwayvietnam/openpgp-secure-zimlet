@@ -9,7 +9,7 @@ var mathMl = ['math', 'menclose', 'merror', 'mfenced', 'mfrac', 'mglyph', 'mi', 
 
 var text = ['#text'];
 
-var html$1 = ['accept', 'action', 'align', 'alt', 'autocomplete', 'background', 'bgcolor', 'border', 'cellpadding', 'cellspacing', 'checked', 'cite', 'class', 'clear', 'color', 'cols', 'colspan', 'coords', 'datetime', 'default', 'dir', 'disabled', 'download', 'enctype', 'face', 'for', 'headers', 'height', 'hidden', 'high', 'href', 'hreflang', 'id', 'ismap', 'label', 'lang', 'list', 'loop', 'low', 'max', 'maxlength', 'media', 'method', 'min', 'multiple', 'name', 'noshade', 'novalidate', 'nowrap', 'open', 'optimum', 'pattern', 'placeholder', 'poster', 'preload', 'pubdate', 'radiogroup', 'readonly', 'rel', 'required', 'rev', 'reversed', 'role', 'rows', 'rowspan', 'spellcheck', 'scope', 'selected', 'shape', 'size', 'span', 'srclang', 'start', 'src', 'step', 'style', 'summary', 'tabindex', 'title', 'type', 'usemap', 'valign', 'value', 'width', 'xmlns'];
+var html$1 = ['accept', 'action', 'align', 'alt', 'autocomplete', 'background', 'bgcolor', 'border', 'cellpadding', 'cellspacing', 'checked', 'cite', 'class', 'clear', 'color', 'cols', 'colspan', 'coords', 'crossorigin', 'datetime', 'default', 'dir', 'disabled', 'download', 'enctype', 'face', 'for', 'headers', 'height', 'hidden', 'high', 'href', 'hreflang', 'id', 'integrity', 'ismap', 'label', 'lang', 'list', 'loop', 'low', 'max', 'maxlength', 'media', 'method', 'min', 'multiple', 'name', 'noshade', 'novalidate', 'nowrap', 'open', 'optimum', 'pattern', 'placeholder', 'poster', 'preload', 'pubdate', 'radiogroup', 'readonly', 'rel', 'required', 'rev', 'reversed', 'role', 'rows', 'rowspan', 'spellcheck', 'scope', 'selected', 'shape', 'size', 'sizes', 'span', 'srclang', 'start', 'src', 'srcset', 'step', 'style', 'summary', 'tabindex', 'title', 'type', 'usemap', 'valign', 'value', 'width', 'xmlns'];
 
 var svg$1 = ['accent-height', 'accumulate', 'additivive', 'alignment-baseline', 'ascent', 'attributename', 'attributetype', 'azimuth', 'basefrequency', 'baseline-shift', 'begin', 'bias', 'by', 'class', 'clip', 'clip-path', 'clip-rule', 'color', 'color-interpolation', 'color-interpolation-filters', 'color-profile', 'color-rendering', 'cx', 'cy', 'd', 'dx', 'dy', 'diffuseconstant', 'direction', 'display', 'divisor', 'dur', 'edgemode', 'elevation', 'end', 'fill', 'fill-opacity', 'fill-rule', 'filter', 'flood-color', 'flood-opacity', 'font-family', 'font-size', 'font-size-adjust', 'font-stretch', 'font-style', 'font-variant', 'font-weight', 'fx', 'fy', 'g1', 'g2', 'glyph-name', 'glyphref', 'gradientunits', 'gradienttransform', 'height', 'href', 'id', 'image-rendering', 'in', 'in2', 'k', 'k1', 'k2', 'k3', 'k4', 'kerning', 'keypoints', 'keysplines', 'keytimes', 'lang', 'lengthadjust', 'letter-spacing', 'kernelmatrix', 'kernelunitlength', 'lighting-color', 'local', 'marker-end', 'marker-mid', 'marker-start', 'markerheight', 'markerunits', 'markerwidth', 'maskcontentunits', 'maskunits', 'max', 'mask', 'media', 'method', 'mode', 'min', 'name', 'numoctaves', 'offset', 'operator', 'opacity', 'order', 'orient', 'orientation', 'origin', 'overflow', 'paint-order', 'path', 'pathlength', 'patterncontentunits', 'patterntransform', 'patternunits', 'points', 'preservealpha', 'r', 'rx', 'ry', 'radius', 'refx', 'refy', 'repeatcount', 'repeatdur', 'restart', 'result', 'rotate', 'scale', 'seed', 'shape-rendering', 'specularconstant', 'specularexponent', 'spreadmethod', 'stddeviation', 'stitchtiles', 'stop-color', 'stop-opacity', 'stroke-dasharray', 'stroke-dashoffset', 'stroke-linecap', 'stroke-linejoin', 'stroke-miterlimit', 'stroke-opacity', 'stroke', 'stroke-width', 'style', 'surfacescale', 'tabindex', 'targetx', 'targety', 'transform', 'text-anchor', 'text-decoration', 'text-rendering', 'textlength', 'type', 'u1', 'u2', 'unicode', 'values', 'viewbox', 'visibility', 'vert-adv-y', 'vert-origin-x', 'vert-origin-y', 'width', 'word-spacing', 'wrap', 'writing-mode', 'xchannelselector', 'ychannelselector', 'x', 'x1', 'x2', 'xmlns', 'y', 'y1', 'y2', 'z', 'zoomandpan'];
 
@@ -41,6 +41,14 @@ function clone(object) {
   return newObject;
 }
 
+var MUSTACHE_EXPR = /\{\{[\s\S]*|[\s\S]*\}\}/gm; // Specify template detection regex for SAFE_FOR_TEMPLATES mode
+var ERB_EXPR = /<%[\s\S]*|[\s\S]*%>/gm;
+var DATA_ATTR = /^data-[\-\w.\u00B7-\uFFFF]/; // eslint-disable-line no-useless-escape
+var ARIA_ATTR = /^aria-[\-\w]+$/; // eslint-disable-line no-useless-escape
+var IS_ALLOWED_URI = /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i; // eslint-disable-line no-useless-escape
+var IS_SCRIPT_OR_DATA = /^(?:\w+script|data):/i;
+var ATTR_WHITESPACE = /[\u0000-\u0020\u00A0\u1680\u180E\u2000-\u2029\u205f\u3000]/g; // This needs to be extensive thanks to Webkit/Blink's behavior
+
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
@@ -57,15 +65,15 @@ function createDOMPurify() {
   };
 
   /**
-      * Version label, exposed for easier checks
-      * if DOMPurify is up to date or not
-      */
-  DOMPurify.version = '1.0.2';
+   * Version label, exposed for easier checks
+   * if DOMPurify is up to date or not
+   */
+  DOMPurify.version = '1.1.1';
 
   /**
-    * Array of elements that DOMPurify removed during sanitation.
-    * Empty if nothing was removed.
-    */
+   * Array of elements that DOMPurify removed during sanitation.
+   * Empty if nothing was removed.
+   */
   DOMPurify.removed = [];
 
   if (!window || !window.document || window.document.nodeType !== 9) {
@@ -120,14 +128,23 @@ function createDOMPurify() {
   var hooks = {};
 
   /**
-    * Expose whether this browser supports running the full DOMPurify.
-    */
+   * Expose whether this browser supports running the full DOMPurify.
+   */
   DOMPurify.isSupported = implementation && typeof implementation.createHTMLDocument !== 'undefined' && document.documentMode !== 9;
 
+  var MUSTACHE_EXPR$$1 = MUSTACHE_EXPR,
+      ERB_EXPR$$1 = ERB_EXPR,
+      DATA_ATTR$$1 = DATA_ATTR,
+      ARIA_ATTR$$1 = ARIA_ATTR,
+      IS_SCRIPT_OR_DATA$$1 = IS_SCRIPT_OR_DATA,
+      ATTR_WHITESPACE$$1 = ATTR_WHITESPACE;
+
+
+  var IS_ALLOWED_URI$$1 = IS_ALLOWED_URI;
   /**
-    * We consider the elements and attributes below to be safe. Ideally
-    * don't add any new ones but feel free to remove unwanted ones.
-    */
+   * We consider the elements and attributes below to be safe. Ideally
+   * don't add any new ones but feel free to remove unwanted ones.
+   */
 
   /* allowed element names */
   var ALLOWED_TAGS = null;
@@ -159,10 +176,6 @@ function createDOMPurify() {
    * This means, DOMPurify removes data attributes, mustaches and ERB
    */
   var SAFE_FOR_TEMPLATES = false;
-
-  /* Specify template detection regex for SAFE_FOR_TEMPLATES mode */
-  var MUSTACHE_EXPR = /\{\{[\s\S]*|[\s\S]*\}\}/gm;
-  var ERB_EXPR = /<%[\s\S]*|[\s\S]*%>/gm;
 
   /* Decide if document with <html>... should be returned */
   var WHOLE_DOCUMENT = false;
@@ -215,17 +228,16 @@ function createDOMPurify() {
   var formElement = document.createElement('form');
 
   /**
-  * _parseConfig
-  *
-  * @param  optional config literal
-  */
+   * _parseConfig
+   *
+   * @param  optional config literal
+   */
   // eslint-disable-next-line complexity
   var _parseConfig = function _parseConfig(cfg) {
     /* Shield configuration object from tampering */
     if ((typeof cfg === 'undefined' ? 'undefined' : _typeof(cfg)) !== 'object') {
       cfg = {};
     }
-
     /* Set configuration parameters */
     ALLOWED_TAGS = 'ALLOWED_TAGS' in cfg ? addToSet({}, cfg.ALLOWED_TAGS) : DEFAULT_ALLOWED_TAGS;
     ALLOWED_ATTR = 'ALLOWED_ATTR' in cfg ? addToSet({}, cfg.ALLOWED_ATTR) : DEFAULT_ALLOWED_ATTR;
@@ -244,6 +256,8 @@ function createDOMPurify() {
     FORCE_BODY = cfg.FORCE_BODY || false; // Default false
     SANITIZE_DOM = cfg.SANITIZE_DOM !== false; // Default true
     KEEP_CONTENT = cfg.KEEP_CONTENT !== false; // Default true
+
+    IS_ALLOWED_URI$$1 = cfg.ALLOWED_URI_REGEXP || IS_ALLOWED_URI$$1;
 
     if (SAFE_FOR_TEMPLATES) {
       ALLOW_DATA_ATTR = false;
@@ -310,10 +324,10 @@ function createDOMPurify() {
   };
 
   /**
-  * _forceRemove
-  *
-  * @param  a DOM node
-  */
+   * _forceRemove
+   *
+   * @param  a DOM node
+   */
   var _forceRemove = function _forceRemove(node) {
     DOMPurify.removed.push({ element: node });
     try {
@@ -324,11 +338,11 @@ function createDOMPurify() {
   };
 
   /**
-  * _removeAttribute
-  *
-  * @param  an Attribute name
-  * @param  a DOM node
-  */
+   * _removeAttribute
+   *
+   * @param  an Attribute name
+   * @param  a DOM node
+   */
   var _removeAttribute = function _removeAttribute(name, node) {
     DOMPurify.removed.push({
       attribute: node.getAttributeNode(name),
@@ -338,11 +352,11 @@ function createDOMPurify() {
   };
 
   /**
-  * _initDocument
-  *
-  * @param  a string of dirty markup
-  * @return a DOM, filled with the dirty markup
-  */
+   * _initDocument
+   *
+   * @param  a string of dirty markup
+   * @return a DOM, filled with the dirty markup
+   */
   var _initDocument = function _initDocument(dirty) {
     /* Create a HTML document */
     var doc = void 0;
@@ -418,11 +432,11 @@ function createDOMPurify() {
   }
 
   /**
-  * _createIterator
-  *
-  * @param  document/fragment to create iterator for
-  * @return iterator instance
-  */
+   * _createIterator
+   *
+   * @param  document/fragment to create iterator for
+   * @return iterator instance
+   */
   var _createIterator = function _createIterator(root) {
     return createNodeIterator.call(root.ownerDocument || root, root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_COMMENT | NodeFilter.SHOW_TEXT, function () {
       return NodeFilter.FILTER_ACCEPT;
@@ -430,11 +444,11 @@ function createDOMPurify() {
   };
 
   /**
-  * _isClobbered
-  *
-  * @param  element to check for clobbering attacks
-  * @return true if clobbered, false if safe
-  */
+   * _isClobbered
+   *
+   * @param  element to check for clobbering attacks
+   * @return true if clobbered, false if safe
+   */
   var _isClobbered = function _isClobbered(elm) {
     if (elm instanceof Text || elm instanceof Comment) {
       return false;
@@ -446,22 +460,22 @@ function createDOMPurify() {
   };
 
   /**
-  * _isNode
-  *
-  * @param object to check whether it's a DOM node
-  * @return true is object is a DOM node
-  */
+   * _isNode
+   *
+   * @param object to check whether it's a DOM node
+   * @return true is object is a DOM node
+   */
   var _isNode = function _isNode(obj) {
     return (typeof Node === 'undefined' ? 'undefined' : _typeof(Node)) === 'object' ? obj instanceof Node : obj && (typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) === 'object' && typeof obj.nodeType === 'number' && typeof obj.nodeName === 'string';
   };
 
   /**
-  * _executeHook
-  * Execute user configurable hooks
-  *
-  * @param  {String} entryPoint  Name of the hook's entry point
-  * @param  {Node} currentNode
-  */
+   * _executeHook
+   * Execute user configurable hooks
+   *
+   * @param  {String} entryPoint  Name of the hook's entry point
+   * @param  {Node} currentNode
+   */
   var _executeHook = function _executeHook(entryPoint, currentNode, data) {
     if (!hooks[entryPoint]) {
       return;
@@ -473,15 +487,15 @@ function createDOMPurify() {
   };
 
   /**
-  * _sanitizeElements
-  *
-  * @protect nodeName
-  * @protect textContent
-  * @protect removeChild
-  *
-  * @param   node to check for permission to exist
-  * @return  true if node was killed, false if left alive
-  */
+   * _sanitizeElements
+   *
+   * @protect nodeName
+   * @protect textContent
+   * @protect removeChild
+   *
+   * @param   node to check for permission to exist
+   * @return  true if node was killed, false if left alive
+   */
   var _sanitizeElements = function _sanitizeElements(currentNode) {
     var content = void 0;
 
@@ -525,8 +539,8 @@ function createDOMPurify() {
     if (SAFE_FOR_TEMPLATES && currentNode.nodeType === 3) {
       /* Get the element's text content */
       content = currentNode.textContent;
-      content = content.replace(MUSTACHE_EXPR, ' ');
-      content = content.replace(ERB_EXPR, ' ');
+      content = content.replace(MUSTACHE_EXPR$$1, ' ');
+      content = content.replace(ERB_EXPR$$1, ' ');
       if (currentNode.textContent !== content) {
         DOMPurify.removed.push({ element: currentNode.cloneNode() });
         currentNode.textContent = content;
@@ -539,24 +553,17 @@ function createDOMPurify() {
     return false;
   };
 
-  var DATA_ATTR = /^data-[\-\w.\u00B7-\uFFFF]/; // eslint-disable-line no-useless-escape
-  var ARIA_ATTR = /^aria-[\-\w]+$/; // eslint-disable-line no-useless-escape
-  var IS_ALLOWED_URI = /^(?:(?:(?:f|ht)tps?|mailto|tel):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i; // eslint-disable-line no-useless-escape
-  var IS_SCRIPT_OR_DATA = /^(?:\w+script|data):/i;
-  /* This needs to be extensive thanks to Webkit/Blink's behavior */
-  var ATTR_WHITESPACE = /[\u0000-\u0020\u00A0\u1680\u180E\u2000-\u2029\u205f\u3000]/g;
-
   /**
-  * _sanitizeAttributes
-  *
-  * @protect attributes
-  * @protect nodeName
-  * @protect removeAttribute
-  * @protect setAttribute
-  *
-  * @param   node to sanitize
-  * @return  void
-  */
+   * _sanitizeAttributes
+   *
+   * @protect attributes
+   * @protect nodeName
+   * @protect removeAttribute
+   * @protect setAttribute
+   *
+   * @param   node to sanitize
+   * @return  void
+   */
   // eslint-disable-next-line complexity
   var _sanitizeAttributes = function _sanitizeAttributes(currentNode) {
     var attr = void 0;
@@ -631,23 +638,23 @@ function createDOMPurify() {
       }
 
       /* Make sure attribute cannot clobber */
-      if (SANITIZE_DOM && (lcName === 'id' || lcName === 'name') && (value in window || value in document || value in formElement)) {
+      if (SANITIZE_DOM && (lcName === 'id' || lcName === 'name') && (value in document || value in formElement)) {
         continue;
       }
 
       /* Sanitize attribute content to be template-safe */
       if (SAFE_FOR_TEMPLATES) {
-        value = value.replace(MUSTACHE_EXPR, ' ');
-        value = value.replace(ERB_EXPR, ' ');
+        value = value.replace(MUSTACHE_EXPR$$1, ' ');
+        value = value.replace(ERB_EXPR$$1, ' ');
       }
 
       /* Allow valid data-* attributes: At least one character after "-"
          (https://html.spec.whatwg.org/multipage/dom.html#embedding-custom-non-visible-data-with-the-data-*-attributes)
          XML-compatible (https://html.spec.whatwg.org/multipage/infrastructure.html#xml-compatible and http://www.w3.org/TR/xml/#d0e804)
          We don't need to check the value; it's always URI safe. */
-      if (ALLOW_DATA_ATTR && DATA_ATTR.test(lcName)) {
+      if (ALLOW_DATA_ATTR && DATA_ATTR$$1.test(lcName)) {
         // This attribute is safe
-      } else if (ALLOW_ARIA_ATTR && ARIA_ATTR.test(lcName)) {
+      } else if (ALLOW_ARIA_ATTR && ARIA_ATTR$$1.test(lcName)) {
         // This attribute is safe
         /* Otherwise, check the name is permitted */
       } else if (!ALLOWED_ATTR[lcName] || FORBID_ATTR[lcName]) {
@@ -658,7 +665,7 @@ function createDOMPurify() {
         // This attribute is safe
         /* Check no script, data or unknown possibly unsafe URI
          unless we know URI values are safe for that attribute */
-      } else if (IS_ALLOWED_URI.test(value.replace(ATTR_WHITESPACE, ''))) {
+      } else if (IS_ALLOWED_URI$$1.test(value.replace(ATTR_WHITESPACE$$1, ''))) {
         // This attribute is safe
         /* Keep image data URIs alive if src/xlink:href is allowed */
       } else if ((lcName === 'src' || lcName === 'xlink:href') && value.indexOf('data:') === 0 && DATA_URI_TAGS[currentNode.nodeName.toLowerCase()]) {
@@ -666,7 +673,7 @@ function createDOMPurify() {
         /* Allow unknown protocols: This provides support for links that
          are handled by protocol handlers which may be unknown ahead of
          time, e.g. fb:, spotify: */
-      } else if (ALLOW_UNKNOWN_PROTOCOLS && !IS_SCRIPT_OR_DATA.test(value.replace(ATTR_WHITESPACE, ''))) {
+      } else if (ALLOW_UNKNOWN_PROTOCOLS && !IS_SCRIPT_OR_DATA$$1.test(value.replace(ATTR_WHITESPACE$$1, ''))) {
         // This attribute is safe
         /* Check for binary attributes */
         // eslint-disable-next-line no-negated-condition
@@ -689,11 +696,11 @@ function createDOMPurify() {
   };
 
   /**
-  * _sanitizeShadowDOM
-  *
-  * @param  fragment to iterate over recursively
-  * @return void
-  */
+   * _sanitizeShadowDOM
+   *
+   * @param  fragment to iterate over recursively
+   * @return void
+   */
   var _sanitizeShadowDOM = function _sanitizeShadowDOM(fragment) {
     var shadowNode = void 0;
     var shadowIterator = _createIterator(fragment);
@@ -724,12 +731,12 @@ function createDOMPurify() {
   };
 
   /**
-  * Sanitize
-  * Public method providing core sanitation functionality
-  *
-  * @param {String|Node} dirty string or DOM node
-  * @param {Object} configuration object
-  */
+   * Sanitize
+   * Public method providing core sanitation functionality
+   *
+   * @param {String|Node} dirty string or DOM node
+   * @param {Object} configuration object
+   */
   // eslint-disable-next-line complexity
   DOMPurify.sanitize = function (dirty, cfg) {
     var body = void 0;
@@ -751,6 +758,9 @@ function createDOMPurify() {
         throw new TypeError('toString is not a function');
       } else {
         dirty = dirty.toString();
+        if (typeof dirty !== 'string') {
+          throw new TypeError('dirty is not a string, aborting');
+        }
       }
     }
 
@@ -859,35 +869,35 @@ function createDOMPurify() {
   };
 
   /**
-  * Public method to set the configuration once
-  * setConfig
-  *
-  * @param {Object} configuration object
-  * @return void
-  */
+   * Public method to set the configuration once
+   * setConfig
+   *
+   * @param {Object} configuration object
+   * @return void
+   */
   DOMPurify.setConfig = function (cfg) {
     _parseConfig(cfg);
     SET_CONFIG = true;
   };
 
   /**
-  * Public method to remove the configuration
-  * clearConfig
-  *
-  * @return void
-  */
+   * Public method to remove the configuration
+   * clearConfig
+   *
+   * @return void
+   */
   DOMPurify.clearConfig = function () {
     CONFIG = null;
     SET_CONFIG = false;
   };
 
   /**
-  * AddHook
-  * Public method to add DOMPurify hooks
-  *
-  * @param {String} entryPoint
-  * @param {Function} hookFunction
-  */
+   * AddHook
+   * Public method to add DOMPurify hooks
+   *
+   * @param {String} entryPoint
+   * @param {Function} hookFunction
+   */
   DOMPurify.addHook = function (entryPoint, hookFunction) {
     if (typeof hookFunction !== 'function') {
       return;
@@ -897,13 +907,13 @@ function createDOMPurify() {
   };
 
   /**
-  * RemoveHook
-  * Public method to remove a DOMPurify hook at a given entryPoint
-  * (pops it from the stack of hooks if more are present)
-  *
-  * @param {String} entryPoint
-  * @return void
-  */
+   * RemoveHook
+   * Public method to remove a DOMPurify hook at a given entryPoint
+   * (pops it from the stack of hooks if more are present)
+   *
+   * @param {String} entryPoint
+   * @return void
+   */
   DOMPurify.removeHook = function (entryPoint) {
     if (hooks[entryPoint]) {
       hooks[entryPoint].pop();
@@ -911,12 +921,12 @@ function createDOMPurify() {
   };
 
   /**
-  * RemoveHooks
-  * Public method to remove all DOMPurify hooks at a given entryPoint
-  *
-  * @param  {String} entryPoint
-  * @return void
-  */
+   * RemoveHooks
+   * Public method to remove all DOMPurify hooks at a given entryPoint
+   *
+   * @param  {String} entryPoint
+   * @return void
+   */
   DOMPurify.removeHooks = function (entryPoint) {
     if (hooks[entryPoint]) {
       hooks[entryPoint] = [];
@@ -924,11 +934,11 @@ function createDOMPurify() {
   };
 
   /**
-  * RemoveAllHooks
-  * Public method to remove all DOMPurify hooks
-  *
-  * @return void
-  */
+   * RemoveAllHooks
+   * Public method to remove all DOMPurify hooks
+   *
+   * @return void
+   */
   DOMPurify.removeAllHooks = function () {
     hooks = {};
   };
