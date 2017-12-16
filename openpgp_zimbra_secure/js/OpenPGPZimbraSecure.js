@@ -282,6 +282,7 @@ OpenPGPZimbraSecure.prototype._overrideZmMailListController = function() {
     var self = this;
     this.overrideClass('ZmMailListController.prototype._printListener', function(ev) {
         var listener = arguments.callee.func;
+        var msg = this.getMsg();
         if (msg) {
             var pgpMessage = self._pgpMessageCache[msg.id];
             if (pgpMessage && pgpMessage.encrypted && pgpMessage.textContent.length > 0) {
