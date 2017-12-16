@@ -117,40 +117,32 @@ OpenPGPZimbraSecure.prototype._handleNewWindow = function() {
     this._overrideZmMailMsgView();
     this._overrideZmComposeView();
 
-    if (!this._overridedClasses['ZmNewWindow']) {
-        var deepCopyFunc = ZmNewWindow.prototype._deepCopyMsg;
-        ZmNewWindow.prototype._deepCopyMsg = function(msg) {
-            var newMsg = deepCopyFunc.call(this, msg);
-            var oldMsg = newMsg.cloneOf;
-            if (oldMsg && oldMsg.attrs) {
-                newMsg.attrs = oldMsg.attrs;
-            }
-            return newMsg;
-        };
-        this._overridedClasses['ZmNewWindow'] = true;
-    }
+    this.overrideClass('ZmNewWindow.prototype._deepCopyMsg', function(msg) {
+        var newMsg = arguments.callee.func.call(this, msg);
+        var oldMsg = newMsg.cloneOf;
+        if (oldMsg && oldMsg.attrs) {
+            newMsg.attrs = oldMsg.attrs;
+        }
+        return newMsg;
+    });
 };
 
 /**
  * Override ZmMailMsg class.
  */
 OpenPGPZimbraSecure.prototype._overrideZmMailMsg = function() {
-    if (!this._overridedClasses['ZmMailMsg']) {
-        var self = this;
-        var sendMsgFunc = ZmMailMsg.prototype._sendMessage;
-        ZmMailMsg.prototype._sendMessage = function(params) {
-            self._sendMessage(sendMsgFunc, this, params);
-        };
+    var self = this;
+    this.overrideClass('ZmMailMsg.prototype._sendMessage', function(params) {
+        self._sendMessage(arguments.callee.func, this, params);
+    });
 
-        var fetchMsgFunc = ZmMailMsg._handleResponseFetchMsg;
-        ZmMailMsg._handleResponseFetchMsg = function(callback, result) {
-            var newCallback = new AjxCallback(this, function(newResult) {
-                fetchMsgFunc.call(this, callback, newResult || result);
-            });
-            self._handleMessageResponse(newCallback, result);
-        };
-        this._overridedClasses['ZmMailMsg'] = true;
-    }
+    this.overrideClass('ZmMailMsg._handleResponseFetchMsg', function(callback, result) {
+        var origFunc = arguments.callee.func;
+        var newCallback = new AjxCallback(this, function(newResult) {
+            origFunc.call(this, callback, newResult || result);
+        });
+        self._handleMessageResponse(newCallback, result);
+    });
 };
 
 
@@ -158,77 +150,71 @@ OpenPGPZimbraSecure.prototype._overrideZmMailMsg = function() {
  * Override ZmConv class.
  */
 OpenPGPZimbraSecure.prototype._overrideZmConv = function() {
-    if (!this._overridedClasses['ZmConv']) {
-        var responseLoadMsgsFunc = ZmConv.prototype._handleResponseLoadMsgs;
-        ZmConv.prototype._handleResponseLoadMsgs = function(callback, result) {
-            var newCallback = new AjxCallback(this, function(newResult) {
-                responseLoadMsgsFunc.call(this, callback, newResult || result);
-            });
-            self._handleMessageResponse(newCallback, result);
-        };
-        this._overridedClasses['ZmConv'] = true;
-    }
+    var self = this;
+    this.overrideClass('ZmConv.prototype._handleResponseLoadMsgs', function(callback, result) {
+        var origFunc = arguments.callee.func;
+        var newCallback = new AjxCallback(this, function(newResult) {
+            origFunc.call(this, callback, newResult || result);
+        });
+        self._handleMessageResponse(newCallback, result);
+    });
 };
 
 /**
  * Override ZmSearch class.
  */
 OpenPGPZimbraSecure.prototype._overrideZmSearch = function() {
-    if (!this._overridedClasses['ZmSearch']) {
-        var self = this;
-        var responseGetConvFunc = ZmSearch.prototype._handleResponseGetConv;
-        ZmSearch.prototype._handleResponseGetConv = function(callback, result) {
-            var newCallback = new AjxCallback(this, function(newResult) {
-                responseGetConvFunc.call(this, callback, newResult || result);
-            });
-            self._handleMessageResponse(newCallback, result);
-        };
+    var self = this;
+    this.overrideClass('ZmSearch.prototype._handleResponseGetConv', function(callback, result) {
+        var origFunc = arguments.callee.func;
+        var newCallback = new AjxCallback(this, function(newResult) {
+            origFunc.call(this, callback, newResult || result);
+        });
+        self._handleMessageResponse(newCallback, result);
+    });
 
-        var responseExecuteFunc = ZmSearch.prototype._handleResponseExecute;
-        ZmSearch.prototype._handleResponseExecute = function(callback, result) {
-            var newCallback = new AjxCallback(this, function(newResult) {
-                responseExecuteFunc.call(this, callback, newResult || result);
-            });
-            self._handleMessageResponse(newCallback, result);
-        };
-        this._overridedClasses['ZmSearch'] = true;
-    }
+    this.overrideClass('ZmSearch.prototype._handleResponseExecute', function(callback, result) {
+        var origFunc = arguments.callee.func;
+        var newCallback = new AjxCallback(this, function(newResult) {
+            origFunc.call(this, callback, newResult || result);
+        });
+        self._handleMessageResponse(newCallback, result);
+    });
 };
 
 /**
  * Override ZmMailMsgView class.
  */
 OpenPGPZimbraSecure.prototype._overrideZmMailMsgView = function() {
-    if (!this._overridedClasses['ZmMailMsgView']) {
-        var self = this;
-        var inlineImgFunc = ZmMailMsgView.__unfangInternalImage;
-        ZmMailMsgView.__unfangInternalImage = function(msg, elem, aname, external) {
-            var result = inlineImgFunc(msg, elem, aname, external);
-            if (aname == 'src' && self._pgpMessageCache[msg.id]) {
-                var pgpMessage = self._pgpMessageCache[msg.id];
-                if (pgpMessage.encrypted && pgpMessage.attachments.length > 0) {
-                    var pnSrc = Dwt.getAttr(elem, 'pn' + aname);
-                    var mceSrc = Dwt.getAttr(elem, 'data-mce-' + aname);
-                    var link = pnSrc || mceSrc || Dwt.getAttr(elem, aname);
+    var self = this;
+    this.overrideClass('ZmMailMsgView.__unfangInternalImage', function(msg, elem, aname, external) {
+        var result = arguments.callee.func(msg, elem, aname, external);
+        if (aname == 'src' && self._pgpMessageCache[msg.id]) {
+            var pgpMessage = self._pgpMessageCache[msg.id];
+            if (pgpMessage.encrypted && pgpMessage.attachments.length > 0) {
+                var pnSrc = Dwt.getAttr(elem, 'pn' + aname);
+                var mceSrc = Dwt.getAttr(elem, 'data-mce-' + aname);
+                var link = pnSrc || mceSrc || Dwt.getAttr(elem, aname);
 
-                    if (link && link.substring(0, 4) === 'cid:') {
-                        var attachment = false;
-                        pgpMessage.attachments.forEach(function(attach) {
-                            if (!attachment && (attach.cid && attach.cid === link.substring(4))) {
-                                attachment = attach;
-                            };
-                        });
-                        if (attachment) {
-                            var content = OpenPGPUtils.base64Encode(OpenPGPUtils.stringToBin(attachment.content));
-                            var newLink = 'data:' + attachment.type + ';base64,' + content.replace(/\r?\n/g, '');
-                            elem.setAttribute('src', newLink);
-                        }
+                if (link && link.substring(0, 4) === 'cid:') {
+                    var attachment = false;
+                    pgpMessage.attachments.forEach(function(attach) {
+                        if (!attachment && (attach.cid && attach.cid === link.substring(4))) {
+                            attachment = attach;
+                        };
+                    });
+                    if (attachment) {
+                        var content = OpenPGPUtils.base64Encode(OpenPGPUtils.stringToBin(attachment.content));
+                        var newLink = 'data:' + attachment.type + ';base64,' + content.replace(/\r?\n/g, '');
+                        elem.setAttribute('src', newLink);
                     }
                 }
             }
-            return result;
-        };
+        }
+        return result;
+    });
 
+    if (!this._overridedClasses['ZmMailMsgView']) {
         if (!ZmMailMsgView._attachmentHandlers) {
             ZmMailMsgView._attachmentHandlers = {};
         }
@@ -262,32 +248,30 @@ OpenPGPZimbraSecure.prototype._overrideZmMailMsgView = function() {
  * Override ZmMsgController class.
  */
 OpenPGPZimbraSecure.prototype._overrideZmMsgController = function() {
-    if (!this._overridedClasses['ZmMsgController']) {
-        var self = this;
-        var listener = ZmMsgController.prototype._printListener;
-        ZmMsgController.prototype._printListener = function(ev) {
-            var id;
-            var msg = this.getMsg();
-            if (msg instanceof ZmConv) {
-                id = msg.msgIds[0];
-            }
-            else {
-                id = msg.id;
-            }
+    var self = this;
+    this.overrideClass('ZmMsgController.prototype._printListener', function(ev) {
+        var id;
+        var msg = this.getMsg();
+        if (msg instanceof ZmConv) {
+            id = msg.msgIds[0];
+        }
+        else {
+            id = msg.id;
+        }
 
-            var pgpMessage = self._pgpMessageCache[id];
-            if (pgpMessage && pgpMessage.encrypted && pgpMessage.textContent.length > 0) {
-                self._encryptedMessagePrint(msg, pgpMessage);
-            }
-            else {
-                listener.call(this, ev);
-            }
-        };
-
+        var pgpMessage = self._pgpMessageCache[id];
+        if (pgpMessage && pgpMessage.encrypted && pgpMessage.textContent.length > 0) {
+            self._encryptedMessagePrint(msg, pgpMessage);
+        }
+        else {
+            arguments.callee.func.call(this, ev);
+        }
+    });
+    if (!this._overridedClasses['AjxDispatcher.run.GetMsgController']) {
         var controller = AjxDispatcher.run('GetMsgController');
         controller._listeners[ZmOperation.PRINT] = controller._printListener.bind(controller);
 
-        this._overridedClasses['ZmMsgController'] = true;
+        this._overridedClasses['AjxDispatcher.run.GetMsgController'] = true;
     }
 };
 
@@ -295,29 +279,28 @@ OpenPGPZimbraSecure.prototype._overrideZmMsgController = function() {
  * Override ZmMailListController class.
  */
 OpenPGPZimbraSecure.prototype._overrideZmMailListController = function() {
-    if (!this._overridedClasses['ZmMailListController']) {
-        var self = this;
-        var listener = ZmMailListController.prototype._printListener;
-        ZmMailListController.prototype._printListener = function(ev) {
-            var msg = this.getMsg();
-            if (msg) {
-                var pgpMessage = self._pgpMessageCache[msg.id];
-                if (pgpMessage && pgpMessage.encrypted && pgpMessage.textContent.length > 0) {
-                    self._encryptedMessagePrint(msg, pgpMessage);
-                }
-                else {
-                    listener.call(this, ev);
-                }
+    var self = this;
+    this.overrideClass('ZmMailListController.prototype._printListener', function(ev) {
+        var listener = arguments.callee.func;
+        if (msg) {
+            var pgpMessage = self._pgpMessageCache[msg.id];
+            if (pgpMessage && pgpMessage.encrypted && pgpMessage.textContent.length > 0) {
+                self._encryptedMessagePrint(msg, pgpMessage);
             }
             else {
                 listener.call(this, ev);
             }
-        };
+        }
+        else {
+            listener.call(this, ev);
+        }
+    });
 
+    if (!this._overridedClasses['AjxDispatcher.run.GetMailListController']) {
         var controller = AjxDispatcher.run('GetMailListController');
         controller._listeners[ZmOperation.PRINT] = controller._printListener.bind(controller);
 
-        this._overridedClasses['ZmMailListController'] = true;
+        this._overridedClasses['AjxDispatcher.run.GetMailListController'] = true;
     }
 };
 
@@ -325,59 +308,54 @@ OpenPGPZimbraSecure.prototype._overrideZmMailListController = function() {
  * Override ZmComposeView class.
  */
 OpenPGPZimbraSecure.prototype._overrideZmComposeView = function() {
-    if (!this._overridedClasses['ZmComposeView']) {
-        var self = this;
-        var setFromSelectFunc = ZmComposeView.prototype._setFromSelect;
-        ZmComposeView.prototype._setFromSelect = function(msg) {
-            setFromSelectFunc.call(this, msg);
-            if (msg && self._pgpMessageCache[msg.id]) {
-                var pgpMessage = self._pgpMessageCache[msg.id];
-                if (pgpMessage.encrypted && pgpMessage.attachments.length > 0) {
-                    var controller = this.getController();
-                    var draftAids = [];
-                    var url = appCtxt.get(ZmSetting.CSFE_ATTACHMENT_UPLOAD_URI) + '?fmt=raw';
-                    pgpMessage.attachments.forEach(function(attachment, index) {
-                        var callback = new AjxCallback(function(response) {
-                            if (response.success) {
-                                var values = JSON.parse('[' + response.text.replace(/'/g, '"')  + ']');
-                                if (values && values.length == 3 && values[0] == 200) {
-                                    attachment.aid = values[2];
-                                    if (!attachment.cid) {
-                                        draftAids.push(attachment.aid);
-                                    }
+    var self = this;
+    this.overrideClass('ZmComposeView.prototype._setFromSelect', function(msg) {
+        var origFunc = arguments.callee.func;
+        origFunc.call(this, msg);
+        if (msg && self._pgpMessageCache[msg.id]) {
+            var pgpMessage = self._pgpMessageCache[msg.id];
+            if (pgpMessage.encrypted && pgpMessage.attachments.length > 0) {
+                var controller = this.getController();
+                var draftAids = [];
+                var url = appCtxt.get(ZmSetting.CSFE_ATTACHMENT_UPLOAD_URI) + '?fmt=raw';
+                pgpMessage.attachments.forEach(function(attachment, index) {
+                    var callback = new AjxCallback(function(response) {
+                        if (response.success) {
+                            var values = JSON.parse('[' + response.text.replace(/'/g, '"')  + ']');
+                            if (values && values.length == 3 && values[0] == 200) {
+                                attachment.aid = values[2];
+                                if (!attachment.cid) {
+                                    draftAids.push(attachment.aid);
                                 }
                             }
-                            if (pgpMessage.attachments.length == index + 1) {
-                                controller.saveDraft(ZmComposeController.DRAFT_TYPE_AUTO, draftAids.join(','));
-                            }
-                        });
-                        var content = (attachment.type.indexOf(ZmMimeTable.TEXT) == -1) ? OpenPGPUtils.stringToBin(attachment.content) : attachment.content;
-                        AjxRpc.invoke(content, url, {
-                            'Content-Type': attachment.type,
-                            'Content-Disposition': 'attachment; filename="' + attachment.name + '"'
-                        }, callback);
-                    });
-                }
-            }
-        };
-
-        var topPartFunc = ZmComposeView.prototype._getTopPart;
-        ZmComposeView.prototype._getTopPart = function(msg, isDraft, bodyContent) {
-            if (this._origMsg && self._pgpMessageCache[this._origMsg.id]) {
-                var pgpMessage = self._pgpMessageCache[this._origMsg.id];
-                if (pgpMessage.encrypted && pgpMessage.attachments.length > 0) {
-                    pgpMessage.attachments.forEach(function(attachment) {
-                        if (attachment.cid && attachment.aid) {
-                            msg.addInlineAttachmentId(attachment.cid, attachment.aid);
-                            delete attachment.aid;
+                        }
+                        if (pgpMessage.attachments.length == index + 1) {
+                            controller.saveDraft(ZmComposeController.DRAFT_TYPE_AUTO, draftAids.join(','));
                         }
                     });
-                }
+                    var content = (attachment.type.indexOf(ZmMimeTable.TEXT) == -1) ? OpenPGPUtils.stringToBin(attachment.content) : attachment.content;
+                    AjxRpc.invoke(content, url, {
+                        'Content-Type': attachment.type,
+                        'Content-Disposition': 'attachment; filename="' + attachment.name + '"'
+                    }, callback);
+                });
             }
-            return topPartFunc.call(this, msg, isDraft, bodyContent);
-        };
-        this._overridedClasses['ZmComposeView'] = true;
-    }
+        }
+    });
+    this.overrideClass('ZmComposeView.prototype._getTopPart', function(msg, isDraft, bodyContent) {
+        if (this._origMsg && self._pgpMessageCache[this._origMsg.id]) {
+            var pgpMessage = self._pgpMessageCache[this._origMsg.id];
+            if (pgpMessage.encrypted && pgpMessage.attachments.length > 0) {
+                pgpMessage.attachments.forEach(function(attachment) {
+                    if (attachment.cid && attachment.aid) {
+                        msg.addInlineAttachmentId(attachment.cid, attachment.aid);
+                        delete attachment.aid;
+                    }
+                });
+            }
+        }
+        return arguments.callee.func.call(this, msg, isDraft, bodyContent);
+    });
 };
 
 /**
