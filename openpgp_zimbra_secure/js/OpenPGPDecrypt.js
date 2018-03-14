@@ -71,12 +71,12 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
         };
         parser.onbody = function(node, chunk){
             if (encrypted && OpenPGPUtils.hasInlinePGPContent(node.raw, OpenPGPUtils.OPENPGP_MESSAGE_HEADER)) {
-                cipherText = OpenPGPUtils.binToString(chunk);
+                cipherText = openpgp.util.bin2str(chunk);
             }
             if (signed) {
                 var ct = node.contentType.value;
                 if (OpenPGPUtils.isSignatureContentType(ct) || OpenPGPUtils.hasInlinePGPContent(node.raw, OpenPGPUtils.OPENPGP_SIGNATURE_HEADER)) {
-                    signature = OpenPGPUtils.binToString(chunk);
+                    signature = openpgp.util.bin2str(chunk);
                 }
             }
         };
