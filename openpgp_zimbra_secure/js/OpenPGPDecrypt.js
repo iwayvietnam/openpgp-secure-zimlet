@@ -178,7 +178,7 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
             self._publicKeys.forEach(function(key) {
                 var keyid = key.primaryKey.keyid;
                 if (keyid.equals(signature.keyid)) {
-                    key.getuserIds().forEach(function(userId) {
+                    key.getUserIds().forEach(function(userId) {
                         if (signature.userId.length == 0) {
                             signature.userId = userId;
                         }
@@ -290,7 +290,7 @@ OpenPGPDecrypt.decryptContent = function(content, publicKeys, privateKey, onDecr
             publicKeys.forEach(function(key) {
                 var keyid = key.primaryKey.keyid;
                 if (keyid.equals(signature.keyid)) {
-                    key.getuserIds().forEach(function(userId) {
+                    key.getUserIds().forEach(function(userId) {
                         if (signature.userId.length == 0) {
                             signature.userId = userId;
                         }
