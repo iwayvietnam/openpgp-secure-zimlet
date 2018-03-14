@@ -168,7 +168,7 @@ OpenPGPSecureMessageProcessor.prototype.onDecrypted = function(callback, msg, me
             pgpMessage.textContent = content;
         }
         else {
-            content = OpenPGPUtils.binToString(chunk);
+            content = openpgp.util.bin2str(chunk);
         }
         if (pgpMessage.encrypted && cd && isAttach) {
             var attachment = {
@@ -317,7 +317,7 @@ OpenPGPSecureMessageProcessor.prototype._decryptInlineMessage = function(callbac
                     var parser = new window['emailjs-mime-parser']();
                     parser.onbody = function(node, chunk){
                         var ct = node.contentType;
-                        var content = OpenPGPUtils.binToString(chunk);
+                        var content = openpgp.util.bin2str(chunk);
                         var hasPGPKey = OpenPGPUtils.isPGPKeysContentType(ct.value) || OpenPGPUtils.hasInlinePGPContent(content, OpenPGPUtils.OPENPGP_PUBLIC_KEY_HEADER);
                         if (hasPGPKey) {
                             pgpMessage.hasPGPKey = hasPGPKey;
