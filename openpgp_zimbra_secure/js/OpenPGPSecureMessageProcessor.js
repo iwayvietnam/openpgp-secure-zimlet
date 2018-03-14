@@ -357,11 +357,11 @@ OpenPGPSecureMessageProcessor.prototype._addSecurityHeader = function(msg, signa
         msg._attrs = {};
     }
     signatures.forEach(function(signature) {
-        var userid = AjxStringUtil.htmlEncode(signature.userid);
-        if (!userid) {
-            userid = self._handler.getMessage('keyInfoKeyId') + ': ' + signature.keyid.toHex();
+        var userId = AjxStringUtil.htmlEncode(signature.userId);
+        if (!userId) {
+            userId = self._handler.getMessage('keyInfoKeyId') + ': ' + signature.keyid.toHex();
         }
-        var desc = signature.valid ? AjxMessageFormat.format(self._handler.getMessage('goodSignatureFrom'), userid) : AjxMessageFormat.format(self._handler.getMessage('badSignatureFrom'), userid);
+        var desc = signature.valid ? AjxMessageFormat.format(self._handler.getMessage('goodSignatureFrom'), userId) : AjxMessageFormat.format(self._handler.getMessage('badSignatureFrom'), userId);
 
         var htmlArr = [];
         htmlArr.push(AjxMessageFormat.format('<span class="securityValue {0}">', signature.valid ? 'valid' : 'invalid'));

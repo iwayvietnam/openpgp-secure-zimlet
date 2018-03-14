@@ -174,16 +174,16 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
     })
     .then(function(message) {
         message.signatures.forEach(function(signature) {
-            signature.userid = '';
+            signature.userId = '';
             self._publicKeys.forEach(function(key) {
                 var keyid = key.primaryKey.keyid;
                 if (keyid.equals(signature.keyid)) {
-                    key.getUserIds().forEach(function(userId) {
-                        if (signature.userid.length == 0) {
-                            signature.userid = userId;
+                    key.getuserIds().forEach(function(userId) {
+                        if (signature.userId.length == 0) {
+                            signature.userId = userId;
                         }
                         else {
-                            signature.userid += ', ' + userId;
+                            signature.userId += ', ' + userId;
                         }
                     });
                 }
@@ -286,10 +286,18 @@ OpenPGPDecrypt.decryptContent = function(content, publicKeys, privateKey, onDecr
     })
     .then(function(result) {
         result.signatures.forEach(function(signature) {
+            signature.userId = '';
             publicKeys.forEach(function(key) {
                 var keyid = key.primaryKey.keyid;
                 if (keyid.equals(signature.keyid)) {
-                    signature.userid = key.getPrimaryUser().user.userId.userid;
+                    key.getuserIds().forEach(function(userId) {
+                        if (signature.userId.length == 0) {
+                            signature.userId = userId;
+                        }
+                        else {
+                            signature.userId += ', ' + userId;
+                        }
+                    });
                 }
             });
         });
