@@ -215,7 +215,7 @@ OpenPGPSecureMessageProcessor.prototype.onDecrypted = function(callback, msg, me
                 });
 
                 if (attachment) {
-                    var content = OpenPGPUtils.base64Encode(OpenPGPUtils.stringToBin(attachment.content));
+                    var content = OpenPGPUtils.base64Encode(openpgp.util.str2Uint8Array(attachment.content));
                     data.attrValue = 'data:' + attachment.type + ';base64,' + content.replace(/\r?\n/g, '');
                 }
             }

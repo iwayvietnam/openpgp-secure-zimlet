@@ -219,7 +219,7 @@ OpenPGPZimbraSecure.prototype._overrideZmMailMsgView = function() {
                             };
                         });
                         if (attachment) {
-                            var content = OpenPGPUtils.base64Encode(OpenPGPUtils.stringToBin(attachment.content));
+                            var content = OpenPGPUtils.base64Encode(openpgp.util.str2Uint8Array(attachment.content));
                             var newLink = 'data:' + attachment.type + ';base64,' + content.replace(/\r?\n/g, '');
                             elem.setAttribute('src', newLink);
                         }
@@ -353,7 +353,7 @@ OpenPGPZimbraSecure.prototype._overrideZmComposeView = function() {
                                 controller.saveDraft(ZmComposeController.DRAFT_TYPE_AUTO, draftAids);
                             }
                         });
-                        var content = (attachment.type.indexOf(ZmMimeTable.TEXT) == -1) ? OpenPGPUtils.stringToBin(attachment.content) : attachment.content;
+                        var content = (attachment.type.indexOf(ZmMimeTable.TEXT) == -1) ? openpgp.util.str2Uint8Array(attachment.content) : attachment.content;
                         AjxRpc.invoke(content, url, {
                             'Cache-Control': 'no-cache',
                             'X-Requested-With': 'XMLHttpRequest',
