@@ -335,24 +335,28 @@ OpenPGPZimbraSecure.prototype._overrideZmComposeView = function() {
                 if (pgpMessage.encrypted && pgpMessage.attachments.length > 0) {
                     var controller = this.getController();
                     var draftAids = [];
-                    var url = appCtxt.get(ZmSetting.CSFE_ATTACHMENT_UPLOAD_URI) + '?fmt=raw';
+                    var url = appCtxt.get(ZmSetting.CSFE_ATTACHMENT_UPLOAD_URI) + '?fmt=extended,raw';
                     pgpMessage.attachments.forEach(function(attachment, index) {
                         var callback = new AjxCallback(function(response) {
                             if (response.success) {
-                                var values = JSON.parse('[' + response.text.replace(/'/g, '"')  + ']');
+                                var values = eval("[" + response.text + "]");
                                 if (values && values.length == 3 && values[0] == 200) {
-                                    attachment.aid = values[2];
-                                    if (!attachment.cid) {
-                                        draftAids.push(attachment.aid);
-                                    }
+                                    values[2].forEach(function(value) {
+                                        attachment.aid = value.aid;
+                                        if (!attachment.cid) {
+                                            draftAids.push(value);
+                                        }
+                                    });
                                 }
                             }
                             if (pgpMessage.attachments.length == index + 1) {
-                                controller.saveDraft(ZmComposeController.DRAFT_TYPE_AUTO, draftAids.join(','));
+                                controller.saveDraft(ZmComposeController.DRAFT_TYPE_AUTO, draftAids);
                             }
                         });
                         var content = (attachment.type.indexOf(ZmMimeTable.TEXT) == -1) ? OpenPGPUtils.stringToBin(attachment.content) : attachment.content;
                         AjxRpc.invoke(content, url, {
+                            'Cache-Control': 'no-cache',
+                            'X-Requested-With': 'XMLHttpRequest',
                             'Content-Type': attachment.type,
                             'Content-Disposition': 'attachment; filename="' + attachment.name + '"'
                         }, callback);
