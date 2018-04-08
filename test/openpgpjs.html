@@ -193,10 +193,10 @@
                         var verify = '';
                         message.signatures.forEach(function(signature) {
                             if (signature.valid) {
-                                verify += 'Good signature from ' + signature.userid + '\n';
+                                verify += 'Good signature from ' + signature.userId + '\n';
                             }
                             else {
-                                verify += 'Bad signature from ' + signature.userid + '\n';
+                                verify += 'Bad signature from ' + signature.userId + '\n';
                             }
                         });
                         $('#openpgp-verify').text(verify);
@@ -239,10 +239,10 @@
                         var result = '';
                         message.signatures.forEach(function(signature) {
                             if (signature.valid) {
-                                result += 'Good signature from ' + signature.userid + '\n';
+                                result += 'Good signature from ' + signature.userId + '\n';
                             }
                             else {
-                                result += 'Bad signature from ' + signature.userid + '\n';
+                                result += 'Bad signature from ' + signature.userId + '\n';
                             }
                         });
                         $('#openpgp-decrypted').text(result);

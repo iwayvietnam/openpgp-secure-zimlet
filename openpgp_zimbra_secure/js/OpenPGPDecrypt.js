@@ -71,12 +71,12 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
         };
         parser.onbody = function(node, chunk){
             if (encrypted && OpenPGPUtils.hasInlinePGPContent(node.raw, OpenPGPUtils.OPENPGP_MESSAGE_HEADER)) {
-                cipherText = OpenPGPUtils.binToString(chunk);
+                cipherText = openpgp.util.bin2str(chunk);
             }
             if (signed) {
                 var ct = node.contentType.value;
                 if (OpenPGPUtils.isSignatureContentType(ct) || OpenPGPUtils.hasInlinePGPContent(node.raw, OpenPGPUtils.OPENPGP_SIGNATURE_HEADER)) {
-                    signature = OpenPGPUtils.binToString(chunk);
+                    signature = openpgp.util.bin2str(chunk);
                 }
             }
         };
@@ -131,7 +131,7 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
                 parser.onbody = function(node, chunk){
                     var ct = node.contentType.value;
                     if (OpenPGPUtils.isSignatureContentType(ct) || OpenPGPUtils.hasInlinePGPContent(node.raw, OpenPGPUtils.OPENPGP_SIGNATURE_HEADER)) {
-                        message.signature = OpenPGPUtils.binToString(chunk);
+                        message.signature = openpgp.util.bin2str(chunk);
                     }
                 };
                 parser.write(message.content);
@@ -150,8 +150,15 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
             }
 
             if (message.signature.length > 0) {
-                var pgpMessage = openpgp.message.readSignedContent(message.content, message.signature);
-                message.signatures = pgpMessage.verify(self._publicKeys);
+                var opts = {
+                    message: openpgp.message.fromText(message.content),
+                    signature: openpgp.signature.readArmored(message.signature),
+                    publicKeys: self._publicKeys
+                };
+                return openpgp.verify(opts).then(function(verified) {
+                    message.signatures = verified.signatures;
+                    return message;
+                });
             }
         }
 
@@ -167,10 +174,18 @@ OpenPGPDecrypt.prototype.decrypt = function(message) {
     })
     .then(function(message) {
         message.signatures.forEach(function(signature) {
+            signature.userId = '';
             self._publicKeys.forEach(function(key) {
                 var keyid = key.primaryKey.keyid;
                 if (keyid.equals(signature.keyid)) {
-                    signature.userid = key.getPrimaryUser().user.userId.userid;
+                    key.getUserIds().forEach(function(userId) {
+                        if (signature.userId.length == 0) {
+                            signature.userId = userId;
+                        }
+                        else {
+                            signature.userId += ', ' + userId;
+                        }
+                    });
                 }
             });
         });
@@ -271,10 +286,18 @@ OpenPGPDecrypt.decryptContent = function(content, publicKeys, privateKey, onDecr
     })
     .then(function(result) {
         result.signatures.forEach(function(signature) {
+            signature.userId = '';
             publicKeys.forEach(function(key) {
                 var keyid = key.primaryKey.keyid;
                 if (keyid.equals(signature.keyid)) {
-                    signature.userid = key.getPrimaryUser().user.userId.userid;
+                    key.getUserIds().forEach(function(userId) {
+                        if (signature.userId.length == 0) {
+                            signature.userId = userId;
+                        }
+                        else {
+                            signature.userId += ', ' + userId;
+                        }
+                    });
                 }
             });
         });

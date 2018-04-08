@@ -168,7 +168,7 @@ OpenPGPSecureMessageProcessor.prototype.onDecrypted = function(callback, msg, me
             pgpMessage.textContent = content;
         }
         else {
-            content = OpenPGPUtils.binToString(chunk);
+            content = openpgp.util.bin2str(chunk);
         }
         if (pgpMessage.encrypted && cd && isAttach) {
             var attachment = {
@@ -317,7 +317,7 @@ OpenPGPSecureMessageProcessor.prototype._decryptInlineMessage = function(callbac
                     var parser = new window['emailjs-mime-parser']();
                     parser.onbody = function(node, chunk){
                         var ct = node.contentType;
-                        var content = OpenPGPUtils.binToString(chunk);
+                        var content = openpgp.util.bin2str(chunk);
                         var hasPGPKey = OpenPGPUtils.isPGPKeysContentType(ct.value) || OpenPGPUtils.hasInlinePGPContent(content, OpenPGPUtils.OPENPGP_PUBLIC_KEY_HEADER);
                         if (hasPGPKey) {
                             pgpMessage.hasPGPKey = hasPGPKey;
@@ -357,11 +357,11 @@ OpenPGPSecureMessageProcessor.prototype._addSecurityHeader = function(msg, signa
         msg._attrs = {};
     }
     signatures.forEach(function(signature) {
-        var userid = AjxStringUtil.htmlEncode(signature.userid);
-        if (!userid) {
-            userid = self._handler.getMessage('keyInfoKeyId') + ': ' + signature.keyid.toHex();
+        var userId = AjxStringUtil.htmlEncode(signature.userId);
+        if (!userId) {
+            userId = self._handler.getMessage('keyInfoKeyId') + ': ' + signature.keyid.toHex();
         }
-        var desc = signature.valid ? AjxMessageFormat.format(self._handler.getMessage('goodSignatureFrom'), userid) : AjxMessageFormat.format(self._handler.getMessage('badSignatureFrom'), userid);
+        var desc = signature.valid ? AjxMessageFormat.format(self._handler.getMessage('goodSignatureFrom'), userId) : AjxMessageFormat.format(self._handler.getMessage('badSignatureFrom'), userId);
 
         var htmlArr = [];
         htmlArr.push(AjxMessageFormat.format('<span class="securityValue {0}">', signature.valid ? 'valid' : 'invalid'));
