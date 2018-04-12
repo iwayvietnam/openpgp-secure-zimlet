@@ -486,7 +486,7 @@ OpenPGPZimbraSecure.prototype._renderMessageInfo = function(msg, view) {
 
                 var clientVersion = OpenPGPZimbraSecure.getClientVersion();
                 var mimeInfo = ZmMimeTable.getInfo(attachment.type);
-                if (clientVersion.indexOf('8.7.0_GA') >= 0 || clientVersion.indexOf('8.7.1_GA') >= 0) {
+                if (clientVersion.indexOf('8.7.') >= 0 || clientVersion.indexOf('8.8.') >= 0) {
                     imageHtml = AjxImg.getImageHtml({
                         imageName: mimeInfo ? mimeInfo.image : 'GenericDoc',
                         styles: 'position:relative;',
