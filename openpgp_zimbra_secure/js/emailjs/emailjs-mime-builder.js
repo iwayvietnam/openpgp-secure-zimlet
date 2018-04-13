@@ -396,9 +396,9 @@
 
                     value = this._buildHeaderValue(structured);
                     break;
-                case 'Bcc':
+                // case 'Bcc':
                     // skip BCC values
-                    return;
+                    // return;
             }
 
             // skip empty lines

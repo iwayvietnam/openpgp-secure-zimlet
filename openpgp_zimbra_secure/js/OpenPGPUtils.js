@@ -466,7 +466,7 @@ OpenPGPUtils.saveTextAs = function(text, name) {
  */
 OpenPGPUtils.saveAs = function(data, name, type) {
     if (typeof data === 'string') {
-        data = OpenPGPUtils.stringToBin(data);
+        data = openpgp.util.str2Uint8Array(data);
     }
     var blob = new Blob([data], {type: type});
     saveAs(blob, name);
