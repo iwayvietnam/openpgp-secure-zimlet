@@ -155,9 +155,11 @@ OpenPGPSecureMessageProcessor.prototype.onDecrypted = function(callback, msg, me
         pgpKey: msg.pgpKey
     };
 
+    var codec = window['emailjs-mime-codec'];
     var parser = new window['emailjs-mime-parser']();
     parser.onbody = function(node, chunk){
         var cd = (node.headers['content-disposition']) ? node.headers['content-disposition'][0] : false;
+        var cte = (node.headers['content-transfer-encoding']) ? node.headers['content-transfer-encoding'][0] : false;
         var isAttach = cd ? OpenPGPUtils.isAttachment(cd.initial) : false;
         var ct = node.contentType;
         var content = '';
@@ -165,6 +167,9 @@ OpenPGPSecureMessageProcessor.prototype.onDecrypted = function(callback, msg, me
             ct.value === ZmMimeTable.TEXT_PLAIN ||
             ct.value === ZmMimeTable.TEXT_XML) {
             content = OpenPGPUtils.utf8Decode(chunk);
+            if (cte && cte.value == 'quoted-printable') {
+                content = codec.quotedPrintableDecode(content);
+            }
             pgpMessage.textContent = content;
         }
         else {
