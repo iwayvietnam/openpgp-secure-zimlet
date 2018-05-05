@@ -155,7 +155,6 @@ OpenPGPSecureMessageProcessor.prototype.onDecrypted = function(callback, msg, me
         pgpKey: msg.pgpKey
     };
 
-    var codec = window['emailjs-mime-codec'];
     var parser = new window['emailjs-mime-parser']();
     parser.onbody = function(node, chunk){
         var cd = (node.headers['content-disposition']) ? node.headers['content-disposition'][0] : false;
@@ -168,6 +167,7 @@ OpenPGPSecureMessageProcessor.prototype.onDecrypted = function(callback, msg, me
             ct.value === ZmMimeTable.TEXT_XML) {
             content = OpenPGPUtils.utf8Decode(chunk);
             if (cte && cte.value == 'quoted-printable') {
+                var codec = window['emailjs-mime-codec'];
                 content = codec.quotedPrintableDecode(content);
             }
             pgpMessage.textContent = content;
