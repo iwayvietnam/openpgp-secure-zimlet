@@ -368,10 +368,13 @@ OpenPGPUtils.mimeNodeToZmMimePart = function(node, withAttachment) {
         if (node.content) {
             var content = '';
             if (part.ct === ZmMimeTable.TEXT_HTML || part.ct === ZmMimeTable.TEXT_PLAIN) {
-                content = OpenPGPUtils.utf8Decode(node.content);
                 if (cte && cte.value == 'quoted-printable') {
                     var codec = window['emailjs-mime-codec'];
+                    content = codec.fromTypedArray(node.content);
                     content = codec.quotedPrintableDecode(content);
+                }
+                else {
+                    content = OpenPGPUtils.utf8Decode(node.content);
                 }
                 DOMPurify.addHook('uponSanitizeAttribute', function(node, data) {
                     if (data.attrName == 'src' && data.attrValue.indexOf('cid:') >= 0) {

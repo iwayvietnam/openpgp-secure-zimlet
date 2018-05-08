@@ -165,10 +165,13 @@ OpenPGPSecureMessageProcessor.prototype.onDecrypted = function(callback, msg, me
         if (ct.value === ZmMimeTable.TEXT_HTML ||
             ct.value === ZmMimeTable.TEXT_PLAIN ||
             ct.value === ZmMimeTable.TEXT_XML) {
-            content = OpenPGPUtils.utf8Decode(chunk);
             if (cte && cte.value == 'quoted-printable') {
                 var codec = window['emailjs-mime-codec'];
+                content = codec.fromTypedArray(chunk);
                 content = codec.quotedPrintableDecode(content);
+            }
+            else {
+                content = OpenPGPUtils.utf8Decode(chunk);
             }
             pgpMessage.textContent = content;
         }
