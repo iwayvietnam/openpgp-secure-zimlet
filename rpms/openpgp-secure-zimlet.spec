@@ -56,6 +56,9 @@ fi
 /opt/zimbra/zimlets-extra/openpgp_zimbra_secure.zip
 
 %changelog
+* Tue May 08 2018 Nguyen Van Nguyen <nguyennv1981@gmail.com> - 1.0.15-1
+- Update to release 1.0.15
+
 * Fri Apr 13 2018 Nguyen Van Nguyen <nguyennv1981@gmail.com> - 1.0.14-1
 - Update to release 1.0.14
 
