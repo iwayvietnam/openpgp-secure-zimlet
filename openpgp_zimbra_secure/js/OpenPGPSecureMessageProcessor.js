@@ -158,13 +158,21 @@ OpenPGPSecureMessageProcessor.prototype.onDecrypted = function(callback, msg, me
     var parser = new window['emailjs-mime-parser']();
     parser.onbody = function(node, chunk){
         var cd = (node.headers['content-disposition']) ? node.headers['content-disposition'][0] : false;
+        var cte = (node.headers['content-transfer-encoding']) ? node.headers['content-transfer-encoding'][0] : false;
         var isAttach = cd ? OpenPGPUtils.isAttachment(cd.initial) : false;
         var ct = node.contentType;
         var content = '';
         if (ct.value === ZmMimeTable.TEXT_HTML ||
             ct.value === ZmMimeTable.TEXT_PLAIN ||
             ct.value === ZmMimeTable.TEXT_XML) {
-            content = OpenPGPUtils.utf8Decode(chunk);
+            if (cte && cte.value == 'quoted-printable') {
+                var codec = window['emailjs-mime-codec'];
+                content = codec.fromTypedArray(chunk);
+                content = codec.quotedPrintableDecode(content);
+            }
+            else {
+                content = OpenPGPUtils.utf8Decode(chunk);
+            }
             pgpMessage.textContent = content;
         }
         else {
@@ -215,7 +223,7 @@ OpenPGPSecureMessageProcessor.prototype.onDecrypted = function(callback, msg, me
                 });
 
                 if (attachment) {
-                    var content = OpenPGPUtils.base64Encode(OpenPGPUtils.stringToBin(attachment.content));
+                    var content = OpenPGPUtils.base64Encode(openpgp.util.str2Uint8Array(attachment.content));
                     data.attrValue = 'data:' + attachment.type + ';base64,' + content.replace(/\r?\n/g, '');
                 }
             }
