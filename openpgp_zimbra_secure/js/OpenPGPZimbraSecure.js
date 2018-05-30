@@ -101,8 +101,9 @@ OpenPGPZimbraSecure.prototype.init = function() {
         };
     });
 
+    var d = new Date();
     this._addJsScripts([
-        this.getResource('js/openpgpjs/openpgp.min.js')
+        this.getResource('js/openpgpjs/openpgp.min.js?' + d.getTime())
     ], new AjxCallback(function() {
         self._initOpenPGP();
     }));
@@ -826,7 +827,8 @@ OpenPGPZimbraSecure.prototype._initOpenPGP = function() {
     var self = this;
     var sequence = Promise.resolve();
     sequence.then(function() {
-        var path = self.getResource('js/openpgpjs/openpgp.worker.min.js');
+        var d = new Date();
+        var path = self.getResource('js/openpgpjs/openpgp.worker.min.js?' + d.getTime());
         openpgp.initWorker({
             path: path
         });
