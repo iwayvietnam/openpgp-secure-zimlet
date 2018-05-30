@@ -5196,7 +5196,7 @@ exports.default = {
   tolerant: true, // ignore unsupported/unrecognizable packets instead of throwing an error
   show_version: true,
   show_comment: true,
-  versionstring: "OpenPGP.js v2.6.2",
+  versionstring: "OpenPGP.js v2.6.2-1",
   commentstring: "https://openpgpjs.org",
   keyserver: "https://keyserver.ubuntu.com",
   node_store: './openpgp.store'
@@ -20111,9 +20111,9 @@ SymmetricallyEncrypted.prototype.write = function () {
  */
 SymmetricallyEncrypted.prototype.decrypt = function (sessionKeyAlgorithm, key) {
   var decrypted = _crypto2.default.cfb.decrypt(sessionKeyAlgorithm, key, this.encrypted, true);
-  // for modern cipher (blocklength != 64 bit, except for Twofish) MDC is required
-  if (!this.ignore_mdc_error && (sessionKeyAlgorithm === 'aes128' || sessionKeyAlgorithm === 'aes192' || sessionKeyAlgorithm === 'aes256')) {
-    throw new Error('Decryption failed due to missing MDC in combination with modern cipher.');
+  // If MDC errors are not being ignored, all missing MDC packets in symmetrically encrypted data should throw an error
+  if (!this.ignore_mdc_error) {
+    throw new Error('Decryption failed due to missing MDC.');
   }
   this.packets.read(decrypted);
 
