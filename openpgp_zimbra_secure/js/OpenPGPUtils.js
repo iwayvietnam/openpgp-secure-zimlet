@@ -295,11 +295,12 @@ OpenPGPUtils.fetchPart = function(part, baseUrl) {
 
         if (response.success) {
             var codec = window['emailjs-mime-codec'];
+            data = codec.base64.decode(response.text);
             return {
-                data: codec.base64.decode(response.text),
                 ct: cType,
-                cd: cDisposition,
-                cte: 'base64'
+                cd: (cType != ZmMimeTable.MSG_RFC822) ? cDisposition : 'attachment',
+                cte: (cType != ZmMimeTable.MSG_RFC822) ? 'base64' : '7bit',
+                data: (cType != ZmMimeTable.MSG_RFC822) ? data : codec.fromTypedArray(data)
             };
         }
     }
