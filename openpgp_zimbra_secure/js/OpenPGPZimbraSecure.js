@@ -194,7 +194,7 @@ OpenPGPZimbraSecure.prototype._overrideZmMailMsgView = function() {
     var self = this;
     this.overrideClass('ZmMailMsgView.__unfangInternalImage', function(msg, elem, aname, external) {
         var result = arguments.callee.func(msg, elem, aname, external);
-        if (aname == 'src' && self._pgpMessageCache[msg.id]) {
+        if (typeof aname !== 'undefined' && typeof msg !== 'undefined' && aname == 'src' && self._pgpMessageCache[msg.id]) {
             var pgpMessage = self._pgpMessageCache[msg.id];
             if (pgpMessage.encrypted && pgpMessage.attachments.length > 0) {
                 var pnSrc = Dwt.getAttr(elem, 'pn' + aname);
