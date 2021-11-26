@@ -5196,7 +5196,7 @@ exports.default = {
   tolerant: true, // ignore unsupported/unrecognizable packets instead of throwing an error
   show_version: true,
   show_comment: true,
-  versionstring: "OpenPGP.js v2.6.2-1",
+  versionstring: "OpenPGP.js v2.6.2-2",
   commentstring: "https://openpgpjs.org",
   keyserver: "https://keyserver.ubuntu.com",
   node_store: './openpgp.store'
@@ -12666,14 +12666,14 @@ function armor(messagetype, body, partindex, parttotal) {
     case _enums2.default.armor.multipart_section:
       result.push("-----BEGIN PGP MESSAGE, PART " + partindex + "/" + parttotal + "-----\r\n");
       result.push(addheader());
-      result.push(_base2.default.encode(body));
+      result.push(_base2.default.encode(body).trim());
       result.push("\r\n=" + getCheckSum(body) + "\r\n");
       result.push("-----END PGP MESSAGE, PART " + partindex + "/" + parttotal + "-----\r\n");
       break;
     case _enums2.default.armor.multipart_last:
       result.push("-----BEGIN PGP MESSAGE, PART " + partindex + "-----\r\n");
       result.push(addheader());
-      result.push(_base2.default.encode(body));
+      result.push(_base2.default.encode(body).trim());
       result.push("\r\n=" + getCheckSum(body) + "\r\n");
       result.push("-----END PGP MESSAGE, PART " + partindex + "-----\r\n");
       break;
@@ -12683,35 +12683,35 @@ function armor(messagetype, body, partindex, parttotal) {
       result.push(body.text.replace(/\n-/g, "\n- -"));
       result.push("\r\n-----BEGIN PGP SIGNATURE-----\r\n");
       result.push(addheader());
-      result.push(_base2.default.encode(body.data));
+      result.push(_base2.default.encode(body.data).trim());
       result.push("\r\n=" + getCheckSum(body.data) + "\r\n");
       result.push("-----END PGP SIGNATURE-----\r\n");
       break;
     case _enums2.default.armor.message:
       result.push("-----BEGIN PGP MESSAGE-----\r\n");
       result.push(addheader());
-      result.push(_base2.default.encode(body));
+      result.push(_base2.default.encode(body).trim());
       result.push("\r\n=" + getCheckSum(body) + "\r\n");
       result.push("-----END PGP MESSAGE-----\r\n");
       break;
     case _enums2.default.armor.public_key:
       result.push("-----BEGIN PGP PUBLIC KEY BLOCK-----\r\n");
       result.push(addheader());
-      result.push(_base2.default.encode(body));
+      result.push(_base2.default.encode(body).trim());
       result.push("\r\n=" + getCheckSum(body) + "\r\n");
       result.push("-----END PGP PUBLIC KEY BLOCK-----\r\n\r\n");
       break;
     case _enums2.default.armor.private_key:
       result.push("-----BEGIN PGP PRIVATE KEY BLOCK-----\r\n");
       result.push(addheader());
-      result.push(_base2.default.encode(body));
+      result.push(_base2.default.encode(body).trim());
       result.push("\r\n=" + getCheckSum(body) + "\r\n");
       result.push("-----END PGP PRIVATE KEY BLOCK-----\r\n");
       break;
     case _enums2.default.armor.signature:
       result.push("-----BEGIN PGP SIGNATURE-----\r\n");
       result.push(addheader());
-      result.push(_base2.default.encode(body));
+      result.push(_base2.default.encode(body).trim());
       result.push("\r\n=" + getCheckSum(body) + "\r\n");
       result.push("-----END PGP SIGNATURE-----\r\n");
       break;
